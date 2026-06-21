@@ -41,19 +41,21 @@ export default async function EditarRecompensasPage() {
           <div key={r.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${r.active ? '' : 'opacity-60'}`}>
             <form action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
-              <div className="flex items-start gap-3">
-                <EmojiInput name="icon" defaultValue={r.icon} suggestions={REWARD_ICONS} />
-                <div className="flex-1 space-y-2">
-                  <input name="name" defaultValue={r.name} className={`${inputCls} font-display font-bold`} />
-                  <label className="block">
-                    <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-                    <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
-                  </label>
-                  <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                    Guardar
-                  </SubmitButton>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{r.icon}</span>
+                <input name="name" defaultValue={r.name} className={`${inputCls} flex-1 font-display font-bold`} />
               </div>
+              <label className="mt-2 block">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
+                <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
+              </label>
+              <div className="mt-2">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
+                <EmojiInput name="icon" defaultValue={r.icon} suggestions={REWARD_ICONS} />
+              </div>
+              <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+                Guardar
+              </SubmitButton>
             </form>
             <ToggleRewardActive id={r.id} active={r.active} />
           </div>
@@ -61,19 +63,18 @@ export default async function EditarRecompensasPage() {
 
         {/* Añadir */}
         <form action={addReward} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
-          <div className="flex items-start gap-3">
+          <input name="name" placeholder="Nueva recompensa" className={`${inputCls} font-display font-bold`} required />
+          <label className="mt-2 block">
+            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
+            <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
+          </label>
+          <div className="mt-2">
+            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
             <EmojiInput name="icon" defaultValue="🎁" suggestions={REWARD_ICONS} />
-            <div className="flex-1 space-y-2">
-              <input name="name" placeholder="Nueva recompensa" className={`${inputCls} font-display font-bold`} required />
-              <label className="block">
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-                <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
-              </label>
-              <SubmitButton className="tap-bounce w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
-                Añadir recompensa
-              </SubmitButton>
-            </div>
           </div>
+          <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
+            Añadir recompensa
+          </SubmitButton>
         </form>
       </div>
     </div>
