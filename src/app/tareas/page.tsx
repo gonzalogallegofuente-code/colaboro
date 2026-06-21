@@ -6,6 +6,7 @@ import { Nav } from '@/components/Nav'
 import { SubmitButton } from '@/components/SubmitButton'
 import { EmojiInput } from '@/components/EmojiInput'
 import { AvatarUpload } from '@/components/AvatarUpload'
+import { ColorPicker } from '@/components/ColorPicker'
 
 export const dynamic = 'force-dynamic'
 
@@ -151,6 +152,10 @@ export default async function TareasPage() {
                   <span className="text-[11px] font-semibold text-gray-400">Emoji (si no hay foto)</span>
                   <EmojiInput name="emoji" defaultValue={k.emoji} suggestions={KID_EMOJIS} />
                 </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-gray-400">Color</span>
+                  <ColorPicker name="color" defaultValue={k.color} />
+                </div>
                 <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                   Guardar
                 </SubmitButton>
@@ -163,10 +168,14 @@ export default async function TareasPage() {
           <div className="flex items-center gap-2">
             <EmojiInput name="emoji" defaultValue="🙂" suggestions={KID_EMOJIS} />
             <input name="name" placeholder="Nombre del hijo" className={`${inputCls} flex-1`} required />
-            <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-emerald-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-              Añadir
-            </SubmitButton>
           </div>
+          <div className="mt-2">
+            <span className="text-[11px] font-semibold text-gray-400">Color</span>
+            <ColorPicker name="color" defaultValue="#16a34a" />
+          </div>
+          <SubmitButton className="tap-bounce mt-2 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
+            Añadir hijo
+          </SubmitButton>
         </form>
       </div>
     </div>

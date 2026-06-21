@@ -1,20 +1,12 @@
 import Link from 'next/link'
-import { getRewardsData, getAllRewards } from '@/lib/data'
-import { formatAmount, unitIcon, unitWord } from '@/lib/money'
-import { addReward, redeemReward, setRewardActive, updateReward } from '@/app/actions'
+import { getRewardsData } from '@/lib/data'
+import { formatAmount, unitIcon } from '@/lib/money'
+import { redeemReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { Avatar } from '@/components/Avatar'
-import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
-import { EmojiInput } from '@/components/EmojiInput'
 
 export const dynamic = 'force-dynamic'
-
-const REWARD_ICONS = ['🎮', '🍦', '🍫', '🌙', '🎬', '🛝', '📱', '🧸', '💶', '🍕', '🎨', '⚽', '🎟️', '🚲', '📚', '🎤']
-
-function costInput(cents: number): string {
-  return (cents / 100).toString().replace('.', ',')
-}
 
 export default async function RecompensasPage({
   searchParams,
@@ -23,7 +15,7 @@ export default async function RecompensasPage({
 }) {
   const sp = await searchParams
   const kidParam = sp.kid ? Number(sp.kid) : undefined
-  const [data, allRewards] = await Promise.all([getRewardsData(kidParam), getAllRewards()])
+  const data = await getRewardsData(kidParam)
 
   if (!data) {
     return (
@@ -38,15 +30,22 @@ export default async function RecompensasPage({
 
   const { money, kids, selectedKidId, rewards, redemptions } = data
   const selKid = kids.find((k) => k.id === selectedKidId)!
-  const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
   return (
     <div className="mx-auto max-w-md pb-12">
       <Nav active="recompensas" />
 
-      <h1 className="px-4 pt-2 font-display text-xl font-bold text-indigo-800">🎁 Recompensas</h1>
+      <div className="flex items-center justify-between px-4 pt-2">
+        <h1 className="font-display text-xl font-bold text-indigo-800">🎁 Recompensas</h1>
+        <Link
+          href="/recompensas/editar"
+          className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
+        >
+          ✏️ Editar
+        </Link>
+      </div>
       <p className="px-4 text-xs font-semibold text-indigo-900/50">
-        Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios. La lista la rellenáis vosotros.
+        Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios.
       </p>
 
       {/* Hijo */}
@@ -76,14 +75,19 @@ export default async function RecompensasPage({
       </div>
 
       <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-indigo-900/70">
-        {selKid.name} tiene <span className="font-bold text-indigo-700">{formatAmount(selKid.balanceCents, money)}</span> para gastar
+        {selKid.name} tiene{' '}
+        <span className="font-bold text-indigo-700">{formatAmount(selKid.balanceCents, money)}</span> para gastar
       </p>
 
       {/* Lista canjeable */}
       <div className="mx-3 mt-2 space-y-2.5">
         {rewards.length === 0 && (
           <div className="rounded-3xl bg-white/90 p-6 text-center text-gray-500 shadow-md">
-            No hay recompensas. Añade alguna abajo 👇
+            No hay recompensas todavía.{' '}
+            <Link href="/recompensas/editar" className="font-bold text-indigo-600 underline">
+              Añade alguna
+            </Link>
+            .
           </div>
         )}
         {rewards.map((r) => {
@@ -146,61 +150,6 @@ export default async function RecompensasPage({
           </div>
         </>
       )}
-
-      {/* Gestionar */}
-      <h2 className="px-4 pt-6 font-display text-lg font-bold text-indigo-800">✏️ Editar recompensas</h2>
-      <div className="mx-3 mt-2 space-y-2.5">
-        {allRewards.map((r) => (
-          <div key={r.id} className={`rounded-3xl bg-white/90 p-3 shadow-md ${r.active ? '' : 'opacity-60'}`}>
-            <form action={updateReward}>
-              <input type="hidden" name="id" value={r.id} />
-              <div className="flex items-start gap-3">
-                <EmojiInput name="icon" defaultValue={r.icon} suggestions={REWARD_ICONS} />
-                <div className="flex-1 space-y-2">
-                  <input name="name" defaultValue={r.name} className={`${inputCls} font-display font-bold`} />
-                  <label className="block">
-                    <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(money)})</span>
-                    <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
-                  </label>
-                  <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                    Guardar
-                  </SubmitButton>
-                </div>
-              </div>
-            </form>
-            <ToggleRewardActive id={r.id} active={r.active} />
-          </div>
-        ))}
-
-        {/* Añadir */}
-        <form action={addReward} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-white/70 p-3">
-          <div className="flex items-start gap-3">
-            <EmojiInput name="icon" defaultValue="🎁" suggestions={REWARD_ICONS} />
-            <div className="flex-1 space-y-2">
-              <input name="name" placeholder="Nueva recompensa" className={`${inputCls} font-display font-bold`} required />
-              <label className="block">
-                <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(money)})</span>
-                <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
-              </label>
-              <SubmitButton className="tap-bounce w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
-                Añadir recompensa
-              </SubmitButton>
-            </div>
-          </div>
-        </form>
-      </div>
     </div>
-  )
-}
-
-function ToggleRewardActive({ id, active }: { id: number; active: boolean }) {
-  return (
-    <form action={setRewardActive} className="mt-2 text-right">
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="active" value={active ? '0' : '1'} />
-      <SubmitButton className="text-xs font-semibold text-gray-400 underline underline-offset-2">
-        {active ? 'Ocultar' : 'Activar'}
-      </SubmitButton>
-    </form>
   )
 }

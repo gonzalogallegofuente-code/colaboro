@@ -145,7 +145,10 @@ export async function addKid(formData: FormData) {
     .select({ max: sql<number>`coalesce(max(${kids.sortOrder}),0)::int` })
     .from(kids)
   const sortOrder = (max ?? 0) + 1
-  const color = ['#2563eb', '#e11d48', '#16a34a', '#d97706', '#7c3aed'][sortOrder % 5]
+  const picked = String(formData.get('color') ?? '')
+  const color = /^#[0-9a-fA-F]{6}$/.test(picked)
+    ? picked
+    : ['#2563eb', '#e11d48', '#16a34a', '#d97706', '#7c3aed'][sortOrder % 5]
   await db.insert(kids).values({ name, emoji, color, sortOrder })
   redirect('/tareas')
 }
@@ -158,7 +161,7 @@ export async function updateKid(formData: FormData) {
   if (!name) throw new Error('Falta el nombre')
   const emoji = String(formData.get('emoji') ?? '').trim() || '🙂'
 
-  const set: { name: string; emoji: string; avatarUrl?: string | null } = { name, emoji }
+  const set: { name: string; emoji: string; avatarUrl?: string | null; color?: string } = { name, emoji }
   const avatarUrl = String(formData.get('avatarUrl') ?? '')
   if (formData.get('clearAvatar') === '1') {
     set.avatarUrl = null
@@ -166,6 +169,8 @@ export async function updateKid(formData: FormData) {
     if (avatarUrl.length > 500_000) throw new Error('La foto es demasiado grande')
     set.avatarUrl = avatarUrl
   }
+  const color = String(formData.get('color') ?? '')
+  if (/^#[0-9a-fA-F]{6}$/.test(color)) set.color = color
 
   await db.update(kids).set(set).where(eq(kids.id, id))
   redirect('/tareas')
@@ -199,7 +204,7 @@ export async function addReward(formData: FormData) {
     .select({ max: sql<number>`coalesce(max(${rewards.sortOrder}),0)::int` })
     .from(rewards)
   await db.insert(rewards).values({ name, icon, costCents, sortOrder: (max ?? 0) + 1 })
-  redirect('/recompensas')
+  redirect('/recompensas/editar')
 }
 
 export async function updateReward(formData: FormData) {
@@ -211,7 +216,7 @@ export async function updateReward(formData: FormData) {
   const icon = String(formData.get('icon') ?? '').trim() || '🎁'
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
   await db.update(rewards).set({ name, icon, costCents }).where(eq(rewards.id, id))
-  redirect('/recompensas')
+  redirect('/recompensas/editar')
 }
 
 export async function setRewardActive(formData: FormData) {
