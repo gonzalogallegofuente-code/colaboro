@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getHistory } from '@/lib/data'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
 import { euros } from '@/lib/money'
@@ -30,11 +31,19 @@ export default async function HistoricoPage() {
                 <span className="font-display text-sm font-bold text-gray-700">
                   {formatRange(w.start, w.end)}
                 </span>
-                {isCurrent && (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-                    en curso
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {isCurrent && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                      en curso
+                    </span>
+                  )}
+                  <Link
+                    href={`/semana?w=${w.start}`}
+                    className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600"
+                  >
+                    📅 ver días
+                  </Link>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {kids.map((k) => {

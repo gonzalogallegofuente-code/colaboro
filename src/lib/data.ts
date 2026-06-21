@@ -1,7 +1,7 @@
 import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
 import { db } from './db'
 import { kids, tasks, completions, payouts, type Kid, type Task } from './db/schema'
-import { weekRange, weekStartOf, parseYmd, ymd, addDays } from './week'
+import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
 
 export async function getActiveKids(): Promise<Kid[]> {
   return db.select().from(kids).where(eq(kids.active, true)).orderBy(kids.sortOrder, kids.id)
@@ -104,6 +104,79 @@ export async function getBoardData(selectedDate: string, kidId?: number): Promis
     weekCountByTask,
     dayCountByTask,
   }
+}
+
+export type WeekGridKid = { id: number; name: string; emoji: string; color: string; weekCents: number }
+export type WeekGrid = {
+  kids: WeekGridKid[]
+  tasks: Task[]
+  selectedKidId: number
+  range: { start: string; end: string }
+  days: { ymd: string; dow: string; dom: number }[]
+  grid: Record<number, number[]>
+  dayCents: number[]
+  weekCents: number
+}
+
+// Parte semanal: para una semana y un hijo, cuántas veces se hizo cada tarea
+// cada día (cuadrícula tareas × días) + total por día.
+export async function getWeekGrid(anyDate: string, kidId?: number): Promise<WeekGrid | null> {
+  const [kidList, taskList] = await Promise.all([getActiveKids(), getActiveTasks()])
+  if (kidList.length === 0) return null
+
+  const range = weekRange(anyDate)
+  const days = weekDays(range.start)
+
+  const weekRows = await db
+    .select({
+      kidId: completions.kidId,
+      cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
+    })
+    .from(completions)
+    .where(and(gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)))
+    .groupBy(completions.kidId)
+  const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
+
+  const kids: WeekGridKid[] = kidList.map((k) => ({
+    id: k.id,
+    name: k.name,
+    emoji: k.emoji,
+    color: k.color,
+    weekCents: week.get(k.id) ?? 0,
+  }))
+  const selectedKidId =
+    kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+
+  const rows = await db
+    .select({
+      taskId: completions.taskId,
+      doneOn: completions.doneOn,
+      valueCents: completions.valueCents,
+    })
+    .from(completions)
+    .where(
+      and(
+        eq(completions.kidId, selectedKidId),
+        gte(completions.doneOn, range.start),
+        lte(completions.doneOn, range.end),
+      ),
+    )
+
+  const dayIndex = new Map(days.map((d, i) => [d.ymd, i]))
+  const grid: Record<number, number[]> = {}
+  for (const t of taskList) grid[t.id] = Array(7).fill(0)
+  const dayCents = Array(7).fill(0)
+  let weekCents = 0
+  for (const r of rows) {
+    const di = dayIndex.get(r.doneOn)
+    if (di === undefined) continue
+    if (!grid[r.taskId]) grid[r.taskId] = Array(7).fill(0)
+    grid[r.taskId][di] += 1
+    dayCents[di] += r.valueCents
+    weekCents += r.valueCents
+  }
+
+  return { kids, tasks: taskList, selectedKidId, range, days, grid, dayCents, weekCents }
 }
 
 export type WeekHistory = {

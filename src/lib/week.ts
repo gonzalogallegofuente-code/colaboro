@@ -66,3 +66,20 @@ export function friendlyDay(s: string): string {
   if (s === ymd(addDays(new Date(), -1))) return 'Ayer'
   return formatDay(s)
 }
+
+const DOW2 = ['do', 'lu', 'ma', 'mi', 'ju', 'vi', 'sá']
+
+// Los 7 días de la semana (sáb→vie) que empieza en `startYmd`.
+export function weekDays(startYmd: string): { ymd: string; dow: string; dom: number }[] {
+  const start = parseYmd(startYmd)
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = addDays(start, i)
+    return { ymd: ymd(d), dow: DOW2[d.getDay()], dom: d.getDate() }
+  })
+}
+
+// Sábado de la semana anterior / siguiente a la que contiene `anyDate`.
+export function shiftWeek(anyDate: string, weeks: number): string {
+  const start = weekStartOf(parseYmd(anyDate))
+  return ymd(addDays(start, weeks * 7))
+}
