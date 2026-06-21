@@ -21,15 +21,15 @@ export default async function EditarRecompensasPage() {
 
   return (
     <div className="mx-auto max-w-md pb-12">
-      <Nav active="recompensas" />
+      <Nav active="tareas" />
 
       <div className="flex items-center justify-between px-4 pt-2">
         <h1 className="font-display text-xl font-bold text-[var(--head)]">✏️ Editar recompensas</h1>
         <Link
-          href="/recompensas"
+          href="/tareas"
           className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
         >
-          ← Volver
+          ← Ajustes
         </Link>
       </div>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">

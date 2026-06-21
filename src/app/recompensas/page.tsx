@@ -35,15 +35,7 @@ export default async function RecompensasPage({
     <div className="mx-auto max-w-md pb-12">
       <Nav active="recompensas" />
 
-      <div className="flex items-center justify-between px-4 pt-2">
-        <h1 className="font-display text-xl font-bold text-[var(--head)]">🎁 Recompensas</h1>
-        <Link
-          href="/recompensas/editar"
-          className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
-        >
-          ✏️ Editar
-        </Link>
-      </div>
+      <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🎁 Recompensas</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
         Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios.
       </p>
@@ -83,11 +75,7 @@ export default async function RecompensasPage({
       <div className="mx-3 mt-2 space-y-2.5">
         {rewards.length === 0 && (
           <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
-            No hay recompensas todavía.{' '}
-            <Link href="/recompensas/editar" className="font-bold text-indigo-600 underline">
-              Añade alguna
-            </Link>
-            .
+            Aún no hay recompensas.
           </div>
         )}
         {rewards.map((r) => {

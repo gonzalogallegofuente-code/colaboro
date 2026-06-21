@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getAllTasks, getActiveKids } from '@/lib/data'
 import { getMoneyConfig, getTheme } from '@/lib/settings'
 import { unitWord } from '@/lib/money'
@@ -93,6 +94,15 @@ export default async function TareasPage() {
         </p>
       </form>
 
+      {/* Editar recompensas (aquí, no en la pantalla del niño) */}
+      <Link
+        href="/recompensas/editar"
+        className="tap-bounce mx-3 mt-2 flex items-center justify-between rounded-3xl bg-[var(--card)] p-4 shadow-md"
+      >
+        <span className="font-display text-sm font-bold text-[var(--ink)]">🎁 Editar recompensas</span>
+        <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
+      </Link>
+
       <h2 className="px-4 pt-5 font-display text-lg font-bold text-[var(--head)]">🧹 Tareas</h2>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
         Cambia el icono, el nombre, el valor o las veces por semana. «Ocultar» la quita del
@@ -105,18 +115,17 @@ export default async function TareasPage() {
             key={t.id}
             className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}
           >
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-2xl">{t.icon}</span>
-              <span className="font-display font-bold text-[var(--ink)]">{t.name}</span>
-            </div>
             <form action={updateTask}>
               <input type="hidden" name="id" value={t.id} />
-              <input
-                name="name"
-                defaultValue={t.name}
-                className={`${inputCls} font-display font-bold`}
-                placeholder="Nombre"
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{t.icon}</span>
+                <input
+                  name="name"
+                  defaultValue={t.name}
+                  className={`${inputCls} flex-1 font-display font-bold`}
+                  placeholder="Nombre"
+                />
+              </div>
               <input
                 name="description"
                 defaultValue={t.description ?? ''}
