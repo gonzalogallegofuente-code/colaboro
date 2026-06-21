@@ -17,8 +17,8 @@ export function DateNav({
   const router = useRouter()
   const go = (d: string) => router.replace(`/?kid=${kidId}&d=${d}`)
   const pill = (on: boolean) =>
-    `rounded-full px-3 py-1 text-sm font-medium transition ${
-      on ? 'bg-gray-900 text-white' : 'border bg-white text-gray-600'
+    `tap-bounce rounded-full px-4 py-1.5 text-sm font-display font-semibold transition ${
+      on ? 'bg-indigo-600 text-white shadow-md' : 'bg-white/70 text-indigo-900/70'
     }`
   const other = selectedDate !== today && selectedDate !== yesterday
   return (
@@ -30,8 +30,8 @@ export function DateNav({
         Ayer
       </button>
       <label
-        className={`ml-auto inline-flex items-center gap-1 rounded-full border bg-white px-3 py-1 text-sm text-gray-600 ${
-          other ? 'ring-2 ring-gray-900' : ''
+        className={`ml-auto inline-flex items-center gap-1 rounded-full bg-white/70 px-3 py-1.5 text-sm font-semibold text-indigo-900/70 ${
+          other ? 'ring-2 ring-indigo-500' : ''
         }`}
       >
         <span aria-hidden>📅</span>

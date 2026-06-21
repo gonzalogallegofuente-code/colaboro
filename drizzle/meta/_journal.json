@@ -8,6 +8,13 @@
       "when": 1782057850274,
       "tag": "0000_small_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782059421784,
+      "tag": "0001_jazzy_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }

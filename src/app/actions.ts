@@ -106,6 +106,7 @@ export async function addTask(formData: FormData) {
   const valueCents = parseEurosToCents(String(formData.get('value') ?? '')) ?? 100
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
+  const icon = String(formData.get('icon') ?? '').trim() || '⭐'
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -113,7 +114,7 @@ export async function addTask(formData: FormData) {
   const sortOrder = (max ?? 0) + 1
   const color = PALETTE[sortOrder % PALETTE.length]
 
-  await db.insert(tasks).values({ name, description, valueCents, weeklyTarget, color, sortOrder })
+  await db.insert(tasks).values({ name, description, icon, valueCents, weeklyTarget, color, sortOrder })
   redirect('/tareas')
 }
 
@@ -126,8 +127,9 @@ export async function updateTask(formData: FormData) {
   const valueCents = parseEurosToCents(String(formData.get('value') ?? '')) ?? 100
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
+  const icon = String(formData.get('icon') ?? '').trim() || '⭐'
 
-  await db.update(tasks).set({ name, description, valueCents, weeklyTarget }).where(eq(tasks.id, id))
+  await db.update(tasks).set({ name, description, icon, valueCents, weeklyTarget }).where(eq(tasks.id, id))
   redirect('/tareas')
 }
 
@@ -144,12 +146,24 @@ export async function addKid(formData: FormData) {
   await requireAuth()
   const name = String(formData.get('name') ?? '').trim()
   if (!name) throw new Error('Falta el nombre')
+  const emoji = String(formData.get('emoji') ?? '').trim() || '🙂'
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${kids.sortOrder}),0)::int` })
     .from(kids)
   const sortOrder = (max ?? 0) + 1
   const color = ['#2563eb', '#e11d48', '#16a34a', '#d97706', '#7c3aed'][sortOrder % 5]
-  await db.insert(kids).values({ name, color, sortOrder })
+  await db.insert(kids).values({ name, emoji, color, sortOrder })
+  redirect('/tareas')
+}
+
+export async function updateKid(formData: FormData) {
+  await requireAuth()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const name = String(formData.get('name') ?? '').trim()
+  if (!name) throw new Error('Falta el nombre')
+  const emoji = String(formData.get('emoji') ?? '').trim() || '🙂'
+  await db.update(kids).set({ name, emoji }).where(eq(kids.id, id))
   redirect('/tareas')
 }
 

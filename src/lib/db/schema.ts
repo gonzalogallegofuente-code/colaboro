@@ -13,6 +13,7 @@ import {
 export const kids = pgTable('kids', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
+  emoji: text('emoji').notNull().default('🙂'),
   color: text('color').notNull().default('#2563eb'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),
@@ -25,6 +26,7 @@ export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
+  icon: text('icon').notNull().default('⭐'),
   valueCents: integer('value_cents').notNull().default(100),
   weeklyTarget: integer('weekly_target').notNull().default(7),
   color: text('color').notNull().default('#e9d5ff'),

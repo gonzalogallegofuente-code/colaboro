@@ -5,25 +5,29 @@ import { euros } from '@/lib/money'
 import { markTask, undoTask, payKid } from './actions'
 import { Nav } from '@/components/Nav'
 import { SubmitButton } from '@/components/SubmitButton'
-import { ConfirmSubmit } from '@/components/ConfirmSubmit'
+import { CoinButton } from '@/components/CoinButton'
+import { PayButton } from '@/components/PayButton'
 import { DateNav } from '@/components/DateNav'
 
 export const dynamic = 'force-dynamic'
 
-function ProgressBoxes({ count, target, color }: { count: number; target: number; color: string }) {
+function ProgressCoins({ count, target }: { count: number; target: number }) {
   const filled = Math.min(count, target)
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1">
       {Array.from({ length: target }).map((_, i) => (
         <span
           key={i}
-          className="h-3.5 w-3.5 rounded-[3px] border"
-          style={{ background: i < filled ? color : 'transparent', borderColor: color }}
+          className={`h-4 w-4 rounded-full border ${
+            i < filled
+              ? 'border-amber-500 bg-gradient-to-br from-amber-300 to-amber-500 shadow-sm'
+              : 'border-gray-200 bg-gray-100'
+          }`}
         />
       ))}
-      <span className="ml-1 text-[11px] text-gray-500">
+      <span className="ml-1 font-display text-xs font-semibold text-gray-500">
         {count}/{target}
-        {count > target ? ` (+${count - target})` : ''}
+        {count > target ? ` +${count - target}` : ''}
       </span>
     </div>
   )
@@ -46,9 +50,9 @@ export default async function Page({
     return (
       <div className="mx-auto max-w-md">
         <Nav active="inicio" />
-        <div className="mx-3 mt-10 rounded-2xl bg-white p-6 text-center shadow-sm">
+        <div className="mx-3 mt-10 rounded-3xl bg-white/90 p-6 text-center shadow-md">
           <p className="text-gray-600">Todavía no hay nadie dado de alta.</p>
-          <Link href="/tareas" className="mt-3 inline-block rounded-xl bg-gray-900 px-4 py-2 text-white">
+          <Link href="/tareas" className="mt-3 inline-block rounded-2xl bg-indigo-600 px-4 py-2 font-display font-bold text-white">
             Añadir hijos y tareas
           </Link>
         </div>
@@ -63,8 +67,8 @@ export default async function Page({
     <div className="mx-auto max-w-md pb-12">
       <Nav active="inicio" />
 
-      {/* Pestañas por hijo */}
-      <div className="grid grid-cols-2 gap-2 px-3">
+      {/* Selector de hijo */}
+      <div className="grid grid-cols-2 gap-3 px-3">
         {data.kids.map((k) => {
           const on = k.id === selKid.id
           return (
@@ -72,110 +76,111 @@ export default async function Page({
               key={k.id}
               href={`/?kid=${k.id}&d=${selectedDate}`}
               replace
-              className="rounded-2xl border-2 p-3 text-center transition"
-              style={{ borderColor: k.color, background: on ? `${k.color}1a` : '#fff' }}
+              className={`tap-bounce relative overflow-hidden rounded-3xl p-3 text-center shadow-md transition ${
+                on ? 'scale-[1.03] shadow-xl ring-4 ring-white' : 'opacity-90'
+              }`}
+              style={{ background: on ? k.color : 'rgba(255,255,255,0.85)', color: on ? '#fff' : '#374151' }}
             >
-              <div className="font-bold" style={{ color: k.color }}>
-                {k.name}
+              <div className="text-5xl float-soft">{k.emoji}</div>
+              <div className="font-display text-lg font-bold">{k.name}</div>
+              <div
+                className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-bold ${
+                  on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'
+                }`}
+              >
+                🪙 {euros(k.weekCents)}
               </div>
-              <div className="text-[11px] uppercase tracking-wide text-gray-400">Esta semana</div>
-              <div className="text-lg font-extrabold text-gray-800">{euros(k.weekCents)}</div>
             </Link>
           )
         })}
       </div>
 
-      {/* Resumen de dinero del hijo seleccionado */}
-      <div className="mx-3 mt-3 flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
-        <div>
-          <div className="text-[11px] uppercase tracking-wide text-gray-400">Sin pagar</div>
-          <div className="text-3xl font-extrabold" style={{ color: selKid.color }}>
+      {/* Dinero del hijo seleccionado */}
+      <div
+        className="mx-3 mt-3 flex items-center justify-between overflow-hidden rounded-3xl p-4 text-white shadow-lg"
+        style={{ background: `linear-gradient(135deg, ${selKid.color}, ${selKid.color}cc)` }}
+      >
+        <div className="min-w-0">
+          <div className="font-display text-sm font-semibold text-white/85">
+            {selKid.emoji} {selKid.name} lleva ganado
+          </div>
+          <div className="font-display text-[2.6rem] font-bold leading-tight drop-shadow-sm">
             {euros(selKid.balanceCents)}
           </div>
-          <div className="mt-1 text-xs text-gray-500">Esta semana {euros(selKid.weekCents)}</div>
+          <div className="text-xs font-semibold text-white/85">
+            Esta semana {euros(selKid.weekCents)}
+          </div>
         </div>
         <form action={payKid}>
           <input type="hidden" name="kidId" value={selKid.id} />
-          <ConfirmSubmit
+          <PayButton
             message={`¿Pagar ${euros(selKid.balanceCents)} a ${selKid.name} y poner su contador a 0?`}
             disabled={selKid.balanceCents <= 0}
-            className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm disabled:opacity-40"
-          >
-            Pagar
-          </ConfirmSubmit>
+          />
         </form>
       </div>
 
-      {/* Selector de día */}
+      {/* Día */}
       <div className="mx-3 mt-4">
         <DateNav kidId={selKid.id} selectedDate={selectedDate} today={today} yesterday={yesterday} />
-        <p className="mt-1.5 px-1 text-[11px] text-gray-400">
-          Apuntando para <span className="font-medium text-gray-500">{friendlyDay(selectedDate)}</span>
+        <p className="mt-1.5 px-1 text-[11px] font-semibold text-indigo-900/50">
+          Apuntando para <span className="text-indigo-900/80">{friendlyDay(selectedDate)}</span>
           {' · '}semana {formatRange(data.range.start, data.range.end)}
-          {!inThisWeek ? ' (semana anterior)' : ''}
+          {!inThisWeek ? ' (anterior)' : ''}
         </p>
       </div>
 
-      {/* Lista de tareas */}
-      <div className="mx-3 mt-2 space-y-2">
+      {/* Tareas */}
+      <div className="mx-3 mt-2 space-y-2.5">
         {data.tasks.length === 0 && (
-          <div className="rounded-2xl bg-white p-6 text-center text-gray-500 shadow-sm">
-            No hay tareas.{' '}
-            <Link href="/tareas" className="font-medium text-gray-900 underline">
-              Añade alguna
+          <div className="rounded-3xl bg-white/90 p-6 text-center text-gray-500 shadow-md">
+            No hay tareas todavía.{' '}
+            <Link href="/tareas" className="font-bold text-indigo-600 underline">
+              ¡Añade una!
             </Link>
-            .
           </div>
         )}
         {data.tasks.map((t) => {
           const week = data.weekCountByTask[t.id] ?? 0
           const day = data.dayCountByTask[t.id] ?? 0
           return (
-            <div
-              key={t.id}
-              className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm"
-              style={{ borderLeft: `6px solid ${t.color}` }}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="truncate font-semibold text-gray-800">{t.name}</span>
-                  <span className="shrink-0 text-xs text-gray-400">{euros(t.valueCents)}</span>
-                </div>
-                {t.description && (
-                  <div className="truncate text-[11px] text-gray-400">{t.description}</div>
-                )}
-                <ProgressBoxes count={week} target={t.weeklyTarget} color={t.color} />
+            <div key={t.id} className="flex items-center gap-3 rounded-3xl bg-white/90 p-3 shadow-md animate-pop">
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-3xl shadow-inner"
+                style={{ background: t.color }}
+              >
+                {t.icon}
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5">
-                {day > 0 && (
-                  <>
-                    <form action={undoTask}>
-                      <input type="hidden" name="kidId" value={selKid.id} />
-                      <input type="hidden" name="taskId" value={t.id} />
-                      <input type="hidden" name="doneOn" value={selectedDate} />
-                      <SubmitButton
-                        className="flex h-9 w-9 items-center justify-center rounded-full border text-xl leading-none text-gray-400"
-                        aria-label="Quitar una"
-                      >
-                        −
-                      </SubmitButton>
-                    </form>
-                    <span className="w-4 text-center text-sm font-bold text-gray-700">{day}</span>
-                  </>
-                )}
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-display text-base font-bold text-gray-800">{t.name}</div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                  🪙 {euros(t.valueCents)}
+                </span>
+                <ProgressCoins count={week} target={t.weeklyTarget} />
+              </div>
+
+              <div className="flex shrink-0 flex-col items-center gap-1.5">
                 <form action={markTask}>
                   <input type="hidden" name="kidId" value={selKid.id} />
                   <input type="hidden" name="taskId" value={t.id} />
                   <input type="hidden" name="doneOn" value={selectedDate} />
-                  <SubmitButton
-                    className="flex h-12 w-12 items-center justify-center rounded-full text-3xl leading-none text-white shadow-sm active:scale-95"
-                    style={{ background: selKid.color }}
-                    aria-label={`Marcar ${t.name} para ${selKid.name}`}
-                  >
-                    +
-                  </SubmitButton>
+                  <CoinButton color={selKid.color} label={`Marcar ${t.name} para ${selKid.name}`} />
                 </form>
+                {day > 0 && (
+                  <form action={undoTask} className="flex items-center gap-1">
+                    <input type="hidden" name="kidId" value={selKid.id} />
+                    <input type="hidden" name="taskId" value={t.id} />
+                    <input type="hidden" name="doneOn" value={selectedDate} />
+                    <SubmitButton
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-lg leading-none text-gray-500"
+                      aria-label="Quitar una"
+                    >
+                      −
+                    </SubmitButton>
+                    <span className="font-display text-xs font-bold text-gray-400">×{day}</span>
+                  </form>
+                )}
               </div>
             </div>
           )
