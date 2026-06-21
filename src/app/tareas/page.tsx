@@ -105,24 +105,27 @@ export default async function TareasPage() {
             key={t.id}
             className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}
           >
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-2xl">{t.icon}</span>
+              <span className="font-display font-bold text-[var(--ink)]">{t.name}</span>
+            </div>
             <form action={updateTask}>
               <input type="hidden" name="id" value={t.id} />
-              <div className="flex gap-3">
+              <input
+                name="name"
+                defaultValue={t.name}
+                className={`${inputCls} font-display font-bold`}
+                placeholder="Nombre"
+              />
+              <input
+                name="description"
+                defaultValue={t.description ?? ''}
+                className={`${inputCls} mt-1.5 text-[var(--ink-2)]`}
+                placeholder="Descripción (opcional)"
+              />
+              <div className="mt-2">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
                 <EmojiInput name="icon" defaultValue={t.icon} suggestions={TASK_ICONS} />
-                <div className="flex-1">
-                  <input
-                    name="name"
-                    defaultValue={t.name}
-                    className={`${inputCls} font-display font-bold`}
-                    placeholder="Nombre"
-                  />
-                  <input
-                    name="description"
-                    defaultValue={t.description ?? ''}
-                    className={`${inputCls} mt-1.5 text-[var(--ink-2)]`}
-                    placeholder="Descripción (opcional)"
-                  />
-                </div>
               </div>
               <div className="mt-2 flex items-end gap-2">
                 <label className="flex-1">
@@ -146,12 +149,11 @@ export default async function TareasPage() {
       {/* Añadir tarea */}
       <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">➕ Nueva tarea</h2>
       <form action={addTask} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-        <div className="flex gap-3">
+        <input name="name" placeholder="Nombre de la tarea" className={`${inputCls} font-display font-bold`} required />
+        <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
+        <div className="mt-2">
+          <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
           <EmojiInput name="icon" defaultValue="⭐" suggestions={TASK_ICONS} />
-          <div className="flex-1">
-            <input name="name" placeholder="Nombre de la tarea" className={`${inputCls} font-display font-bold`} required />
-            <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
-          </div>
         </div>
         <div className="mt-2 flex items-end gap-2">
           <label className="flex-1">
