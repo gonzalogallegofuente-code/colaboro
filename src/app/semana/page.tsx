@@ -39,7 +39,7 @@ export default async function SemanaPage({
     return (
       <div className="mx-auto max-w-md">
         <Nav active="semana" />
-        <div className="mx-3 mt-10 rounded-3xl bg-white/90 p-6 text-center text-gray-600 shadow-md">
+        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
           Todavía no hay nadie dado de alta.
         </div>
       </div>
@@ -56,8 +56,8 @@ export default async function SemanaPage({
     <div className="mx-auto max-w-md pb-12">
       <Nav active="semana" />
 
-      <h1 className="px-4 pt-2 font-display text-xl font-bold text-indigo-800">📅 Parte semanal</h1>
-      <p className="px-4 text-xs font-semibold text-indigo-900/50">Qué día hizo cada cosa. 🪙 = hecho ese día.</p>
+      <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📅 Parte semanal</h1>
+      <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">Qué día hizo cada cosa. 🪙 = hecho ese día.</p>
 
       {/* Hijo */}
       <div className="mt-3 flex gap-2 px-3">
@@ -71,11 +71,11 @@ export default async function SemanaPage({
               className={`flex flex-1 items-center justify-center gap-2 rounded-2xl px-2 py-2 shadow-sm ${
                 on ? 'shadow-md ring-2 ring-white' : ''
               }`}
-              style={{ background: on ? k.color : 'rgba(255,255,255,0.85)', color: on ? '#fff' : '#374151' }}
+              style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
             >
               <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
               <span className="font-display font-bold">{k.name}</span>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'}`}>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'}`}>
                 {unitIcon(money)} {formatAmount(k.weekCents, money)}
               </span>
             </Link>
@@ -88,20 +88,20 @@ export default async function SemanaPage({
         <Link
           href={`/semana?kid=${selectedKidId}&w=${shiftWeek(range.start, -1)}`}
           replace
-          className="tap-bounce rounded-full bg-white/70 px-3 py-1.5 font-display font-bold text-indigo-700 shadow-sm"
+          className="tap-bounce rounded-full bg-[var(--card)] px-3 py-1.5 font-display font-bold text-[var(--head)] shadow-sm"
           aria-label="Semana anterior"
         >
           ◀
         </Link>
         <div className="text-center">
-          <div className="font-display font-bold text-indigo-800">{formatRange(range.start, range.end)}</div>
+          <div className="font-display font-bold text-[var(--head)]">{formatRange(range.start, range.end)}</div>
           {isCurrent && <div className="text-[11px] font-semibold text-emerald-600">esta semana</div>}
         </div>
         {canGoNext ? (
           <Link
             href={`/semana?kid=${selectedKidId}&w=${shiftWeek(range.start, 1)}`}
             replace
-            className="tap-bounce rounded-full bg-white/70 px-3 py-1.5 font-display font-bold text-indigo-700 shadow-sm"
+            className="tap-bounce rounded-full bg-[var(--card)] px-3 py-1.5 font-display font-bold text-[var(--head)] shadow-sm"
             aria-label="Semana siguiente"
           >
             ▶
@@ -112,14 +112,14 @@ export default async function SemanaPage({
       </div>
 
       {/* Cuadrícula */}
-      <div className="mx-3 mt-2 overflow-hidden rounded-3xl bg-white/90 p-2.5 shadow-md">
+      <div className="mx-3 mt-2 overflow-hidden rounded-3xl bg-[var(--card)] p-2.5 shadow-md">
         <div className="grid items-center gap-1" style={cols}>
           {/* cabecera de días */}
           <div />
           {days.map((d) => (
             <div key={d.ymd} className={`rounded-lg py-1 text-center ${d.ymd === today ? 'bg-indigo-100' : ''}`}>
-              <div className="text-[10px] font-bold uppercase text-indigo-900/45">{d.dow}</div>
-              <div className="font-display text-xs font-bold text-indigo-800">{d.dom}</div>
+              <div className="text-[10px] font-bold uppercase text-[var(--ink-3)]">{d.dow}</div>
+              <div className="font-display text-xs font-bold text-[var(--head)]">{d.dom}</div>
             </div>
           ))}
 
@@ -133,7 +133,7 @@ export default async function SemanaPage({
                 >
                   {t.icon}
                 </span>
-                <span className="truncate text-[11px] font-semibold leading-tight text-gray-700">{t.name}</span>
+                <span className="truncate text-[11px] font-semibold leading-tight text-[var(--ink)]">{t.name}</span>
               </div>
               {days.map((d, i) => (
                 <Cell key={d.ymd} count={grid[t.id]?.[i] ?? 0} today={d.ymd === today} />
@@ -142,7 +142,7 @@ export default async function SemanaPage({
           ))}
 
           {/* totales por día */}
-          <div className="pr-1 text-right text-[11px] font-bold text-gray-400">Total</div>
+          <div className="pr-1 text-right text-[11px] font-bold text-[var(--ink-3)]">Total</div>
           {dayCents.map((c, i) => (
             <div
               key={i}

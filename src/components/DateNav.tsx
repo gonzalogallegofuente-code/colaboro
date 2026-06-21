@@ -18,7 +18,7 @@ export function DateNav({
   const go = (d: string) => router.replace(`/?kid=${kidId}&d=${d}`)
   const pill = (on: boolean) =>
     `tap-bounce rounded-full px-4 py-1.5 text-sm font-display font-semibold transition ${
-      on ? 'bg-indigo-600 text-white shadow-md' : 'bg-white/70 text-indigo-900/70'
+      on ? 'bg-indigo-600 text-white shadow-md' : 'bg-[var(--card)] text-[var(--ink-2)]'
     }`
   const other = selectedDate !== today && selectedDate !== yesterday
   return (
@@ -30,7 +30,7 @@ export function DateNav({
         Ayer
       </button>
       <label
-        className={`ml-auto inline-flex items-center gap-1 rounded-full bg-white/70 px-3 py-1.5 text-sm font-semibold text-indigo-900/70 ${
+        className={`ml-auto inline-flex items-center gap-1 rounded-full bg-[var(--card)] px-3 py-1.5 text-sm font-semibold text-[var(--ink-2)] ${
           other ? 'ring-2 ring-indigo-500' : ''
         }`}
       >

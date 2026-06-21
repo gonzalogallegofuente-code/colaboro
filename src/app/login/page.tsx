@@ -13,11 +13,11 @@ export default async function LoginPage({
     <main className="mx-auto flex min-h-full max-w-sm flex-col items-center justify-center px-6">
       <div className="mb-6 text-center">
         <div className="text-6xl">🦁🦊</div>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-indigo-700">Colaboro</h1>
-        <p className="mt-1 font-display font-semibold text-indigo-900/60">¡Gana dinero ayudando en casa! 🪙</p>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-[var(--head)]">Colaboro</h1>
+        <p className="mt-1 font-display font-semibold text-[var(--ink-2)]">¡Gana dinero ayudando en casa! 🪙</p>
       </div>
-      <form action={login} className="w-full rounded-3xl bg-white/90 p-5 shadow-xl">
-        <label htmlFor="pin" className="font-display text-sm font-bold text-gray-600">
+      <form action={login} className="w-full rounded-3xl bg-[var(--card)] p-5 shadow-xl">
+        <label htmlFor="pin" className="font-display text-sm font-bold text-[var(--ink-2)]">
           Tu PIN secreto 🔒
         </label>
         <input

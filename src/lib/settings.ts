@@ -4,6 +4,12 @@ import { settings } from './db/schema'
 
 export type Unit = 'eur' | 'pts'
 export type MoneyConfig = { unit: Unit; pointsName: string; pointsIcon: string }
+export type Theme = 'infantil' | 'juvenil'
+
+export async function getTheme(): Promise<Theme> {
+  const [row] = await db.select().from(settings).where(eq(settings.key, 'theme'))
+  return row?.value === 'juvenil' ? 'juvenil' : 'infantil'
+}
 
 export async function getMoneyConfig(): Promise<MoneyConfig> {
   const rows = await db.select().from(settings)

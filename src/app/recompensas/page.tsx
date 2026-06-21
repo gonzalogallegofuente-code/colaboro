@@ -21,7 +21,7 @@ export default async function RecompensasPage({
     return (
       <div className="mx-auto max-w-md">
         <Nav active="recompensas" />
-        <div className="mx-3 mt-10 rounded-3xl bg-white/90 p-6 text-center text-gray-600 shadow-md">
+        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
           Todavía no hay nadie dado de alta.
         </div>
       </div>
@@ -36,15 +36,15 @@ export default async function RecompensasPage({
       <Nav active="recompensas" />
 
       <div className="flex items-center justify-between px-4 pt-2">
-        <h1 className="font-display text-xl font-bold text-indigo-800">🎁 Recompensas</h1>
+        <h1 className="font-display text-xl font-bold text-[var(--head)]">🎁 Recompensas</h1>
         <Link
           href="/recompensas/editar"
-          className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
+          className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
         >
           ✏️ Editar
         </Link>
       </div>
-      <p className="px-4 text-xs font-semibold text-indigo-900/50">
+      <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
         Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios.
       </p>
 
@@ -60,12 +60,12 @@ export default async function RecompensasPage({
               className={`tap-bounce flex items-center justify-center gap-2 rounded-2xl p-3 shadow-md transition ${
                 on ? 'scale-[1.03] shadow-xl ring-4 ring-white' : 'opacity-90'
               }`}
-              style={{ background: on ? k.color : 'rgba(255,255,255,0.85)', color: on ? '#fff' : '#374151' }}
+              style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
             >
               <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={36} />
               <div className="text-left">
                 <div className="font-display font-bold leading-tight">{k.name}</div>
-                <div className={`text-sm font-bold ${on ? 'text-white/90' : 'text-amber-700'}`}>
+                <div className={`text-sm font-bold ${on ? 'text-white/90' : 'text-[var(--chip-ink)]'}`}>
                   {unitIcon(money)} {formatAmount(k.balanceCents, money)}
                 </div>
               </div>
@@ -74,15 +74,15 @@ export default async function RecompensasPage({
         })}
       </div>
 
-      <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-indigo-900/70">
+      <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-[var(--ink-2)]">
         {selKid.name} tiene{' '}
-        <span className="font-bold text-indigo-700">{formatAmount(selKid.balanceCents, money)}</span> para gastar
+        <span className="font-bold text-[var(--head)]">{formatAmount(selKid.balanceCents, money)}</span> para gastar
       </p>
 
       {/* Lista canjeable */}
       <div className="mx-3 mt-2 space-y-2.5">
         {rewards.length === 0 && (
-          <div className="rounded-3xl bg-white/90 p-6 text-center text-gray-500 shadow-md">
+          <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             No hay recompensas todavía.{' '}
             <Link href="/recompensas/editar" className="font-bold text-indigo-600 underline">
               Añade alguna
@@ -93,13 +93,13 @@ export default async function RecompensasPage({
         {rewards.map((r) => {
           const enough = selKid.balanceCents >= r.costCents
           return (
-            <div key={r.id} className="flex items-center gap-3 rounded-3xl bg-white/90 p-3 shadow-md">
+            <div key={r.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-3xl shadow-inner">
                 {r.icon}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-display font-bold text-gray-800">{r.name}</div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                <div className="truncate font-display font-bold text-[var(--ink)]">{r.name}</div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--chip)] px-2 py-0.5 text-xs font-bold text-[var(--chip-ink)]">
                   {unitIcon(money)} {formatAmount(r.costCents, money)}
                 </span>
                 {!enough && (
@@ -127,17 +127,17 @@ export default async function RecompensasPage({
       {/* Canjes recientes */}
       {redemptions.length > 0 && (
         <>
-          <h2 className="px-4 pt-6 font-display text-lg font-bold text-indigo-800">🧾 Últimos canjes</h2>
+          <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">🧾 Últimos canjes</h2>
           <div className="mx-3 mt-2 space-y-2">
             {redemptions.map((red) => {
               const kid = kids.find((k) => k.id === red.kidId)
               const d = new Date(red.createdAt)
               return (
-                <div key={red.id} className="flex items-center gap-3 rounded-2xl bg-white/80 px-3 py-2 shadow-sm">
+                <div key={red.id} className="flex items-center gap-3 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
                   <span className="text-2xl">{red.rewardIcon}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold text-gray-700">{red.rewardName}</div>
-                    <div className="text-[11px] font-semibold text-gray-400">
+                    <div className="truncate text-sm font-bold text-[var(--ink)]">{red.rewardName}</div>
+                    <div className="text-[11px] font-semibold text-[var(--ink-3)]">
                       {kid?.name} · {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </div>
                   </div>

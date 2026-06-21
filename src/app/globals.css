@@ -2,7 +2,40 @@
 
 @theme {
   --font-sans: var(--font-nunito), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-fredoka), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --color-surface: var(--card);
+}
+
+/* ── Temas ──────────────────────────────────────────────────────────── */
+/* Infantil (hasta 9): pastel + Fredoka, el de siempre. */
+.theme-infantil {
+  color-scheme: light;
+  --app-bg: linear-gradient(160deg, #e0f2fe 0%, #ede9fe 45%, #fce7f3 100%);
+  --card: rgba(255, 255, 255, 0.9);
+  --ink: #1f2937;
+  --ink-2: #6b7280;
+  --ink-3: #9ca3af;
+  --head: #3730a3;
+  --nav: rgba(255, 255, 255, 0.4);
+  --chip: #fef3c7;
+  --chip-ink: #b45309;
+  --font-display: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Juvenil (10+): oscuro/gamer, tipografía techy, acentos neón. */
+.theme-juvenil {
+  color-scheme: dark;
+  --app-bg:
+    radial-gradient(1100px 560px at 50% -12%, #3b2f8f 0%, transparent 60%),
+    linear-gradient(160deg, #0b1020 0%, #0f172a 60%, #0b1020 100%);
+  --card: rgba(30, 41, 59, 0.72);
+  --ink: #e7ebf3;
+  --ink-2: #9aa6bd;
+  --ink-3: #6b7890;
+  --head: #c4b5fd;
+  --nav: rgba(2, 6, 23, 0.5);
+  --chip: rgba(34, 211, 238, 0.16);
+  --chip-ink: #67e8f9;
+  --font-display: var(--font-juvenil), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -15,9 +48,9 @@ body {
 }
 
 body {
-  color: #1f2937;
-  background: linear-gradient(160deg, #e0f2fe 0%, #ede9fe 45%, #fce7f3 100%);
+  background: var(--app-bg);
   background-attachment: fixed;
+  color: var(--ink);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -30,8 +63,15 @@ button {
   font-family: var(--font-display);
 }
 
-/* ── Animaciones divertidas ─────────────────────────────────────────── */
+/* En modo juvenil, los campos heredan el esquema oscuro. */
+.theme-juvenil input,
+.theme-juvenil textarea {
+  background: rgba(15, 23, 42, 0.55);
+  color: var(--ink);
+  border-color: rgba(148, 163, 184, 0.3);
+}
 
+/* ── Animaciones ────────────────────────────────────────────────────── */
 @keyframes popIn {
   0% { transform: scale(0.85); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
@@ -40,7 +80,6 @@ button {
   animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* moneda que sube y se desvanece al marcar una tarea */
 @keyframes coinFly {
   0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
   25% { opacity: 1; }
@@ -56,7 +95,6 @@ button {
   z-index: 20;
 }
 
-/* rebote al pulsar el botón + */
 @keyframes tapBounce {
   0% { transform: scale(1); }
   40% { transform: scale(0.82); }
@@ -66,18 +104,6 @@ button {
   animation: tapBounce 0.25s ease;
 }
 
-/* meneo del emoji */
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-9deg); }
-  75% { transform: rotate(9deg); }
-}
-.wiggle-hover:active .wiggle-target,
-.wiggle-hover:hover .wiggle-target {
-  animation: wiggle 0.5s ease;
-}
-
-/* confeti al cobrar */
 @keyframes confettiFall {
   0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
   100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }

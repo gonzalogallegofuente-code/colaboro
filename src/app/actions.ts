@@ -184,6 +184,13 @@ export async function setUnit(formData: FormData) {
   refresh()
 }
 
+export async function setTheme(formData: FormData) {
+  await requireAuth()
+  const theme = formData.get('theme') === 'juvenil' ? 'juvenil' : 'infantil'
+  await setSetting('theme', theme)
+  refresh()
+}
+
 export async function setPointsName(formData: FormData) {
   await requireAuth()
   const name = String(formData.get('pointsName') ?? '').trim() || 'gemas'

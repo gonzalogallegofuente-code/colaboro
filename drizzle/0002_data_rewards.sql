@@ -2,7 +2,8 @@
 INSERT INTO settings (key, value) VALUES
   ('unit', 'eur'),
   ('points_name', 'gemas'),
-  ('points_icon', '💎')
+  ('points_icon', '💎'),
+  ('theme', 'infantil')
 ON CONFLICT (key) DO NOTHING;
 
 -- Recompensas de ejemplo (editables/borrables). Coste en céntimos (=/100):

@@ -4,11 +4,11 @@ import { logout } from '@/app/actions'
 export function Nav({ active }: { active?: 'inicio' | 'semana' | 'recompensas' | 'historico' | 'tareas' }) {
   const tab = (on?: boolean) =>
     `flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
-      on ? 'bg-white text-indigo-700 shadow-sm' : 'bg-white/50 text-indigo-900/70'
+      on ? 'bg-[var(--card)] text-[var(--head)] shadow-sm' : 'text-[var(--ink-2)]'
     }`
   return (
-    <header className="sticky top-0 z-30 mb-2 flex items-center justify-between bg-white/40 px-3 py-3 backdrop-blur-md">
-      <Link href="/" className="font-display text-2xl font-bold tracking-tight text-indigo-700">
+    <header className="sticky top-0 z-30 mb-2 flex items-center justify-between bg-[var(--nav)] px-3 py-3 backdrop-blur-md">
+      <Link href="/" className="font-display text-2xl font-bold tracking-tight text-[var(--head)]">
         ✨ Colaboro
       </Link>
       <nav className="flex items-center gap-1.5">
@@ -25,7 +25,7 @@ export function Nav({ active }: { active?: 'inicio' | 'semana' | 'recompensas' |
           ⚙️
         </Link>
         <form action={logout}>
-          <button className="rounded-full bg-white/50 px-3 py-1.5 text-sm" aria-label="Salir">
+          <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir">
             🚪
           </button>
         </form>
