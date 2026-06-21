@@ -1,9 +1,11 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { getWeekGrid } from '@/lib/data'
+import { getUnit } from '@/lib/settings'
 import { todayYmd, formatRange, shiftWeek } from '@/lib/week'
-import { euros } from '@/lib/money'
+import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
+import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +33,7 @@ export default async function SemanaPage({
   const anchor = sp.w && /^\d{4}-\d{2}-\d{2}$/.test(sp.w) ? sp.w : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const data = await getWeekGrid(anchor, kidParam)
+  const [data, unit] = await Promise.all([getWeekGrid(anchor, kidParam), getUnit()])
 
   if (!data) {
     return (
@@ -71,10 +73,10 @@ export default async function SemanaPage({
               }`}
               style={{ background: on ? k.color : 'rgba(255,255,255,0.85)', color: on ? '#fff' : '#374151' }}
             >
-              <span className="text-2xl">{k.emoji}</span>
+              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
               <span className="font-display font-bold">{k.name}</span>
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'}`}>
-                🪙 {euros(k.weekCents)}
+                {unitIcon(unit)} {formatAmount(k.weekCents, unit)}
               </span>
             </Link>
           )
@@ -148,7 +150,11 @@ export default async function SemanaPage({
                 c > 0 ? 'text-emerald-600' : 'text-gray-300'
               }`}
             >
-              {c > 0 ? (c / 100).toFixed(2).replace('.', ',') : '·'}
+              {c > 0
+                ? unit === 'pts'
+                  ? String(Math.round((c / 100) * 100) / 100).replace('.', ',')
+                  : (c / 100).toFixed(2).replace('.', ',')
+                : '·'}
             </div>
           ))}
         </div>

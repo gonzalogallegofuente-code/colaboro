@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getBoardData } from '@/lib/data'
+import { getUnit } from '@/lib/settings'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
-import { euros } from '@/lib/money'
+import { formatAmount, unitIcon } from '@/lib/money'
 import { markTask, undoTask, payKid } from './actions'
 import { Nav } from '@/components/Nav'
+import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
 import { PayButton } from '@/components/PayButton'
@@ -44,7 +46,7 @@ export default async function Page({
   const selectedDate = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const data = await getBoardData(selectedDate, kidParam)
+  const [data, unit] = await Promise.all([getBoardData(selectedDate, kidParam), getUnit()])
 
   if (!data) {
     return (
@@ -81,14 +83,14 @@ export default async function Page({
               }`}
               style={{ background: on ? k.color : 'rgba(255,255,255,0.85)', color: on ? '#fff' : '#374151' }}
             >
-              <div className="text-5xl float-soft">{k.emoji}</div>
-              <div className="font-display text-lg font-bold">{k.name}</div>
+              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={56} className="float-soft mx-auto" />
+              <div className="mt-1 font-display text-lg font-bold">{k.name}</div>
               <div
                 className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-bold ${
                   on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'
                 }`}
               >
-                🪙 {euros(k.weekCents)}
+                {unitIcon(unit)} {formatAmount(k.weekCents, unit)}
               </div>
             </Link>
           )
@@ -101,23 +103,33 @@ export default async function Page({
         style={{ background: `linear-gradient(135deg, ${selKid.color}, ${selKid.color}cc)` }}
       >
         <div className="min-w-0">
-          <div className="font-display text-sm font-semibold text-white/85">
-            {selKid.emoji} {selKid.name} lleva ganado
+          <div className="flex items-center gap-1.5 font-display text-sm font-semibold text-white/85">
+            <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={22} className="ring-1 ring-white/60" />
+            {selKid.name} lleva ganado
           </div>
           <div className="font-display text-[2.6rem] font-bold leading-tight drop-shadow-sm">
-            {euros(selKid.balanceCents)}
+            {formatAmount(selKid.balanceCents, unit)}
           </div>
           <div className="text-xs font-semibold text-white/85">
-            Esta semana {euros(selKid.weekCents)}
+            Esta semana {formatAmount(selKid.weekCents, unit)}
           </div>
         </div>
-        <form action={payKid}>
-          <input type="hidden" name="kidId" value={selKid.id} />
-          <PayButton
-            message={`¿Pagar ${euros(selKid.balanceCents)} a ${selKid.name} y poner su contador a 0?`}
-            disabled={selKid.balanceCents <= 0}
-          />
-        </form>
+        {unit === 'eur' ? (
+          <form action={payKid}>
+            <input type="hidden" name="kidId" value={selKid.id} />
+            <PayButton
+              message={`¿Pagar ${formatAmount(selKid.balanceCents, unit)} a ${selKid.name} y poner su contador a 0?`}
+              disabled={selKid.balanceCents <= 0}
+            />
+          </form>
+        ) : (
+          <Link
+            href={`/recompensas?kid=${selKid.id}`}
+            className="tap-bounce shrink-0 rounded-2xl bg-white/95 px-4 py-2.5 font-display text-base font-bold text-indigo-600 shadow-md ring-2 ring-white"
+          >
+            🎁 Canjear
+          </Link>
+        )}
       </div>
 
       {/* Día */}
@@ -155,7 +167,7 @@ export default async function Page({
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-base font-bold text-gray-800">{t.name}</div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
-                  🪙 {euros(t.valueCents)}
+                  {unitIcon(unit)} {formatAmount(t.valueCents, unit)}
                 </span>
                 <ProgressCoins count={week} target={t.weeklyTarget} />
               </div>

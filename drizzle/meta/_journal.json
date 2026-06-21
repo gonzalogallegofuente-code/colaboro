@@ -15,6 +15,13 @@
       "when": 1782059421784,
       "tag": "0001_jazzy_mikhail_rasputin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782061014697,
+      "tag": "0002_blue_payback",
+      "breakpoints": true
     }
   ]
 }

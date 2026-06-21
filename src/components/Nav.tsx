@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { logout } from '@/app/actions'
 
-export function Nav({ active }: { active?: 'inicio' | 'semana' | 'historico' | 'tareas' }) {
+export function Nav({ active }: { active?: 'inicio' | 'semana' | 'recompensas' | 'historico' | 'tareas' }) {
   const tab = (on?: boolean) =>
     `flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
       on ? 'bg-white text-indigo-700 shadow-sm' : 'bg-white/50 text-indigo-900/70'
@@ -14,6 +14,9 @@ export function Nav({ active }: { active?: 'inicio' | 'semana' | 'historico' | '
       <nav className="flex items-center gap-1.5">
         <Link href="/semana" className={tab(active === 'semana')} aria-label="Parte semanal">
           📅
+        </Link>
+        <Link href="/recompensas" className={tab(active === 'recompensas')} aria-label="Recompensas">
+          🎁
         </Link>
         <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
           🏆

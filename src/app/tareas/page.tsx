@@ -1,8 +1,11 @@
 import { getAllTasks, getActiveKids } from '@/lib/data'
-import { addKid, addTask, setTaskActive, updateKid, updateTask } from '@/app/actions'
+import { getUnit } from '@/lib/settings'
+import { unitWord } from '@/lib/money'
+import { addKid, addTask, setTaskActive, setUnit, updateKid, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { SubmitButton } from '@/components/SubmitButton'
 import { EmojiInput } from '@/components/EmojiInput'
+import { AvatarUpload } from '@/components/AvatarUpload'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,62 +17,80 @@ function eurosInput(cents: number): string {
 }
 
 export default async function TareasPage() {
-  const [tasks, kids] = await Promise.all([getAllTasks(), getActiveKids()])
+  const [tasks, kids, unit] = await Promise.all([getAllTasks(), getActiveKids(), getUnit()])
   const inputCls =
     'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
+  const unitPill = (on: boolean) =>
+    `tap-bounce rounded-xl px-4 py-1.5 font-display text-sm font-bold ${
+      on ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-indigo-700 ring-2 ring-indigo-100'
+    }`
 
   return (
     <div className="mx-auto max-w-md pb-12">
       <Nav active="tareas" />
 
-      <h1 className="px-4 pt-2 font-display text-xl font-bold text-indigo-800">⚙️ Tareas</h1>
+      <h1 className="px-4 pt-2 font-display text-xl font-bold text-indigo-800">⚙️ Ajustes</h1>
+
+      {/* Unidad: € o puntos */}
+      <div className="mx-3 mt-2 flex items-center gap-2 rounded-3xl bg-white/90 p-3 shadow-md">
+        <span className="font-display text-sm font-bold text-gray-700">Contar en:</span>
+        <form action={setUnit}>
+          <input type="hidden" name="unit" value="eur" />
+          <button className={unitPill(unit === 'eur')}>🪙 Euros</button>
+        </form>
+        <form action={setUnit}>
+          <input type="hidden" name="unit" value="pts" />
+          <button className={unitPill(unit === 'pts')}>⭐ Puntos</button>
+        </form>
+      </div>
+
+      <h2 className="px-4 pt-5 font-display text-lg font-bold text-indigo-800">🧹 Tareas</h2>
       <p className="px-4 text-xs font-semibold text-indigo-900/50">
-        Cambia el icono, el nombre, el valor (€) o las veces por semana. «Ocultar» la quita del
+        Cambia el icono, el nombre, el valor o las veces por semana. «Ocultar» la quita del
         tablero sin borrar lo apuntado.
       </p>
 
       <div className="mx-3 mt-3 space-y-2.5">
         {tasks.map((t) => (
-          <form
+          <div
             key={t.id}
-            action={updateTask}
             className={`rounded-3xl bg-white/90 p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}
           >
-            <input type="hidden" name="id" value={t.id} />
-            <div className="flex gap-3">
-              <EmojiInput name="icon" defaultValue={t.icon} suggestions={TASK_ICONS} />
-              <div className="flex-1">
-                <input
-                  name="name"
-                  defaultValue={t.name}
-                  className={`${inputCls} font-display font-bold`}
-                  placeholder="Nombre"
-                />
-                <input
-                  name="description"
-                  defaultValue={t.description ?? ''}
-                  className={`${inputCls} mt-1.5 text-gray-500`}
-                  placeholder="Descripción (opcional)"
-                />
+            <form action={updateTask}>
+              <input type="hidden" name="id" value={t.id} />
+              <div className="flex gap-3">
+                <EmojiInput name="icon" defaultValue={t.icon} suggestions={TASK_ICONS} />
+                <div className="flex-1">
+                  <input
+                    name="name"
+                    defaultValue={t.name}
+                    className={`${inputCls} font-display font-bold`}
+                    placeholder="Nombre"
+                  />
+                  <input
+                    name="description"
+                    defaultValue={t.description ?? ''}
+                    className={`${inputCls} mt-1.5 text-gray-500`}
+                    placeholder="Descripción (opcional)"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="mt-2 flex items-end gap-2">
-              <label className="flex-1">
-                <span className="text-[11px] font-semibold text-gray-400">Valor (€)</span>
-                <input name="value" defaultValue={eurosInput(t.valueCents)} inputMode="decimal" className={inputCls} />
-              </label>
-              <label className="flex-1">
-                <span className="text-[11px] font-semibold text-gray-400">Veces/semana</span>
-                <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
-              </label>
-            </div>
-            <div className="mt-2.5 flex items-center gap-2">
-              <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+              <div className="mt-2 flex items-end gap-2">
+                <label className="flex-1">
+                  <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(unit)})</span>
+                  <input name="value" defaultValue={eurosInput(t.valueCents)} inputMode="decimal" className={inputCls} />
+                </label>
+                <label className="flex-1">
+                  <span className="text-[11px] font-semibold text-gray-400">Veces/semana</span>
+                  <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
+                </label>
+              </div>
+              <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                 Guardar
               </SubmitButton>
-              <ToggleActive id={t.id} active={t.active} />
-            </div>
-          </form>
+            </form>
+            <ToggleActive id={t.id} active={t.active} />
+          </div>
         ))}
       </div>
 
@@ -85,7 +106,7 @@ export default async function TareasPage() {
         </div>
         <div className="mt-2 flex items-end gap-2">
           <label className="flex-1">
-            <span className="text-[11px] font-semibold text-gray-400">Valor (€)</span>
+            <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(unit)})</span>
             <input name="value" defaultValue="1" inputMode="decimal" className={inputCls} />
           </label>
           <label className="flex-1">
@@ -102,13 +123,21 @@ export default async function TareasPage() {
       <h2 className="px-4 pt-6 font-display text-lg font-bold text-indigo-800">🧒 Hijos</h2>
       <div className="mx-3 mt-2 space-y-2.5">
         {kids.map((k) => (
-          <form key={k.id} action={updateKid} className="flex items-center gap-2 rounded-3xl bg-white/90 p-3 shadow-md">
+          <form key={k.id} action={updateKid} className="rounded-3xl bg-white/90 p-3 shadow-md">
             <input type="hidden" name="id" value={k.id} />
-            <EmojiInput name="emoji" defaultValue={k.emoji} suggestions={KID_EMOJIS} />
-            <input name="name" defaultValue={k.name} className={`${inputCls} flex-1 font-display font-bold`} />
-            <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-              Guardar
-            </SubmitButton>
+            <div className="flex items-start gap-3">
+              <AvatarUpload emoji={k.emoji} initialUrl={k.avatarUrl} />
+              <div className="flex-1 space-y-2">
+                <input name="name" defaultValue={k.name} className={`${inputCls} font-display font-bold`} />
+                <div>
+                  <span className="text-[11px] font-semibold text-gray-400">Emoji (si no hay foto)</span>
+                  <EmojiInput name="emoji" defaultValue={k.emoji} suggestions={KID_EMOJIS} />
+                </div>
+                <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+                  Guardar
+                </SubmitButton>
+              </div>
+            </div>
           </form>
         ))}
 
@@ -128,11 +157,11 @@ export default async function TareasPage() {
 
 function ToggleActive({ id, active }: { id: number; active: boolean }) {
   return (
-    <form action={setTaskActive}>
+    <form action={setTaskActive} className="mt-2 text-right">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="active" value={active ? '0' : '1'} />
-      <SubmitButton className="rounded-xl border-2 border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-500">
-        {active ? 'Ocultar' : 'Activar'}
+      <SubmitButton className="text-xs font-semibold text-gray-400 underline underline-offset-2">
+        {active ? 'Ocultar del tablero' : 'Activar'}
       </SubmitButton>
     </form>
   )

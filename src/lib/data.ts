@@ -1,7 +1,18 @@
 import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
 import { db } from './db'
-import { kids, tasks, completions, payouts, type Kid, type Task } from './db/schema'
+import {
+  kids,
+  tasks,
+  completions,
+  payouts,
+  rewards,
+  redemptions,
+  type Kid,
+  type Task,
+  type Reward,
+} from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
+import { getUnit, type Unit } from './settings'
 
 export async function getActiveKids(): Promise<Kid[]> {
   return db.select().from(kids).where(eq(kids.active, true)).orderBy(kids.sortOrder, kids.id)
@@ -13,6 +24,29 @@ export async function getActiveTasks(): Promise<Task[]> {
 
 export async function getAllTasks(): Promise<Task[]> {
   return db.select().from(tasks).orderBy(tasks.sortOrder, tasks.id)
+}
+
+// Saldo por hijo = ganado − pagado − canjeado (en céntimos).
+export async function kidBalances(): Promise<Map<number, number>> {
+  const [earned, paid, redeemed] = await Promise.all([
+    db
+      .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
+      .from(completions)
+      .groupBy(completions.kidId),
+    db
+      .select({ kidId: payouts.kidId, c: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int` })
+      .from(payouts)
+      .groupBy(payouts.kidId),
+    db
+      .select({ kidId: redemptions.kidId, c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::int` })
+      .from(redemptions)
+      .groupBy(redemptions.kidId),
+  ])
+  const m = new Map<number, number>()
+  for (const r of earned) m.set(r.kidId, (m.get(r.kidId) ?? 0) + r.c)
+  for (const r of paid) m.set(r.kidId, (m.get(r.kidId) ?? 0) - r.c)
+  for (const r of redeemed) m.set(r.kidId, (m.get(r.kidId) ?? 0) - r.c)
+  return m
 }
 
 export type KidSummary = Kid & { weekCents: number; balanceCents: number }
@@ -33,21 +67,8 @@ export async function getBoardData(selectedDate: string, kidId?: number): Promis
 
   const range = weekRange(selectedDate)
 
-  const [earnedRows, paidRows, weekRows] = await Promise.all([
-    db
-      .select({
-        kidId: completions.kidId,
-        cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
-      })
-      .from(completions)
-      .groupBy(completions.kidId),
-    db
-      .select({
-        kidId: payouts.kidId,
-        cents: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int`,
-      })
-      .from(payouts)
-      .groupBy(payouts.kidId),
+  const [balances, weekRows] = await Promise.all([
+    kidBalances(),
     db
       .select({
         kidId: completions.kidId,
@@ -58,14 +79,12 @@ export async function getBoardData(selectedDate: string, kidId?: number): Promis
       .groupBy(completions.kidId),
   ])
 
-  const earned = new Map(earnedRows.map((r) => [r.kidId, r.cents]))
-  const paid = new Map(paidRows.map((r) => [r.kidId, r.cents]))
   const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
 
   const kidSummaries: KidSummary[] = kidList.map((k) => ({
     ...k,
     weekCents: week.get(k.id) ?? 0,
-    balanceCents: (earned.get(k.id) ?? 0) - (paid.get(k.id) ?? 0),
+    balanceCents: balances.get(k.id) ?? 0,
   }))
 
   const selectedKidId =
@@ -106,7 +125,14 @@ export async function getBoardData(selectedDate: string, kidId?: number): Promis
   }
 }
 
-export type WeekGridKid = { id: number; name: string; emoji: string; color: string; weekCents: number }
+export type WeekGridKid = {
+  id: number
+  name: string
+  emoji: string
+  avatarUrl: string | null
+  color: string
+  weekCents: number
+}
 export type WeekGrid = {
   kids: WeekGridKid[]
   tasks: Task[]
@@ -141,6 +167,7 @@ export async function getWeekGrid(anyDate: string, kidId?: number): Promise<Week
     id: k.id,
     name: k.name,
     emoji: k.emoji,
+    avatarUrl: k.avatarUrl,
     color: k.color,
     weekCents: week.get(k.id) ?? 0,
   }))
@@ -223,4 +250,69 @@ export async function getHistory(limitWeeks = 16): Promise<HistoryData> {
     .slice(0, limitWeeks)
 
   return { kids: kidList, weeks, payouts: pays }
+}
+
+// ── Recompensas ──────────────────────────────────────────────────────
+export async function getAllRewards(): Promise<Reward[]> {
+  return db.select().from(rewards).orderBy(rewards.sortOrder, rewards.id)
+}
+
+export type RewardKid = {
+  id: number
+  name: string
+  emoji: string
+  avatarUrl: string | null
+  color: string
+  balanceCents: number
+}
+export type RecentRedemption = {
+  id: number
+  kidId: number
+  rewardName: string
+  rewardIcon: string
+  costCents: number
+  createdAt: Date
+}
+export type RewardsData = {
+  unit: Unit
+  kids: RewardKid[]
+  selectedKidId: number
+  rewards: Reward[]
+  redemptions: RecentRedemption[]
+}
+
+export async function getRewardsData(kidId?: number): Promise<RewardsData | null> {
+  const kidList = await getActiveKids()
+  if (kidList.length === 0) return null
+
+  const [unit, balances, rewardList, recent] = await Promise.all([
+    getUnit(),
+    kidBalances(),
+    db.select().from(rewards).where(eq(rewards.active, true)).orderBy(rewards.sortOrder, rewards.id),
+    db
+      .select({
+        id: redemptions.id,
+        kidId: redemptions.kidId,
+        rewardName: redemptions.rewardName,
+        rewardIcon: redemptions.rewardIcon,
+        costCents: redemptions.costCents,
+        createdAt: redemptions.createdAt,
+      })
+      .from(redemptions)
+      .orderBy(desc(redemptions.createdAt))
+      .limit(20),
+  ])
+
+  const kids: RewardKid[] = kidList.map((k) => ({
+    id: k.id,
+    name: k.name,
+    emoji: k.emoji,
+    avatarUrl: k.avatarUrl,
+    color: k.color,
+    balanceCents: balances.get(k.id) ?? 0,
+  }))
+  const selectedKidId =
+    kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+
+  return { unit, kids, selectedKidId, rewards: rewardList, redemptions: recent }
 }

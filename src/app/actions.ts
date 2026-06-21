@@ -5,8 +5,10 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { kids, tasks, completions, payouts } from '@/lib/db/schema'
+import { kids, tasks, completions, payouts, rewards, redemptions } from '@/lib/db/schema'
 import { parseEurosToCents } from '@/lib/money'
+import { kidBalances } from '@/lib/data'
+import { setUnitValue } from '@/lib/settings'
 import {
   SESSION_COOKIE,
   makeSessionToken,
@@ -82,16 +84,8 @@ export async function payKid(formData: FormData) {
   const kidId = Number(formData.get('kidId'))
   if (!kidId) throw new Error('Datos inválidos')
 
-  const [{ earned }] = await db
-    .select({ earned: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
-    .from(completions)
-    .where(eq(completions.kidId, kidId))
-  const [{ paid }] = await db
-    .select({ paid: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int` })
-    .from(payouts)
-    .where(eq(payouts.kidId, kidId))
-
-  const balance = (earned ?? 0) - (paid ?? 0)
+  const balances = await kidBalances()
+  const balance = balances.get(kidId) ?? 0
   if (balance > 0) {
     await db.insert(payouts).values({ kidId, amountCents: balance, note: 'Liquidación' })
   }
@@ -163,8 +157,83 @@ export async function updateKid(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
   if (!name) throw new Error('Falta el nombre')
   const emoji = String(formData.get('emoji') ?? '').trim() || '🙂'
-  await db.update(kids).set({ name, emoji }).where(eq(kids.id, id))
+
+  const set: { name: string; emoji: string; avatarUrl?: string | null } = { name, emoji }
+  const avatarUrl = String(formData.get('avatarUrl') ?? '')
+  if (formData.get('clearAvatar') === '1') {
+    set.avatarUrl = null
+  } else if (avatarUrl.startsWith('data:image/')) {
+    if (avatarUrl.length > 500_000) throw new Error('La foto es demasiado grande')
+    set.avatarUrl = avatarUrl
+  }
+
+  await db.update(kids).set(set).where(eq(kids.id, id))
   redirect('/tareas')
+}
+
+// ── Unidad (€ / puntos) ──────────────────────────────────────────────
+export async function setUnit(formData: FormData) {
+  await requireAuth()
+  const unit = formData.get('unit') === 'pts' ? 'pts' : 'eur'
+  await setUnitValue(unit)
+  refresh()
+}
+
+// ── Recompensas ──────────────────────────────────────────────────────
+export async function addReward(formData: FormData) {
+  await requireAuth()
+  const name = String(formData.get('name') ?? '').trim()
+  if (!name) throw new Error('Falta el nombre')
+  const icon = String(formData.get('icon') ?? '').trim() || '🎁'
+  const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
+  const [{ max }] = await db
+    .select({ max: sql<number>`coalesce(max(${rewards.sortOrder}),0)::int` })
+    .from(rewards)
+  await db.insert(rewards).values({ name, icon, costCents, sortOrder: (max ?? 0) + 1 })
+  redirect('/recompensas')
+}
+
+export async function updateReward(formData: FormData) {
+  await requireAuth()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const name = String(formData.get('name') ?? '').trim()
+  if (!name) throw new Error('Falta el nombre')
+  const icon = String(formData.get('icon') ?? '').trim() || '🎁'
+  const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
+  await db.update(rewards).set({ name, icon, costCents }).where(eq(rewards.id, id))
+  redirect('/recompensas')
+}
+
+export async function setRewardActive(formData: FormData) {
+  await requireAuth()
+  const id = Number(formData.get('id'))
+  const active = formData.get('active') === '1'
+  if (!id) throw new Error('Datos inválidos')
+  await db.update(rewards).set({ active }).where(eq(rewards.id, id))
+  refresh()
+}
+
+export async function redeemReward(formData: FormData) {
+  await requireAuth()
+  const kidId = Number(formData.get('kidId'))
+  const rewardId = Number(formData.get('rewardId'))
+  if (!kidId || !rewardId) throw new Error('Datos inválidos')
+
+  const [r] = await db.select().from(rewards).where(eq(rewards.id, rewardId))
+  if (!r || !r.active) throw new Error('Recompensa no disponible')
+
+  const balances = await kidBalances()
+  if ((balances.get(kidId) ?? 0) < r.costCents) throw new Error('Saldo insuficiente')
+
+  await db.insert(redemptions).values({
+    kidId,
+    rewardId: r.id,
+    rewardName: r.name,
+    rewardIcon: r.icon,
+    costCents: r.costCents,
+  })
+  refresh()
 }
 
 // ── Sesión ───────────────────────────────────────────────────────────

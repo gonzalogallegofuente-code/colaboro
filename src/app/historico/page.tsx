@@ -1,13 +1,15 @@
 import Link from 'next/link'
 import { getHistory } from '@/lib/data'
+import { getUnit } from '@/lib/settings'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
-import { euros } from '@/lib/money'
+import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
+import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HistoricoPage() {
-  const { kids, weeks, payouts } = await getHistory()
+  const [{ kids, weeks, payouts }, unit] = await Promise.all([getHistory(), getUnit()])
   const currentStart = weekRange(todayYmd()).start
 
   return (
@@ -54,11 +56,12 @@ export default async function HistoricoPage() {
                       className="rounded-2xl p-2.5"
                       style={{ background: `${k.color}14` }}
                     >
-                      <div className="font-display text-sm font-bold" style={{ color: k.color }}>
-                        {k.emoji} {k.name}
+                      <div className="flex items-center gap-1 font-display text-sm font-bold" style={{ color: k.color }}>
+                        <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={18} />
+                        {k.name}
                       </div>
                       <div className="font-display text-lg font-bold text-gray-800">
-                        🪙 {euros(cell?.cents ?? 0)}
+                        {unitIcon(unit)} {formatAmount(cell?.cents ?? 0, unit)}
                       </div>
                       <div className="text-[11px] font-semibold text-gray-400">
                         {cell?.count ?? 0} {cell?.count === 1 ? 'tarea' : 'tareas'}
@@ -84,15 +87,18 @@ export default async function HistoricoPage() {
           const d = new Date(p.paidAt)
           return (
             <div key={p.id} className="flex items-center justify-between rounded-3xl bg-white/90 px-4 py-3 shadow-md">
-              <div>
-                <div className="font-display font-bold" style={{ color: kid?.color }}>
-                  {kid?.emoji} {kid?.name ?? 'Hijo'}
-                </div>
-                <div className="text-[11px] font-semibold text-gray-400">
-                  {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+              <div className="flex items-center gap-2">
+                {kid && <Avatar emoji={kid.emoji} avatarUrl={kid.avatarUrl} name={kid.name} size={22} />}
+                <div>
+                  <div className="font-display font-bold" style={{ color: kid?.color }}>
+                    {kid?.name ?? 'Hijo'}
+                  </div>
+                  <div className="text-[11px] font-semibold text-gray-400">
+                    {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
                 </div>
               </div>
-              <div className="font-display text-lg font-bold text-emerald-600">{euros(p.amountCents)}</div>
+              <div className="font-display text-lg font-bold text-emerald-600">{formatAmount(p.amountCents, unit)}</div>
             </div>
           )
         })}
