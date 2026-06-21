@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getBoardData } from '@/lib/data'
-import { getUnit } from '@/lib/settings'
+import { getMoneyConfig } from '@/lib/settings'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { markTask, undoTask, payKid } from './actions'
@@ -46,7 +46,7 @@ export default async function Page({
   const selectedDate = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const [data, unit] = await Promise.all([getBoardData(selectedDate, kidParam), getUnit()])
+  const [data, money] = await Promise.all([getBoardData(selectedDate, kidParam), getMoneyConfig()])
 
   if (!data) {
     return (
@@ -90,7 +90,7 @@ export default async function Page({
                   on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'
                 }`}
               >
-                {unitIcon(unit)} {formatAmount(k.weekCents, unit)}
+                {unitIcon(money)} {formatAmount(k.weekCents, money)}
               </div>
             </Link>
           )
@@ -108,17 +108,17 @@ export default async function Page({
             {selKid.name} lleva ganado
           </div>
           <div className="font-display text-[2.6rem] font-bold leading-tight drop-shadow-sm">
-            {formatAmount(selKid.balanceCents, unit)}
+            {formatAmount(selKid.balanceCents, money)}
           </div>
           <div className="text-xs font-semibold text-white/85">
-            Esta semana {formatAmount(selKid.weekCents, unit)}
+            Esta semana {formatAmount(selKid.weekCents, money)}
           </div>
         </div>
-        {unit === 'eur' ? (
+        {money.unit === 'eur' ? (
           <form action={payKid}>
             <input type="hidden" name="kidId" value={selKid.id} />
             <PayButton
-              message={`¿Pagar ${formatAmount(selKid.balanceCents, unit)} a ${selKid.name} y poner su contador a 0?`}
+              message={`¿Pagar ${formatAmount(selKid.balanceCents, money)} a ${selKid.name} y poner su contador a 0?`}
               disabled={selKid.balanceCents <= 0}
             />
           </form>
@@ -167,7 +167,7 @@ export default async function Page({
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-base font-bold text-gray-800">{t.name}</div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
-                  {unitIcon(unit)} {formatAmount(t.valueCents, unit)}
+                  {unitIcon(money)} {formatAmount(t.valueCents, money)}
                 </span>
                 <ProgressCoins count={week} target={t.weeklyTarget} />
               </div>

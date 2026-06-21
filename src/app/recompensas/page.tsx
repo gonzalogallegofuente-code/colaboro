@@ -36,7 +36,7 @@ export default async function RecompensasPage({
     )
   }
 
-  const { unit, kids, selectedKidId, rewards, redemptions } = data
+  const { money, kids, selectedKidId, rewards, redemptions } = data
   const selKid = kids.find((k) => k.id === selectedKidId)!
   const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
@@ -46,7 +46,7 @@ export default async function RecompensasPage({
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-indigo-800">🎁 Recompensas</h1>
       <p className="px-4 text-xs font-semibold text-indigo-900/50">
-        Canjea {unit === 'pts' ? 'puntos' : 'euros'} por premios. La lista la rellenáis vosotros.
+        Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios. La lista la rellenáis vosotros.
       </p>
 
       {/* Hijo */}
@@ -67,7 +67,7 @@ export default async function RecompensasPage({
               <div className="text-left">
                 <div className="font-display font-bold leading-tight">{k.name}</div>
                 <div className={`text-sm font-bold ${on ? 'text-white/90' : 'text-amber-700'}`}>
-                  {unitIcon(unit)} {formatAmount(k.balanceCents, unit)}
+                  {unitIcon(money)} {formatAmount(k.balanceCents, money)}
                 </div>
               </div>
             </Link>
@@ -76,7 +76,7 @@ export default async function RecompensasPage({
       </div>
 
       <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-indigo-900/70">
-        {selKid.name} tiene <span className="font-bold text-indigo-700">{formatAmount(selKid.balanceCents, unit)}</span> para gastar
+        {selKid.name} tiene <span className="font-bold text-indigo-700">{formatAmount(selKid.balanceCents, money)}</span> para gastar
       </p>
 
       {/* Lista canjeable */}
@@ -96,11 +96,11 @@ export default async function RecompensasPage({
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display font-bold text-gray-800">{r.name}</div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
-                  {unitIcon(unit)} {formatAmount(r.costCents, unit)}
+                  {unitIcon(money)} {formatAmount(r.costCents, money)}
                 </span>
                 {!enough && (
                   <div className="mt-0.5 text-[11px] font-semibold text-rose-400">
-                    Te faltan {formatAmount(r.costCents - selKid.balanceCents, unit)}
+                    Te faltan {formatAmount(r.costCents - selKid.balanceCents, money)}
                   </div>
                 )}
               </div>
@@ -108,7 +108,7 @@ export default async function RecompensasPage({
                 <input type="hidden" name="kidId" value={selKid.id} />
                 <input type="hidden" name="rewardId" value={r.id} />
                 <ConfirmSubmit
-                  message={`¿Canjear «${r.name}» por ${formatAmount(r.costCents, unit)}?`}
+                  message={`¿Canjear «${r.name}» por ${formatAmount(r.costCents, money)}?`}
                   disabled={!enough}
                   className="tap-bounce rounded-2xl bg-emerald-600 px-4 py-2.5 font-display text-sm font-bold text-white shadow-sm disabled:opacity-40"
                 >
@@ -138,7 +138,7 @@ export default async function RecompensasPage({
                     </div>
                   </div>
                   <span className="font-display text-sm font-bold text-rose-500">
-                    −{formatAmount(red.costCents, unit)}
+                    −{formatAmount(red.costCents, money)}
                   </span>
                 </div>
               )
@@ -159,7 +159,7 @@ export default async function RecompensasPage({
                 <div className="flex-1 space-y-2">
                   <input name="name" defaultValue={r.name} className={`${inputCls} font-display font-bold`} />
                   <label className="block">
-                    <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(unit)})</span>
+                    <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(money)})</span>
                     <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
                   </label>
                   <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
@@ -179,7 +179,7 @@ export default async function RecompensasPage({
             <div className="flex-1 space-y-2">
               <input name="name" placeholder="Nueva recompensa" className={`${inputCls} font-display font-bold`} required />
               <label className="block">
-                <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(unit)})</span>
+                <span className="text-[11px] font-semibold text-gray-400">Coste ({unitWord(money)})</span>
                 <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
               </label>
               <SubmitButton className="tap-bounce w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">

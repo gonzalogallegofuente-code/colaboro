@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getHistory } from '@/lib/data'
-import { getUnit } from '@/lib/settings'
+import { getMoneyConfig } from '@/lib/settings'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -9,7 +9,7 @@ import { Avatar } from '@/components/Avatar'
 export const dynamic = 'force-dynamic'
 
 export default async function HistoricoPage() {
-  const [{ kids, weeks, payouts }, unit] = await Promise.all([getHistory(), getUnit()])
+  const [{ kids, weeks, payouts }, money] = await Promise.all([getHistory(), getMoneyConfig()])
   const currentStart = weekRange(todayYmd()).start
 
   return (
@@ -61,7 +61,7 @@ export default async function HistoricoPage() {
                         {k.name}
                       </div>
                       <div className="font-display text-lg font-bold text-gray-800">
-                        {unitIcon(unit)} {formatAmount(cell?.cents ?? 0, unit)}
+                        {unitIcon(money)} {formatAmount(cell?.cents ?? 0, money)}
                       </div>
                       <div className="text-[11px] font-semibold text-gray-400">
                         {cell?.count ?? 0} {cell?.count === 1 ? 'tarea' : 'tareas'}
@@ -98,7 +98,7 @@ export default async function HistoricoPage() {
                   </div>
                 </div>
               </div>
-              <div className="font-display text-lg font-bold text-emerald-600">{formatAmount(p.amountCents, unit)}</div>
+              <div className="font-display text-lg font-bold text-emerald-600">{formatAmount(p.amountCents, money)}</div>
             </div>
           )
         })}

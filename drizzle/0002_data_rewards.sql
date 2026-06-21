@@ -1,5 +1,8 @@
--- Ajuste de unidad por defecto (€). Cámbialo a 'pts' desde la app.
-INSERT INTO settings (key, value) VALUES ('unit', 'eur')
+-- Ajustes por defecto: unidad (€) y nombre/icono de los puntos (editable en la app).
+INSERT INTO settings (key, value) VALUES
+  ('unit', 'eur'),
+  ('points_name', 'gemas'),
+  ('points_icon', '💎')
 ON CONFLICT (key) DO NOTHING;
 
 -- Recompensas de ejemplo (editables/borrables). Coste en céntimos (=/100):

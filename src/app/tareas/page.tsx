@@ -1,7 +1,7 @@
 import { getAllTasks, getActiveKids } from '@/lib/data'
-import { getUnit } from '@/lib/settings'
+import { getMoneyConfig } from '@/lib/settings'
 import { unitWord } from '@/lib/money'
-import { addKid, addTask, setTaskActive, setUnit, updateKid, updateTask } from '@/app/actions'
+import { addKid, addTask, setPointsName, setTaskActive, setUnit, updateKid, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { SubmitButton } from '@/components/SubmitButton'
 import { EmojiInput } from '@/components/EmojiInput'
@@ -11,13 +11,14 @@ export const dynamic = 'force-dynamic'
 
 const TASK_ICONS = ['🧹', '🚽', '🚪', '🪟', '👕', '🪶', '🍳', '🧺', '🍽️', '🗑️', '🛏️', '🌱', '🐕', '📚', '🧽', '♻️']
 const KID_EMOJIS = ['🦁', '🦊', '🐯', '🐻', '🐼', '🦄', '🚀', '⚽', '🎮', '🦖', '🐶', '🐱']
+const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
 
 function eurosInput(cents: number): string {
   return (cents / 100).toString().replace('.', ',')
 }
 
 export default async function TareasPage() {
-  const [tasks, kids, unit] = await Promise.all([getAllTasks(), getActiveKids(), getUnit()])
+  const [tasks, kids, money] = await Promise.all([getAllTasks(), getActiveKids(), getMoneyConfig()])
   const inputCls =
     'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
   const unitPill = (on: boolean) =>
@@ -36,13 +37,30 @@ export default async function TareasPage() {
         <span className="font-display text-sm font-bold text-gray-700">Contar en:</span>
         <form action={setUnit}>
           <input type="hidden" name="unit" value="eur" />
-          <button className={unitPill(unit === 'eur')}>🪙 Euros</button>
+          <button className={unitPill(money.unit === 'eur')}>🪙 Euros</button>
         </form>
         <form action={setUnit}>
           <input type="hidden" name="unit" value="pts" />
-          <button className={unitPill(unit === 'pts')}>⭐ Puntos</button>
+          <button className={unitPill(money.unit === 'pts')}>{money.pointsIcon} Puntos</button>
         </form>
       </div>
+
+      {/* Nombre de los puntos */}
+      <form action={setPointsName} className="mx-3 mt-2 rounded-3xl bg-white/90 p-3 shadow-md">
+        <span className="font-display text-sm font-bold text-gray-700">¿Cómo se llaman los puntos?</span>
+        <div className="mt-2 flex items-start gap-3">
+          <EmojiInput name="pointsIcon" defaultValue={money.pointsIcon} suggestions={POINT_ICONS} />
+          <div className="flex-1">
+            <input name="pointsName" defaultValue={money.pointsName} className={inputCls} placeholder="gemas" />
+            <SubmitButton className="tap-bounce mt-2 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+              Guardar
+            </SubmitButton>
+          </div>
+        </div>
+        <p className="mt-1.5 text-[11px] font-semibold text-gray-400">
+          Ej.: «{money.pointsIcon} Leo tiene 5 {money.pointsName}». Solo se usa en modo puntos.
+        </p>
+      </form>
 
       <h2 className="px-4 pt-5 font-display text-lg font-bold text-indigo-800">🧹 Tareas</h2>
       <p className="px-4 text-xs font-semibold text-indigo-900/50">
@@ -77,7 +95,7 @@ export default async function TareasPage() {
               </div>
               <div className="mt-2 flex items-end gap-2">
                 <label className="flex-1">
-                  <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(unit)})</span>
+                  <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(money)})</span>
                   <input name="value" defaultValue={eurosInput(t.valueCents)} inputMode="decimal" className={inputCls} />
                 </label>
                 <label className="flex-1">
@@ -106,7 +124,7 @@ export default async function TareasPage() {
         </div>
         <div className="mt-2 flex items-end gap-2">
           <label className="flex-1">
-            <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(unit)})</span>
+            <span className="text-[11px] font-semibold text-gray-400">Valor ({unitWord(money)})</span>
             <input name="value" defaultValue="1" inputMode="decimal" className={inputCls} />
           </label>
           <label className="flex-1">

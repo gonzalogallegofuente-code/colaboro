@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { getWeekGrid } from '@/lib/data'
-import { getUnit } from '@/lib/settings'
+import { getMoneyConfig } from '@/lib/settings'
 import { todayYmd, formatRange, shiftWeek } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -33,7 +33,7 @@ export default async function SemanaPage({
   const anchor = sp.w && /^\d{4}-\d{2}-\d{2}$/.test(sp.w) ? sp.w : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const [data, unit] = await Promise.all([getWeekGrid(anchor, kidParam), getUnit()])
+  const [data, money] = await Promise.all([getWeekGrid(anchor, kidParam), getMoneyConfig()])
 
   if (!data) {
     return (
@@ -76,7 +76,7 @@ export default async function SemanaPage({
               <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
               <span className="font-display font-bold">{k.name}</span>
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${on ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'}`}>
-                {unitIcon(unit)} {formatAmount(k.weekCents, unit)}
+                {unitIcon(money)} {formatAmount(k.weekCents, money)}
               </span>
             </Link>
           )
@@ -151,7 +151,7 @@ export default async function SemanaPage({
               }`}
             >
               {c > 0
-                ? unit === 'pts'
+                ? money.unit === 'pts'
                   ? String(Math.round((c / 100) * 100) / 100).replace('.', ',')
                   : (c / 100).toFixed(2).replace('.', ',')
                 : '·'}

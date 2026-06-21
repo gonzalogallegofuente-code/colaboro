@@ -12,7 +12,7 @@ import {
   type Reward,
 } from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
-import { getUnit, type Unit } from './settings'
+import { getMoneyConfig, type MoneyConfig } from './settings'
 
 export async function getActiveKids(): Promise<Kid[]> {
   return db.select().from(kids).where(eq(kids.active, true)).orderBy(kids.sortOrder, kids.id)
@@ -274,7 +274,7 @@ export type RecentRedemption = {
   createdAt: Date
 }
 export type RewardsData = {
-  unit: Unit
+  money: MoneyConfig
   kids: RewardKid[]
   selectedKidId: number
   rewards: Reward[]
@@ -285,8 +285,8 @@ export async function getRewardsData(kidId?: number): Promise<RewardsData | null
   const kidList = await getActiveKids()
   if (kidList.length === 0) return null
 
-  const [unit, balances, rewardList, recent] = await Promise.all([
-    getUnit(),
+  const [money, balances, rewardList, recent] = await Promise.all([
+    getMoneyConfig(),
     kidBalances(),
     db.select().from(rewards).where(eq(rewards.active, true)).orderBy(rewards.sortOrder, rewards.id),
     db
@@ -314,5 +314,5 @@ export async function getRewardsData(kidId?: number): Promise<RewardsData | null
   const selectedKidId =
     kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
 
-  return { unit, kids, selectedKidId, rewards: rewardList, redemptions: recent }
+  return { money, kids, selectedKidId, rewards: rewardList, redemptions: recent }
 }

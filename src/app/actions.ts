@@ -8,7 +8,7 @@ import { db } from '@/lib/db'
 import { kids, tasks, completions, payouts, rewards, redemptions } from '@/lib/db/schema'
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
-import { setUnitValue } from '@/lib/settings'
+import { setSetting, setUnitValue } from '@/lib/settings'
 import {
   SESSION_COOKIE,
   makeSessionToken,
@@ -176,6 +176,15 @@ export async function setUnit(formData: FormData) {
   await requireAuth()
   const unit = formData.get('unit') === 'pts' ? 'pts' : 'eur'
   await setUnitValue(unit)
+  refresh()
+}
+
+export async function setPointsName(formData: FormData) {
+  await requireAuth()
+  const name = String(formData.get('pointsName') ?? '').trim() || 'gemas'
+  const icon = String(formData.get('pointsIcon') ?? '').trim() || '💎'
+  await setSetting('points_name', name.slice(0, 20))
+  await setSetting('points_icon', icon.slice(0, 8))
   refresh()
 }
 
