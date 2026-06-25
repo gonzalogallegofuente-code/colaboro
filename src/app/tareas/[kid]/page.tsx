@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { moneyOf, themeOf } from '@/lib/money'
-import { deleteKid, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
+import { unitWord, moneyOf, themeOf } from '@/lib/money'
+import { deleteKid, setGoal, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic'
 
 const KID_EMOJIS = ['🦁', '🦊', '🐯', '🐻', '🐼', '🦄', '🚀', '⚽', '🎮', '🦖', '🐶', '🐱']
 const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
+const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
 export default async function KidSettingsPage({ params }: { params: Promise<{ kid: string }> }) {
@@ -118,6 +119,34 @@ export default async function KidSettingsPage({ params }: { params: Promise<{ ki
               <input name="pointsName" defaultValue={money.pointsName} className={inputCls} placeholder="gemas" />
               <SubmitButton className="tap-bounce mt-2 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                 Guardar
+              </SubmitButton>
+            </div>
+          </div>
+        </form>
+
+        {/* Meta de ahorro */}
+        <form action={setGoal} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <input type="hidden" name="kidId" value={k.id} />
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🎯 Meta de ahorro</span>
+          <p className="text-[11px] text-[var(--ink-3)]">
+            Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Déjalo vacío para quitarla.
+          </p>
+          <div className="mt-2 flex items-start gap-3">
+            <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
+            <div className="flex-1 space-y-2">
+              <input name="goalName" defaultValue={k.goalName ?? ''} placeholder="p. ej. Bici nueva" className={inputCls} />
+              <label className="block">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
+                <input
+                  name="goalCost"
+                  defaultValue={k.goalCostCents ? (k.goalCostCents / 100).toString().replace('.', ',') : ''}
+                  inputMode="decimal"
+                  placeholder="30"
+                  className={inputCls}
+                />
+              </label>
+              <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+                Guardar meta
               </SubmitButton>
             </div>
           </div>

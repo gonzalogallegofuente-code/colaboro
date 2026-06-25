@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getBoardData } from '@/lib/data'
+import { getBoardData, getKidStats } from '@/lib/data'
+import { computeBadges } from '@/lib/badges'
 import { requireAccountPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
@@ -71,6 +72,16 @@ export default async function Page({
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
   const inThisWeek = selectedDate >= data.range.start && selectedDate <= data.range.end
+
+  const stats = await getKidStats(selKid.id)
+  const badges = computeBadges({ bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
+  const earnedBadges = badges.filter((b) => b.earned)
+
+  const goalCost = selKid.goalCostCents ?? 0
+  const hasGoal = goalCost > 0
+  const goalBal = Math.max(0, selKid.balanceCents)
+  const goalPct = hasGoal ? Math.min(100, Math.round((goalBal / goalCost) * 100)) : 0
+  const goalDone = goalBal >= goalCost
 
   return (
     <ThemeShell theme={theme}>
@@ -150,6 +161,52 @@ export default async function Page({
           {!inThisWeek ? ' (anterior)' : ''}
         </p>
       </div>
+
+      {/* Meta de ahorro */}
+      {hasGoal && (
+        <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <div className="flex items-center justify-between text-sm font-bold text-[var(--ink)]">
+            <span className="truncate">
+              🎯 {selKid.goalIcon} {selKid.goalName}
+            </span>
+            <span className="shrink-0">
+              {formatAmount(goalBal, money)} / {formatAmount(goalCost, money)}
+            </span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500" style={{ width: `${goalPct}%` }} />
+          </div>
+          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+            {goalDone ? '¡Meta conseguida! 🎉' : `Te faltan ${formatAmount(goalCost - goalBal, money)}`}
+          </div>
+        </div>
+      )}
+
+      {/* Logros */}
+      <Link
+        href={`/logros?kid=${selKid.id}`}
+        className="tap-bounce mx-3 mt-3 flex items-center gap-2 rounded-3xl bg-[var(--card)] p-3 shadow-md"
+      >
+        {stats.currentStreak > 0 && (
+          <span className="shrink-0 rounded-full bg-orange-100 px-2 py-1 text-sm font-bold text-orange-600">
+            🔥 {stats.currentStreak} {stats.currentStreak === 1 ? 'día' : 'días'}
+          </span>
+        )}
+        <div className="flex flex-1 flex-wrap items-center gap-1">
+          {earnedBadges.length === 0 ? (
+            <span className="text-xs font-semibold text-[var(--ink-3)]">Aún sin medallas — ¡a por la primera! 🌱</span>
+          ) : (
+            earnedBadges.slice(0, 8).map((b) => (
+              <span key={b.id} className="text-xl">
+                {b.icon}
+              </span>
+            ))
+          )}
+        </div>
+        <span className="shrink-0 text-xs font-bold text-[var(--ink-3)]">
+          {earnedBadges.length}/{badges.length} ›
+        </span>
+      </Link>
 
       {/* Tareas */}
       <div className="mx-3 mt-2 space-y-2.5">

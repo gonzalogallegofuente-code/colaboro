@@ -11,7 +11,7 @@ import {
   type Task,
   type Reward,
 } from './db/schema'
-import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
+import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd } from './week'
 
 export async function getActiveKids(accountId: number): Promise<Kid[]> {
   return db
@@ -363,4 +363,51 @@ export async function getRewardsData(accountId: number, kidId?: number): Promise
   }))
 
   return { kids: kidsOut, selectedKidId, rewards: rewardList, redemptions: recent }
+}
+
+// ── Estadísticas / rachas de un hijo ─────────────────────────────────
+export async function getKidStats(kidId: number): Promise<{
+  currentStreak: number
+  bestStreak: number
+  total: number
+  earnedCents: number
+}> {
+  const [dateRows, aggRows] = await Promise.all([
+    db
+      .selectDistinct({ d: completions.doneOn })
+      .from(completions)
+      .where(eq(completions.kidId, kidId))
+      .orderBy(completions.doneOn),
+    db
+      .select({
+        n: sql<number>`count(*)::int`,
+        e: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
+      })
+      .from(completions)
+      .where(eq(completions.kidId, kidId)),
+  ])
+  const dates = dateRows.map((r) => r.d)
+  const set = new Set(dates)
+
+  // Racha actual (indulgente: si hoy aún no se ha hecho nada, cuenta desde ayer).
+  let currentStreak = 0
+  let cursor = parseYmd(todayYmd())
+  if (!set.has(ymd(cursor))) cursor = addDays(cursor, -1)
+  while (set.has(ymd(cursor))) {
+    currentStreak++
+    cursor = addDays(cursor, -1)
+  }
+
+  // Mejor racha histórica.
+  let bestStreak = 0
+  let run = 0
+  let prev: string | null = null
+  for (const d of dates) {
+    if (prev && ymd(addDays(parseYmd(prev), 1)) === d) run++
+    else run = 1
+    if (run > bestStreak) bestStreak = run
+    prev = d
+  }
+
+  return { currentStreak, bestStreak, total: aggRows[0]?.n ?? 0, earnedCents: aggRows[0]?.e ?? 0 }
 }

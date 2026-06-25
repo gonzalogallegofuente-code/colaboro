@@ -331,6 +331,39 @@ export async function setTheme(formData: FormData) {
   refresh()
 }
 
+// ── Meta de ahorro (por hijo) ────────────────────────────────────────
+export async function setGoal(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  const name = String(formData.get('goalName') ?? '').trim()
+  if (!name) {
+    await db
+      .update(kids)
+      .set({ goalName: null, goalIcon: null, goalCostCents: null })
+      .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+    redirect(`/tareas/${kidId}`)
+  }
+  const icon = String(formData.get('goalIcon') ?? '').trim() || '🎯'
+  const cost = parseEurosToCents(String(formData.get('goalCost') ?? '')) ?? 0
+  await db
+    .update(kids)
+    .set({ goalName: name.slice(0, 30), goalIcon: icon.slice(0, 8), goalCostCents: cost })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
+}
+
+export async function clearGoal(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await db
+    .update(kids)
+    .set({ goalName: null, goalIcon: null, goalCostCents: null })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
+}
+
 // ── Recompensas (por hijo) ───────────────────────────────────────────
 export async function addReward(formData: FormData) {
   const accountId = await requireAccount()
