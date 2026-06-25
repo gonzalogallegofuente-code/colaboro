@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { getWeekGrid } from '@/lib/data'
-import { requireAccountPage } from '@/lib/session'
+import { requireViewerPage } from '@/lib/session'
 import { todayYmd, formatRange, shiftWeek } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -34,14 +34,15 @@ export default async function SemanaPage({
   const anchor = sp.w && /^\d{4}-\d{2}-\d{2}$/.test(sp.w) ? sp.w : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const accountId = await requireAccountPage()
-  const data = await getWeekGrid(accountId, anchor, kidParam)
+  const viewer = await requireViewerPage()
+  const isKid = viewer.isKid
+  const data = await getWeekGrid(viewer.accountId, anchor, isKid ? viewer.kidId! : kidParam)
 
   if (!data) {
     return (
       <ThemeShell theme="infantil">
         <div className="mx-auto max-w-md">
-          <Nav active="semana" />
+          <Nav active="semana" kidMode={isKid} />
           <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             Todavía no hay nadie dado de alta.
           </div>
@@ -62,12 +63,13 @@ export default async function SemanaPage({
   return (
     <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
-      <Nav active="semana" />
+      <Nav active="semana" kidMode={isKid} />
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📅 Parte semanal</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">Qué día hizo cada cosa. 🪙 = hecho ese día.</p>
 
-      {/* Hijo */}
+      {/* Hijo (oculto en modo niño) */}
+      {!isKid && (
       <div className="mt-3 flex gap-2 px-3">
         {kids.map((k) => {
           const on = k.id === selectedKidId
@@ -90,6 +92,7 @@ export default async function SemanaPage({
           )
         })}
       </div>
+      )}
 
       {/* Semana ◀ ▶ */}
       <div className="mx-3 mt-3 flex items-center justify-between">

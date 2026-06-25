@@ -38,6 +38,23 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           Elige un hijo para ajustar su diseño, su forma de contar, sus tareas y sus recompensas.
         </p>
 
+        {/* Entrar en modo niño (kiosco) */}
+        {kids.length > 0 && (
+          <Link
+            href="/modo"
+            className="tap-bounce mx-3 mt-3 flex items-center gap-3 rounded-3xl bg-gradient-to-r from-indigo-500 to-violet-500 p-3 text-white shadow-md"
+          >
+            <span className="text-2xl">📱</span>
+            <div className="flex-1">
+              <div className="font-display font-bold">Modo niño</div>
+              <div className="text-[11px] font-semibold text-white/85">
+                Pantalla sencilla para que cada hijo apunte solo lo suyo. Para volver, sal y entra con tu cuenta.
+              </div>
+            </div>
+            <span className="font-display text-lg font-bold text-white/80">›</span>
+          </Link>
+        )}
+
         {/* Niños → cada uno a sus ajustes */}
         <div className="mx-3 mt-3 space-y-2.5">
           {kids.map((k) => (

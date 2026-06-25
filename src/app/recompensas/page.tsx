@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getRewardsData } from '@/lib/data'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { requireAccountPage } from '@/lib/session'
+import { requireViewerPage } from '@/lib/session'
 import { redeemReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
@@ -17,14 +17,15 @@ export default async function RecompensasPage({
 }) {
   const sp = await searchParams
   const kidParam = sp.kid ? Number(sp.kid) : undefined
-  const accountId = await requireAccountPage()
-  const data = await getRewardsData(accountId, kidParam)
+  const viewer = await requireViewerPage()
+  const isKid = viewer.isKid
+  const data = await getRewardsData(viewer.accountId, isKid ? viewer.kidId! : kidParam)
 
   if (!data) {
     return (
       <ThemeShell theme="infantil">
         <div className="mx-auto max-w-md">
-          <Nav active="recompensas" />
+          <Nav active="recompensas" kidMode={isKid} />
           <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             Todavía no hay nadie dado de alta.
           </div>
@@ -41,14 +42,15 @@ export default async function RecompensasPage({
   return (
     <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
-      <Nav active="recompensas" />
+      <Nav active="recompensas" kidMode={isKid} />
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🎁 Recompensas</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
         Canjea {money.unit === 'pts' ? money.pointsName : 'euros'} por premios.
       </p>
 
-      {/* Hijo */}
+      {/* Hijo (oculto en modo niño) */}
+      {!isKid && (
       <div className="mt-3 grid grid-cols-2 gap-3 px-3">
         {kids.map((k) => {
           const on = k.id === selKid.id
@@ -73,6 +75,7 @@ export default async function RecompensasPage({
           )
         })}
       </div>
+      )}
 
       <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-[var(--ink-2)]">
         {selKid.name} tiene{' '}

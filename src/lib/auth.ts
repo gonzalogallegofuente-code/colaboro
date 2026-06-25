@@ -3,6 +3,7 @@
 // (edge) y en las Server Actions (node).
 
 export const SESSION_COOKIE = 'colaboro_session'
+export const KID_COOKIE = 'colaboro_kid'
 const TTL_MS = 365 * 24 * 60 * 60 * 1000 // 1 año
 
 const enc = new TextEncoder()
@@ -49,4 +50,26 @@ export async function readSession(
   if (!/^\d+$/.test(accId) || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return null
   if (!safeEqual(sig, await sign(secret, `${accId}.${exp}`))) return null
   return Number(accId)
+}
+
+// ── Sesión de "modo niño" ────────────────────────────────────────────
+// Cookie "<accountId>.<kidId>.<exp>.<firma>". Es excluyente con la sesión
+// de cuenta: al entrar en modo niño se borra la cookie de cuenta.
+export async function makeKidToken(secret: string, accountId: number, kidId: number): Promise<string> {
+  const payload = `${accountId}.${kidId}.${Date.now() + TTL_MS}`
+  return `${payload}.${await sign(secret, payload)}`
+}
+
+export async function readKidToken(
+  secret: string,
+  token: string | undefined,
+): Promise<{ accountId: number; kidId: number } | null> {
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 4) return null
+  const [accId, kidId, exp, sig] = parts
+  if (!/^\d+$/.test(accId) || !/^\d+$/.test(kidId) || !/^\d+$/.test(exp)) return null
+  if (Number(exp) < Date.now()) return null
+  if (!safeEqual(sig, await sign(secret, `${accId}.${kidId}.${exp}`))) return null
+  return { accountId: Number(accId), kidId: Number(kidId) }
 }

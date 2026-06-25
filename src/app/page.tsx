@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { getBoardData, getKidStats } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
-import { requireAccountPage } from '@/lib/session'
+import { requireViewerPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask, payKid } from './actions'
+import { markTask, undoTask, payKid, exitKidMode } from './actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -49,8 +49,10 @@ export default async function Page({
   const selectedDate = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const accountId = await requireAccountPage()
-  const data = await getBoardData(accountId, selectedDate, kidParam)
+  const viewer = await requireViewerPage()
+  const accountId = viewer.accountId
+  const isKid = viewer.isKid
+  const data = await getBoardData(accountId, selectedDate, isKid ? viewer.kidId! : kidParam)
 
   if (!data) {
     return (
@@ -86,10 +88,25 @@ export default async function Page({
   return (
     <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
-      <Nav active="inicio" />
+      <Nav active="inicio" kidMode={isKid} />
       <InstallPrompt />
 
-      {/* Selector de hijo */}
+      {isKid && (
+        <div className="mx-3 mb-1 flex items-center justify-between rounded-2xl bg-[var(--card)] px-3 py-1.5 text-xs shadow-sm">
+          <span className="font-bold text-[var(--ink-3)]">👦 Modo niño</span>
+          <div className="flex items-center gap-3">
+            <Link href="/modo" className="font-bold text-[var(--ink-2)]">
+              🔄 Cambiar
+            </Link>
+            <form action={exitKidMode}>
+              <button className="font-bold text-red-500">🚪 Salir</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Selector de hijo (oculto en modo niño) */}
+      {!isKid && (
       <div className="grid grid-cols-2 gap-3 px-3">
         {data.kids.map((k) => {
           const on = k.id === selKid.id
@@ -116,6 +133,7 @@ export default async function Page({
           )
         })}
       </div>
+      )}
 
       {/* Dinero del hijo seleccionado */}
       <div
@@ -134,7 +152,7 @@ export default async function Page({
             Esta semana {formatAmount(selKid.weekCents, money)}
           </div>
         </div>
-        {money.unit === 'eur' ? (
+        {money.unit === 'eur' && !isKid ? (
           <form action={payKid}>
             <input type="hidden" name="kidId" value={selKid.id} />
             <PayButton

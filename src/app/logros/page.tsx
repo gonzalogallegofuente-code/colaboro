@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getActiveKids, getKidStats } from '@/lib/data'
-import { requireAccountPage } from '@/lib/session'
+import { requireViewerPage } from '@/lib/session'
 import { formatAmount, moneyOf, themeOf } from '@/lib/money'
 import { computeBadges } from '@/lib/badges'
 import { Nav } from '@/components/Nav'
@@ -11,14 +11,15 @@ export const dynamic = 'force-dynamic'
 
 export default async function LogrosPage({ searchParams }: { searchParams: Promise<{ kid?: string }> }) {
   const sp = await searchParams
-  const accountId = await requireAccountPage()
-  const kids = await getActiveKids(accountId)
+  const viewer = await requireViewerPage()
+  const isKid = viewer.isKid
+  const kids = await getActiveKids(viewer.accountId)
 
   if (kids.length === 0) {
     return (
       <ThemeShell theme="infantil">
         <div className="mx-auto max-w-md">
-          <Nav active="inicio" />
+          <Nav active="logros" kidMode={isKid} />
           <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             Todavía no hay nadie dado de alta.
           </div>
@@ -27,7 +28,7 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
     )
   }
 
-  const kidParam = sp.kid ? Number(sp.kid) : undefined
+  const kidParam = isKid ? viewer.kidId! : sp.kid ? Number(sp.kid) : undefined
   const selKid = kids.find((k) => k.id === kidParam) ?? kids[0]
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
@@ -37,11 +38,12 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
   return (
     <ThemeShell theme={theme}>
       <div className="mx-auto max-w-md pb-12">
-        <Nav active="inicio" />
+        <Nav active="logros" kidMode={isKid} />
 
         <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🏅 Logros</h1>
 
-        {/* Hijo */}
+        {/* Hijo (oculto en modo niño) */}
+        {!isKid && (
         <div className="mt-3 flex gap-2 px-3">
           {kids.map((k) => {
             const on = k.id === selKid.id
@@ -59,6 +61,7 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
             )
           })}
         </div>
+        )}
 
         {/* Resumen */}
         <div className="mx-3 mt-3 grid grid-cols-3 gap-2">

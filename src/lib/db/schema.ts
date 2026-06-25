@@ -37,6 +37,8 @@ export const kids = pgTable('kids', {
   goalName: text('goal_name'),
   goalIcon: text('goal_icon'),
   goalCostCents: integer('goal_cost_cents'),
+  // PIN opcional (4 dígitos) para el modo niño.
+  pin: text('pin'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

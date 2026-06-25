@@ -1,7 +1,13 @@
 import Link from 'next/link'
-import { logout } from '@/app/actions'
+import { logout, exitKidMode } from '@/app/actions'
 
-export function Nav({ active }: { active?: 'inicio' | 'semana' | 'recompensas' | 'historico' | 'tareas' }) {
+export function Nav({
+  active,
+  kidMode,
+}: {
+  active?: 'inicio' | 'semana' | 'recompensas' | 'historico' | 'tareas' | 'logros'
+  kidMode?: boolean
+}) {
   const tab = (on?: boolean) =>
     `flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
       on ? 'bg-[var(--card)] text-[var(--head)] shadow-sm' : 'text-[var(--ink-2)]'
@@ -18,17 +24,34 @@ export function Nav({ active }: { active?: 'inicio' | 'semana' | 'recompensas' |
         <Link href="/recompensas" className={tab(active === 'recompensas')} aria-label="Recompensas">
           🎁
         </Link>
-        <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
-          🏆
-        </Link>
-        <Link href="/tareas" className={tab(active === 'tareas')} aria-label="Tareas">
-          ⚙️
-        </Link>
-        <form action={logout}>
-          <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir">
-            🚪
-          </button>
-        </form>
+        {kidMode && (
+          <Link href="/logros" className={tab(active === 'logros')} aria-label="Logros">
+            🏅
+          </Link>
+        )}
+        {!kidMode && (
+          <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
+            🏆
+          </Link>
+        )}
+        {!kidMode && (
+          <Link href="/tareas" className={tab(active === 'tareas')} aria-label="Tareas">
+            ⚙️
+          </Link>
+        )}
+        {kidMode ? (
+          <form action={exitKidMode}>
+            <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
+              🚪
+            </button>
+          </form>
+        ) : (
+          <form action={logout}>
+            <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir">
+              🚪
+            </button>
+          </form>
+        )}
       </nav>
     </header>
   )

@@ -9,8 +9,8 @@ import { accounts, kids, tasks, completions, payouts, rewards, redemptions } fro
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
 import { hashPassword, verifyPassword } from '@/lib/password'
-import { SESSION_COOKIE, makeSessionToken } from '@/lib/auth'
-import { requireAccount } from '@/lib/session'
+import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
+import { getViewer, requireAccount } from '@/lib/session'
 
 const isYmd = (s: unknown): s is string => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)
 
@@ -37,6 +37,29 @@ async function assertKid(accountId: number, kidId: number) {
     .from(kids)
     .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   if (!k) throw new Error('No autorizado')
+}
+
+// Hijo que realiza la acción: en modo niño se fuerza al hijo de la sesión;
+// como padre, el del formulario (validando que es suyo).
+async function actingKid(formKidId: number): Promise<{ accountId: number; kidId: number }> {
+  const v = await getViewer()
+  if (!v) throw new Error('No autorizado')
+  const kidId = v.isKid ? v.kidId! : formKidId
+  if (!kidId) throw new Error('Datos inválidos')
+  await assertKid(v.accountId, kidId)
+  return { accountId: v.accountId, kidId }
+}
+
+async function setKidCookie(accountId: number, kidId: number) {
+  const token = await makeKidToken(process.env.COLABORO_SECRET!, accountId, kidId)
+  const c = await cookies()
+  c.set(KID_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 365 * 24 * 60 * 60,
+  })
 }
 
 // ── Sesión / cuentas ─────────────────────────────────────────────────
@@ -83,6 +106,47 @@ export async function changePassword(formData: FormData) {
   if (next.length < 6) redirect('/tareas?pw=short')
   await db.update(accounts).set({ passwordHash: hashPassword(next) }).where(eq(accounts.id, accountId))
   redirect('/tareas?pw=ok')
+}
+
+// ── Modo niño ────────────────────────────────────────────────────────
+// Entra en modo niño (kiosco) como un hijo. Desde la cuenta del padre no
+// pide PIN; al cambiar entre hermanos sí se exige el PIN del destino.
+export async function enterKid(formData: FormData) {
+  const v = await getViewer()
+  if (!v) throw new Error('No autorizado')
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  const [k] = await db
+    .select({ id: kids.id, pin: kids.pin })
+    .from(kids)
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, v.accountId), eq(kids.active, true)))
+  if (!k) throw new Error('No autorizado')
+  if (v.isKid && k.pin) {
+    const pin = String(formData.get('pin') ?? '')
+    if (pin !== k.pin) redirect('/modo?e=pin')
+  }
+  await setKidCookie(v.accountId, kidId)
+  const c = await cookies()
+  c.delete(SESSION_COOKIE) // excluyente: se sale de la cuenta del padre
+  redirect('/')
+}
+
+export async function exitKidMode() {
+  const c = await cookies()
+  c.delete(KID_COOKIE)
+  redirect('/login')
+}
+
+export async function setKidPin(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await assertKid(accountId, kidId)
+  const raw = String(formData.get('pin') ?? '').trim()
+  const pin = raw === '' ? null : raw.replace(/\D/g, '').slice(0, 4)
+  if (pin !== null && pin.length < 4) redirect(`/tareas/${kidId}?pin=short`)
+  await db.update(kids).set({ pin }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}?pin=ok`)
 }
 
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────
@@ -134,11 +198,10 @@ async function seedKidDefaults(accountId: number, kidId: number) {
 
 // ── Marcar / deshacer ────────────────────────────────────────────────
 export async function markTask(formData: FormData) {
-  const accountId = await requireAccount()
-  const kidId = Number(formData.get('kidId'))
+  const { accountId, kidId } = await actingKid(Number(formData.get('kidId')))
   const taskId = Number(formData.get('taskId'))
   const doneOn = formData.get('doneOn')
-  if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
+  if (!taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [t] = await db
     .select({ v: tasks.valueCents })
@@ -151,12 +214,10 @@ export async function markTask(formData: FormData) {
 }
 
 export async function undoTask(formData: FormData) {
-  const accountId = await requireAccount()
-  const kidId = Number(formData.get('kidId'))
+  const { kidId } = await actingKid(Number(formData.get('kidId')))
   const taskId = Number(formData.get('taskId'))
   const doneOn = formData.get('doneOn')
-  if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
-  await assertKid(accountId, kidId)
+  if (!taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [row] = await db
     .select({ id: completions.id })
@@ -408,11 +469,9 @@ export async function setRewardActive(formData: FormData) {
 }
 
 export async function redeemReward(formData: FormData) {
-  const accountId = await requireAccount()
-  const kidId = Number(formData.get('kidId'))
+  const { accountId, kidId } = await actingKid(Number(formData.get('kidId')))
   const rewardId = Number(formData.get('rewardId'))
-  if (!kidId || !rewardId) throw new Error('Datos inválidos')
-  await assertKid(accountId, kidId)
+  if (!rewardId) throw new Error('Datos inválidos')
 
   const [r] = await db
     .select()

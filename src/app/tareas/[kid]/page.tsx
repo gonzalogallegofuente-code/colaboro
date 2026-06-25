@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
-import { deleteKid, setGoal, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
+import { deleteKid, enterKid, setGoal, setKidPin, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -19,8 +19,15 @@ const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟
 const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
-export default async function KidSettingsPage({ params }: { params: Promise<{ kid: string }> }) {
+export default async function KidSettingsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ kid: string }>
+  searchParams: Promise<{ pin?: string }>
+}) {
   const { kid } = await params
+  const sp = await searchParams
   const accountId = await requireAccountPage()
   const kids = await getActiveKids(accountId)
   const k = kids.find((x) => x.id === Number(kid))
@@ -151,6 +158,40 @@ export default async function KidSettingsPage({ params }: { params: Promise<{ ki
             </div>
           </div>
         </form>
+
+        {/* Modo niño: PIN + entrar */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">📱 Modo niño</span>
+          <p className="text-[11px] text-[var(--ink-3)]">
+            PIN opcional de 4 dígitos para {k.name} (evita que al cambiar de hermano se cuele en otra cuenta). Déjalo
+            vacío para no pedir PIN.
+          </p>
+          <form action={setKidPin} className="mt-2 flex items-end gap-2">
+            <input type="hidden" name="kidId" value={k.id} />
+            <label className="flex-1">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">PIN (4 dígitos)</span>
+              <input
+                name="pin"
+                inputMode="numeric"
+                maxLength={4}
+                defaultValue={k.pin ?? ''}
+                placeholder="sin PIN"
+                className={`${inputCls} tracking-[0.3em]`}
+              />
+            </label>
+            <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+              Guardar
+            </SubmitButton>
+          </form>
+          {sp.pin === 'ok' && <p className="mt-1 text-[11px] font-bold text-emerald-600">✓ PIN guardado.</p>}
+          {sp.pin === 'short' && <p className="mt-1 text-[11px] font-bold text-rose-500">El PIN debe tener 4 dígitos.</p>}
+          <form action={enterKid} className="mt-2">
+            <input type="hidden" name="kidId" value={k.id} />
+            <SubmitButton className="tap-bounce w-full rounded-xl border-2 border-indigo-200 py-2 font-display text-sm font-bold text-indigo-600">
+              Entrar en modo niño como {k.name} →
+            </SubmitButton>
+          </form>
+        </div>
 
         {/* Editar tareas / recompensas (pantallas con selector de hijo) */}
         <Link
