@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { moneyOf, themeOf } from '@/lib/money'
-import { setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
+import { deleteKid, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
+import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { EmojiInput } from '@/components/EmojiInput'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { ColorPicker } from '@/components/ColorPicker'
@@ -138,6 +139,16 @@ export default async function KidSettingsPage({ params }: { params: Promise<{ ki
           <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
         </Link>
 
+        {/* Borrar hijo */}
+        <form action={deleteKid} className="mx-3 mt-8">
+          <input type="hidden" name="id" value={k.id} />
+          <ConfirmSubmit
+            message={`¿Seguro que quieres BORRAR a ${k.name}? Se eliminarán sus tareas, recompensas y todo su historial. No se puede deshacer.`}
+            className="w-full rounded-2xl border-2 border-red-200 px-3 py-2 text-sm font-bold text-red-500"
+          >
+            🗑️ Borrar a {k.name}
+          </ConfirmSubmit>
+        </form>
       </div>
     </ThemeShell>
   )

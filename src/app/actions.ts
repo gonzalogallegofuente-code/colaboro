@@ -281,6 +281,20 @@ export async function updateKid(formData: FormData) {
   redirect(`/tareas/${id}`)
 }
 
+export async function deleteKid(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  await assertKid(accountId, id)
+  // Borramos las marcas primero (su FK a tasks es restrictiva); el borrado del
+  // hijo arrastra en cascada tareas, recompensas, pagos y canjes.
+  await db.transaction(async (tx) => {
+    await tx.delete(completions).where(eq(completions.kidId, id))
+    await tx.delete(kids).where(and(eq(kids.id, id), eq(kids.accountId, accountId)))
+  })
+  redirect('/tareas')
+}
+
 // ── Unidad / nombre de puntos / tema (POR HIJO) ──────────────────────
 export async function setUnit(formData: FormData) {
   const accountId = await requireAccount()
