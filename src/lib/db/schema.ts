@@ -133,6 +133,18 @@ export const redemptions = pgTable('redemptions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Suscripciones de notificaciones push (por cuenta / dispositivo).
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: serial('id').primaryKey(),
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  endpoint: text('endpoint').notNull().unique(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect
 export type Task = typeof tasks.$inferSelect

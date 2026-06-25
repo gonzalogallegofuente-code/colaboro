@@ -12,6 +12,7 @@ import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { EmojiInput } from '@/components/EmojiInput'
 import { ColorPicker } from '@/components/ColorPicker'
+import { PushToggle } from '@/components/PushToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,6 +98,15 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               Añadir hijo (con tareas de ejemplo)
             </SubmitButton>
           </form>
+        </div>
+
+        {/* Avisos */}
+        <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">🔔 Avisos</h2>
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <p className="mb-2 text-[11px] font-semibold text-[var(--ink-3)]">
+            Recibe un recordatorio diario y un aviso cuando un hijo apunte una tarea desde el modo niño.
+          </p>
+          <PushToggle />
         </div>
 
         {/* Cuenta */}

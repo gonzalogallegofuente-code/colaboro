@@ -5,9 +5,19 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { accounts, kids, tasks, completions, payouts, rewards, redemptions } from '@/lib/db/schema'
+import {
+  accounts,
+  kids,
+  tasks,
+  completions,
+  payouts,
+  rewards,
+  redemptions,
+  pushSubscriptions,
+} from '@/lib/db/schema'
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
+import { sendToAccount } from '@/lib/push'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
 import { getViewer, requireAccount } from '@/lib/session'
@@ -149,6 +159,30 @@ export async function setKidPin(formData: FormData) {
   redirect(`/tareas/${kidId}?pin=ok`)
 }
 
+// ── Avisos push ──────────────────────────────────────────────────────
+export async function saveSubscription(sub: {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+}) {
+  const accountId = await requireAccount()
+  if (!sub?.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) throw new Error('Suscripción inválida')
+  await db
+    .insert(pushSubscriptions)
+    .values({ accountId, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth })
+    .onConflictDoUpdate({
+      target: pushSubscriptions.endpoint,
+      set: { accountId, p256dh: sub.keys.p256dh, auth: sub.keys.auth },
+    })
+}
+
+export async function removeSubscription(endpoint: string) {
+  const accountId = await requireAccount()
+  if (!endpoint) return
+  await db
+    .delete(pushSubscriptions)
+    .where(and(eq(pushSubscriptions.endpoint, endpoint), eq(pushSubscriptions.accountId, accountId)))
+}
+
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────
 const DEFAULT_TASKS = [
   ['Aspirador casa', 'cocina + habitaciones + salón + pasillo', '🧹', 100, 7, '#f7d0e0'],
@@ -198,19 +232,31 @@ async function seedKidDefaults(accountId: number, kidId: number) {
 
 // ── Marcar / deshacer ────────────────────────────────────────────────
 export async function markTask(formData: FormData) {
-  const { accountId, kidId } = await actingKid(Number(formData.get('kidId')))
+  const v = await getViewer()
+  if (!v) throw new Error('No autorizado')
+  const kidId = v.isKid ? v.kidId! : Number(formData.get('kidId'))
   const taskId = Number(formData.get('taskId'))
   const doneOn = formData.get('doneOn')
-  if (!taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
+  if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [t] = await db
-    .select({ v: tasks.valueCents })
+    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon })
     .from(tasks)
-    .where(and(eq(tasks.id, taskId), eq(tasks.kidId, kidId), eq(tasks.accountId, accountId)))
+    .where(and(eq(tasks.id, taskId), eq(tasks.kidId, kidId), eq(tasks.accountId, v.accountId)))
   if (!t) throw new Error('Tarea no encontrada')
 
   await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v })
   refresh()
+
+  // En modo niño, avisa al padre (sin bloquear).
+  if (v.isKid) {
+    const [k] = await db.select({ name: kids.name }).from(kids).where(eq(kids.id, kidId))
+    void sendToAccount(v.accountId, {
+      title: `${t.icon} Tarea hecha`,
+      body: `${k?.name ?? 'Tu hijo'} ha hecho «${t.name}»`,
+      url: '/',
+    })
+  }
 }
 
 export async function undoTask(formData: FormData) {
