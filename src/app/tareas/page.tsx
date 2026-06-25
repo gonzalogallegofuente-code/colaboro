@@ -67,9 +67,10 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
 
           {/* Añadir hijo */}
           <form action={addKid} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
-            <div className="flex items-center gap-2">
+            <input name="name" placeholder="Nombre del hijo" className={`${inputCls} font-display font-bold`} required />
+            <div className="mt-2">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Emoji</span>
               <EmojiInput name="emoji" defaultValue="🙂" suggestions={KID_EMOJIS} />
-              <input name="name" placeholder="Nombre del hijo" className={`${inputCls} flex-1`} required />
             </div>
             <div className="mt-2">
               <span className="text-[11px] font-semibold text-[var(--ink-3)]">Color</span>
