@@ -1,23 +1,22 @@
 import Link from 'next/link'
 import { getHistory } from '@/lib/data'
-import { getMoneyConfig } from '@/lib/settings'
 import { requireAccountPage } from '@/lib/session'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
-import { formatAmount, unitIcon } from '@/lib/money'
+import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
+import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HistoricoPage() {
   const accountId = await requireAccountPage()
-  const [{ kids, weeks, payouts }, money] = await Promise.all([
-    getHistory(accountId),
-    getMoneyConfig(accountId),
-  ])
+  const { kids, weeks, payouts } = await getHistory(accountId)
+  const theme = kids.length ? themeOf(kids[0]) : 'infantil'
   const currentStart = weekRange(todayYmd()).start
 
   return (
+    <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
       <Nav active="historico" />
 
@@ -66,7 +65,7 @@ export default async function HistoricoPage() {
                         {k.name}
                       </div>
                       <div className="font-display text-lg font-bold text-[var(--ink)]">
-                        {unitIcon(money)} {formatAmount(cell?.cents ?? 0, money)}
+                        {unitIcon(moneyOf(k))} {formatAmount(cell?.cents ?? 0, moneyOf(k))}
                       </div>
                       <div className="text-[11px] font-semibold text-[var(--ink-3)]">
                         {cell?.count ?? 0} {cell?.count === 1 ? 'tarea' : 'tareas'}
@@ -103,11 +102,14 @@ export default async function HistoricoPage() {
                   </div>
                 </div>
               </div>
-              <div className="font-display text-lg font-bold text-emerald-600">{formatAmount(p.amountCents, money)}</div>
+              <div className="font-display text-lg font-bold text-emerald-600">
+                {formatAmount(p.amountCents, moneyOf(kid ?? { unit: 'eur', pointsName: 'gemas', pointsIcon: '💎' }))}
+              </div>
             </div>
           )
         })}
       </div>
     </div>
+    </ThemeShell>
   )
 }

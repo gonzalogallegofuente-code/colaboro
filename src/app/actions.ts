@@ -8,7 +8,6 @@ import { db } from '@/lib/db'
 import { accounts, kids, tasks, completions, payouts, rewards, redemptions } from '@/lib/db/schema'
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
-import { setSetting, setUnitValue, seedDefaultSettings } from '@/lib/settings'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, makeSessionToken } from '@/lib/auth'
 import { requireAccount } from '@/lib/session'
@@ -54,7 +53,6 @@ export async function register(formData: FormData) {
     .insert(accounts)
     .values({ email, passwordHash: hashPassword(password) })
     .returning({ id: accounts.id })
-  await seedDefaultSettings(acc.id)
   await setSessionCookie(acc.id)
   redirect('/')
 }
@@ -210,7 +208,7 @@ export async function addTask(formData: FormData) {
     color: '#e9d5ff',
     sortOrder: (max ?? 0) + 1,
   })
-  redirect(`/tareas?kid=${kidId}`)
+  redirect(`/tareas/${kidId}`)
 }
 
 export async function updateTask(formData: FormData) {
@@ -229,7 +227,7 @@ export async function updateTask(formData: FormData) {
     .set({ name, description, icon, valueCents, weeklyTarget })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
-  redirect(`/tareas?kid=${row?.kidId ?? ''}`)
+  redirect(`/tareas/${row?.kidId ?? ''}`)
 }
 
 export async function setTaskActive(formData: FormData) {
@@ -258,7 +256,7 @@ export async function addKid(formData: FormData) {
     : ['#2563eb', '#e11d48', '#16a34a', '#d97706', '#7c3aed'][sortOrder % 5]
   const [k] = await db.insert(kids).values({ accountId, name, emoji, color, sortOrder }).returning({ id: kids.id })
   await seedKidDefaults(accountId, k.id)
-  redirect('/tareas')
+  redirect(`/tareas/${k.id}`)
 }
 
 export async function updateKid(formData: FormData) {
@@ -280,28 +278,42 @@ export async function updateKid(formData: FormData) {
   if (/^#[0-9a-fA-F]{6}$/.test(color)) set.color = color
 
   await db.update(kids).set(set).where(and(eq(kids.id, id), eq(kids.accountId, accountId)))
-  redirect('/tareas')
+  redirect(`/tareas/${id}`)
 }
 
-// ── Unidad / nombre de puntos / tema ─────────────────────────────────
+// ── Unidad / nombre de puntos / tema (POR HIJO) ──────────────────────
 export async function setUnit(formData: FormData) {
   const accountId = await requireAccount()
-  await setUnitValue(accountId, formData.get('unit') === 'pts' ? 'pts' : 'eur')
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await db
+    .update(kids)
+    .set({ unit: formData.get('unit') === 'pts' ? 'pts' : 'eur' })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   refresh()
 }
 
 export async function setPointsName(formData: FormData) {
   const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
   const name = String(formData.get('pointsName') ?? '').trim() || 'gemas'
   const icon = String(formData.get('pointsIcon') ?? '').trim() || '💎'
-  await setSetting(accountId, 'points_name', name.slice(0, 20))
-  await setSetting(accountId, 'points_icon', icon.slice(0, 8))
+  await db
+    .update(kids)
+    .set({ pointsName: name.slice(0, 20), pointsIcon: icon.slice(0, 8) })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   refresh()
 }
 
 export async function setTheme(formData: FormData) {
   const accountId = await requireAccount()
-  await setSetting(accountId, 'theme', formData.get('theme') === 'juvenil' ? 'juvenil' : 'infantil')
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await db
+    .update(kids)
+    .set({ theme: formData.get('theme') === 'juvenil' ? 'juvenil' : 'infantil' })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   refresh()
 }
 

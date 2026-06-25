@@ -12,7 +12,6 @@ import {
   type Reward,
 } from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
-import { getMoneyConfig, type MoneyConfig } from './settings'
 
 export async function getActiveKids(accountId: number): Promise<Kid[]> {
   return db
@@ -155,6 +154,10 @@ export type WeekGridKid = {
   emoji: string
   avatarUrl: string | null
   color: string
+  theme: string
+  unit: string
+  pointsName: string
+  pointsIcon: string
   weekCents: number
 }
 export type WeekGrid = {
@@ -193,6 +196,10 @@ export async function getWeekGrid(
     emoji: k.emoji,
     avatarUrl: k.avatarUrl,
     color: k.color,
+    theme: k.theme,
+    unit: k.unit,
+    pointsName: k.pointsName,
+    pointsIcon: k.pointsIcon,
     weekCents: week.get(k.id) ?? 0,
   }))
   const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
@@ -292,6 +299,10 @@ export type RewardKid = {
   emoji: string
   avatarUrl: string | null
   color: string
+  theme: string
+  unit: string
+  pointsName: string
+  pointsIcon: string
   balanceCents: number
 }
 export type RecentRedemption = {
@@ -303,7 +314,6 @@ export type RecentRedemption = {
   createdAt: Date
 }
 export type RewardsData = {
-  money: MoneyConfig
   kids: RewardKid[]
   selectedKidId: number
   rewards: Reward[]
@@ -316,8 +326,7 @@ export async function getRewardsData(accountId: number, kidId?: number): Promise
 
   const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
 
-  const [money, balances, rewardList, recent] = await Promise.all([
-    getMoneyConfig(accountId),
+  const [balances, rewardList, recent] = await Promise.all([
     kidBalances(accountId),
     db
       .select()
@@ -346,8 +355,12 @@ export async function getRewardsData(accountId: number, kidId?: number): Promise
     emoji: k.emoji,
     avatarUrl: k.avatarUrl,
     color: k.color,
+    theme: k.theme,
+    unit: k.unit,
+    pointsName: k.pointsName,
+    pointsIcon: k.pointsIcon,
     balanceCents: balances.get(k.id) ?? 0,
   }))
 
-  return { money, kids: kidsOut, selectedKidId, rewards: rewardList, redemptions: recent }
+  return { kids: kidsOut, selectedKidId, rewards: rewardList, redemptions: recent }
 }

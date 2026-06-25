@@ -1,11 +1,11 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { getWeekGrid } from '@/lib/data'
-import { getMoneyConfig } from '@/lib/settings'
 import { requireAccountPage } from '@/lib/session'
 import { todayYmd, formatRange, shiftWeek } from '@/lib/week'
-import { formatAmount, unitIcon } from '@/lib/money'
+import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
+import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
@@ -35,29 +35,32 @@ export default async function SemanaPage({
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
   const accountId = await requireAccountPage()
-  const [data, money] = await Promise.all([
-    getWeekGrid(accountId, anchor, kidParam),
-    getMoneyConfig(accountId),
-  ])
+  const data = await getWeekGrid(accountId, anchor, kidParam)
 
   if (!data) {
     return (
-      <div className="mx-auto max-w-md">
-        <Nav active="semana" />
-        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
-          Todavía no hay nadie dado de alta.
+      <ThemeShell theme="infantil">
+        <div className="mx-auto max-w-md">
+          <Nav active="semana" />
+          <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
+            Todavía no hay nadie dado de alta.
+          </div>
         </div>
-      </div>
+      </ThemeShell>
     )
   }
 
   const { kids, tasks, selectedKidId, range, days, grid, dayCents } = data
+  const selKid = kids.find((k) => k.id === selectedKidId) ?? kids[0]
+  const money = moneyOf(selKid)
+  const theme = themeOf(selKid)
   const currentStart = shiftWeek(today, 0)
   const isCurrent = range.start === currentStart
   const canGoNext = range.start < currentStart
   const cols = { gridTemplateColumns: '1.35fr repeat(7, 1fr)' }
 
   return (
+    <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
       <Nav active="semana" />
 
@@ -81,7 +84,7 @@ export default async function SemanaPage({
               <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
               <span className="font-display font-bold">{k.name}</span>
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'}`}>
-                {unitIcon(money)} {formatAmount(k.weekCents, money)}
+                {unitIcon(moneyOf(k))} {formatAmount(k.weekCents, moneyOf(k))}
               </span>
             </Link>
           )
@@ -165,5 +168,6 @@ export default async function SemanaPage({
         </div>
       </div>
     </div>
+    </ThemeShell>
   )
 }

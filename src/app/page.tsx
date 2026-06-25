@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { getBoardData } from '@/lib/data'
-import { getMoneyConfig } from '@/lib/settings'
 import { requireAccountPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
-import { formatAmount, unitIcon } from '@/lib/money'
+import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { markTask, undoTask, payKid } from './actions'
 import { Nav } from '@/components/Nav'
+import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -49,29 +49,31 @@ export default async function Page({
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
   const accountId = await requireAccountPage()
-  const [data, money] = await Promise.all([
-    getBoardData(accountId, selectedDate, kidParam),
-    getMoneyConfig(accountId),
-  ])
+  const data = await getBoardData(accountId, selectedDate, kidParam)
 
   if (!data) {
     return (
-      <div className="mx-auto max-w-md">
-        <Nav active="inicio" />
-        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center shadow-md">
-          <p className="text-[var(--ink-2)]">Todavía no hay nadie dado de alta.</p>
-          <Link href="/tareas" className="mt-3 inline-block rounded-2xl bg-indigo-600 px-4 py-2 font-display font-bold text-white">
-            Añadir hijos y tareas
-          </Link>
+      <ThemeShell theme="infantil">
+        <div className="mx-auto max-w-md">
+          <Nav active="inicio" />
+          <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center shadow-md">
+            <p className="text-[var(--ink-2)]">Todavía no hay nadie dado de alta.</p>
+            <Link href="/tareas" className="mt-3 inline-block rounded-2xl bg-indigo-600 px-4 py-2 font-display font-bold text-white">
+              Añadir hijos y tareas
+            </Link>
+          </div>
         </div>
-      </div>
+      </ThemeShell>
     )
   }
 
   const selKid = data.kids.find((k) => k.id === data.selectedKidId)!
+  const money = moneyOf(selKid)
+  const theme = themeOf(selKid)
   const inThisWeek = selectedDate >= data.range.start && selectedDate <= data.range.end
 
   return (
+    <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
       <Nav active="inicio" />
       <InstallPrompt />
@@ -97,7 +99,7 @@ export default async function Page({
                   on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'
                 }`}
               >
-                {unitIcon(money)} {formatAmount(k.weekCents, money)}
+                {unitIcon(moneyOf(k))} {formatAmount(k.weekCents, moneyOf(k))}
               </div>
             </Link>
           )
@@ -206,5 +208,6 @@ export default async function Page({
         })}
       </div>
     </div>
+    </ThemeShell>
   )
 }

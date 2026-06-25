@@ -2,14 +2,10 @@ import type { Metadata, Viewport } from 'next'
 import { Fredoka, Nunito, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { ServiceWorker } from '@/components/ServiceWorker'
-import { getTheme } from '@/lib/settings'
-import { getAccountId } from '@/lib/session'
 
 const fredoka = Fredoka({ subsets: ['latin'], variable: '--font-fredoka', weight: ['500', '600', '700'] })
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-juvenil', weight: ['500', '600', '700'] })
-
-export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Colaboro',
@@ -25,15 +21,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const accountId = await getAccountId()
-  const theme = accountId ? await getTheme(accountId) : 'infantil'
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // El tema (infantil/juvenil) lo pone cada página con <ThemeShell> según el
+  // hijo activo. El body lleva el infantil como base.
   return (
-    <html
-      lang="es"
-      className={`${fredoka.variable} ${nunito.variable} ${spaceGrotesk.variable} h-full`}
-    >
-      <body className={`theme-${theme} h-full font-sans antialiased`}>
+    <html lang="es" className={`${fredoka.variable} ${nunito.variable} ${spaceGrotesk.variable} h-full`}>
+      <body className="theme-infantil h-full font-sans antialiased">
         {children}
         <ServiceWorker />
       </body>

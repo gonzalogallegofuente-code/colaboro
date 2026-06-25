@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { getRewardsData } from '@/lib/data'
-import { formatAmount, unitIcon } from '@/lib/money'
+import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { requireAccountPage } from '@/lib/session'
 import { redeemReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
+import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 
@@ -21,19 +22,24 @@ export default async function RecompensasPage({
 
   if (!data) {
     return (
-      <div className="mx-auto max-w-md">
-        <Nav active="recompensas" />
-        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
-          Todavía no hay nadie dado de alta.
+      <ThemeShell theme="infantil">
+        <div className="mx-auto max-w-md">
+          <Nav active="recompensas" />
+          <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
+            Todavía no hay nadie dado de alta.
+          </div>
         </div>
-      </div>
+      </ThemeShell>
     )
   }
 
-  const { money, kids, selectedKidId, rewards, redemptions } = data
+  const { kids, selectedKidId, rewards, redemptions } = data
   const selKid = kids.find((k) => k.id === selectedKidId)!
+  const money = moneyOf(selKid)
+  const theme = themeOf(selKid)
 
   return (
+    <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
       <Nav active="recompensas" />
 
@@ -60,7 +66,7 @@ export default async function RecompensasPage({
               <div className="text-left">
                 <div className="font-display font-bold leading-tight">{k.name}</div>
                 <div className={`text-sm font-bold ${on ? 'text-white/90' : 'text-[var(--chip-ink)]'}`}>
-                  {unitIcon(money)} {formatAmount(k.balanceCents, money)}
+                  {unitIcon(moneyOf(k))} {formatAmount(k.balanceCents, moneyOf(k))}
                 </div>
               </div>
             </Link>
@@ -132,7 +138,7 @@ export default async function RecompensasPage({
                     </div>
                   </div>
                   <span className="font-display text-sm font-bold text-rose-500">
-                    −{formatAmount(red.costCents, money)}
+                    −{formatAmount(red.costCents, moneyOf(kid ?? selKid))}
                   </span>
                 </div>
               )
@@ -141,5 +147,6 @@ export default async function RecompensasPage({
         </>
       )}
     </div>
+    </ThemeShell>
   )
 }

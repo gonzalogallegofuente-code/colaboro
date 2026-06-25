@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { getAllRewards, getActiveKids } from '@/lib/data'
-import { getMoneyConfig } from '@/lib/settings'
 import { requireAccountPage } from '@/lib/session'
-import { unitWord } from '@/lib/money'
+import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import { addReward, setRewardActive, updateReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
+import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { EmojiInput } from '@/components/EmojiInput'
@@ -24,29 +24,34 @@ export default async function EditarRecompensasPage({
 }) {
   const sp = await searchParams
   const accountId = await requireAccountPage()
-  const [kids, money] = await Promise.all([getActiveKids(accountId), getMoneyConfig(accountId)])
+  const kids = await getActiveKids(accountId)
   const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
   if (kids.length === 0) {
     return (
-      <div className="mx-auto max-w-md">
-        <Nav active="tareas" />
-        <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
-          Primero añade un hijo en{' '}
-          <Link href="/tareas" className="font-bold text-indigo-600 underline">
-            Ajustes
-          </Link>
-          .
+      <ThemeShell theme="infantil">
+        <div className="mx-auto max-w-md">
+          <Nav active="tareas" />
+          <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
+            Primero añade un hijo en{' '}
+            <Link href="/tareas" className="font-bold text-indigo-600 underline">
+              Ajustes
+            </Link>
+            .
+          </div>
         </div>
-      </div>
+      </ThemeShell>
     )
   }
 
   const kidParam = sp.kid ? Number(sp.kid) : undefined
   const selKid = kids.find((k) => k.id === kidParam) ?? kids[0]
+  const money = moneyOf(selKid)
+  const theme = themeOf(selKid)
   const rewards = await getAllRewards(accountId, selKid.id)
 
   return (
+    <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
       <Nav active="tareas" />
 
@@ -119,6 +124,7 @@ export default async function EditarRecompensasPage({
         </form>
       </div>
     </div>
+    </ThemeShell>
   )
 }
 

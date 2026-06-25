@@ -8,9 +8,22 @@ export function euros(cents: number): string {
   return fmt.format((cents ?? 0) / 100)
 }
 
-import type { MoneyConfig } from './settings'
+import type { MoneyConfig, Theme } from './settings'
 
 const ptsFmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 })
+
+// Config de dinero y tema a partir de la fila del hijo (tienen estos campos).
+export function moneyOf(k: { unit: string; pointsName: string; pointsIcon: string }): MoneyConfig {
+  return {
+    unit: k.unit === 'pts' ? 'pts' : 'eur',
+    pointsName: (k.pointsName || 'gemas').trim() || 'gemas',
+    pointsIcon: (k.pointsIcon || '💎').trim() || '💎',
+  }
+}
+
+export function themeOf(k: { theme: string }): Theme {
+  return k.theme === 'juvenil' ? 'juvenil' : 'infantil'
+}
 
 // Singular castellano sencillo: "gemas" -> "gema", "pavos" -> "pavo".
 function singular(name: string): string {

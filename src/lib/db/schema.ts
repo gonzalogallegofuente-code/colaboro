@@ -28,6 +28,11 @@ export const kids = pgTable('kids', {
   emoji: text('emoji').notNull().default('🙂'),
   avatarUrl: text('avatar_url'),
   color: text('color').notNull().default('#2563eb'),
+  // Ajustes propios de cada hijo:
+  theme: text('theme').notNull().default('infantil'),
+  unit: text('unit').notNull().default('eur'),
+  pointsName: text('points_name').notNull().default('gemas'),
+  pointsIcon: text('points_icon').notNull().default('💎'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
