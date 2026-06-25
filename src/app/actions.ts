@@ -208,7 +208,7 @@ export async function addTask(formData: FormData) {
     color: '#e9d5ff',
     sortOrder: (max ?? 0) + 1,
   })
-  redirect(`/tareas/${kidId}`)
+  redirect(`/tareas/editar?kid=${kidId}`)
 }
 
 export async function updateTask(formData: FormData) {
@@ -227,7 +227,7 @@ export async function updateTask(formData: FormData) {
     .set({ name, description, icon, valueCents, weeklyTarget })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
-  redirect(`/tareas/${row?.kidId ?? ''}`)
+  redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)
 }
 
 export async function setTaskActive(formData: FormData) {
