@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getRewardsData } from '@/lib/data'
 import { formatAmount, unitIcon } from '@/lib/money'
+import { requireAccountPage } from '@/lib/session'
 import { redeemReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { Avatar } from '@/components/Avatar'
@@ -15,7 +16,8 @@ export default async function RecompensasPage({
 }) {
   const sp = await searchParams
   const kidParam = sp.kid ? Number(sp.kid) : undefined
-  const data = await getRewardsData(kidParam)
+  const accountId = await requireAccountPage()
+  const data = await getRewardsData(accountId, kidParam)
 
   if (!data) {
     return (

@@ -14,32 +14,50 @@ import {
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays } from './week'
 import { getMoneyConfig, type MoneyConfig } from './settings'
 
-export async function getActiveKids(): Promise<Kid[]> {
-  return db.select().from(kids).where(eq(kids.active, true)).orderBy(kids.sortOrder, kids.id)
+export async function getActiveKids(accountId: number): Promise<Kid[]> {
+  return db
+    .select()
+    .from(kids)
+    .where(and(eq(kids.accountId, accountId), eq(kids.active, true)))
+    .orderBy(kids.sortOrder, kids.id)
 }
 
-export async function getActiveTasks(): Promise<Task[]> {
-  return db.select().from(tasks).where(eq(tasks.active, true)).orderBy(tasks.sortOrder, tasks.id)
+export async function getActiveTasks(accountId: number, kidId: number): Promise<Task[]> {
+  return db
+    .select()
+    .from(tasks)
+    .where(and(eq(tasks.accountId, accountId), eq(tasks.kidId, kidId), eq(tasks.active, true)))
+    .orderBy(tasks.sortOrder, tasks.id)
 }
 
-export async function getAllTasks(): Promise<Task[]> {
-  return db.select().from(tasks).orderBy(tasks.sortOrder, tasks.id)
+export async function getAllTasks(accountId: number, kidId: number): Promise<Task[]> {
+  return db
+    .select()
+    .from(tasks)
+    .where(and(eq(tasks.accountId, accountId), eq(tasks.kidId, kidId)))
+    .orderBy(tasks.sortOrder, tasks.id)
 }
 
-// Saldo por hijo = ganado − pagado − canjeado (en céntimos).
-export async function kidBalances(): Promise<Map<number, number>> {
+// Saldo por hijo = ganado − pagado − canjeado (en céntimos), solo de la cuenta.
+export async function kidBalances(accountId: number): Promise<Map<number, number>> {
   const [earned, paid, redeemed] = await Promise.all([
     db
       .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
       .from(completions)
+      .innerJoin(kids, eq(kids.id, completions.kidId))
+      .where(eq(kids.accountId, accountId))
       .groupBy(completions.kidId),
     db
       .select({ kidId: payouts.kidId, c: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int` })
       .from(payouts)
+      .innerJoin(kids, eq(kids.id, payouts.kidId))
+      .where(eq(kids.accountId, accountId))
       .groupBy(payouts.kidId),
     db
       .select({ kidId: redemptions.kidId, c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::int` })
       .from(redemptions)
+      .innerJoin(kids, eq(kids.id, redemptions.kidId))
+      .where(eq(kids.accountId, accountId))
       .groupBy(redemptions.kidId),
   ])
   const m = new Map<number, number>()
@@ -61,34 +79,40 @@ export type BoardData = {
   dayCountByTask: Record<number, number>
 }
 
-export async function getBoardData(selectedDate: string, kidId?: number): Promise<BoardData | null> {
-  const [kidList, taskList] = await Promise.all([getActiveKids(), getActiveTasks()])
+export async function getBoardData(
+  accountId: number,
+  selectedDate: string,
+  kidId?: number,
+): Promise<BoardData | null> {
+  const kidList = await getActiveKids(accountId)
   if (kidList.length === 0) return null
 
   const range = weekRange(selectedDate)
 
   const [balances, weekRows] = await Promise.all([
-    kidBalances(),
+    kidBalances(accountId),
     db
       .select({
         kidId: completions.kidId,
         cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
       })
       .from(completions)
-      .where(and(gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)))
+      .innerJoin(kids, eq(kids.id, completions.kidId))
+      .where(
+        and(eq(kids.accountId, accountId), gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)),
+      )
       .groupBy(completions.kidId),
   ])
 
   const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
-
   const kidSummaries: KidSummary[] = kidList.map((k) => ({
     ...k,
     weekCents: week.get(k.id) ?? 0,
     balanceCents: balances.get(k.id) ?? 0,
   }))
 
-  const selectedKidId =
-    kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+  const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+  const taskList = await getActiveTasks(accountId, selectedKidId)
 
   const [weekTaskRows, dayTaskRows] = await Promise.all([
     db
@@ -144,26 +168,26 @@ export type WeekGrid = {
   weekCents: number
 }
 
-// Parte semanal: para una semana y un hijo, cuántas veces se hizo cada tarea
-// cada día (cuadrícula tareas × días) + total por día.
-export async function getWeekGrid(anyDate: string, kidId?: number): Promise<WeekGrid | null> {
-  const [kidList, taskList] = await Promise.all([getActiveKids(), getActiveTasks()])
+export async function getWeekGrid(
+  accountId: number,
+  anyDate: string,
+  kidId?: number,
+): Promise<WeekGrid | null> {
+  const kidList = await getActiveKids(accountId)
   if (kidList.length === 0) return null
 
   const range = weekRange(anyDate)
   const days = weekDays(range.start)
 
   const weekRows = await db
-    .select({
-      kidId: completions.kidId,
-      cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
-    })
+    .select({ kidId: completions.kidId, cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
     .from(completions)
-    .where(and(gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)))
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(and(eq(kids.accountId, accountId), gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)))
     .groupBy(completions.kidId)
   const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
 
-  const kids: WeekGridKid[] = kidList.map((k) => ({
+  const kidsOut: WeekGridKid[] = kidList.map((k) => ({
     id: k.id,
     name: k.name,
     emoji: k.emoji,
@@ -171,15 +195,11 @@ export async function getWeekGrid(anyDate: string, kidId?: number): Promise<Week
     color: k.color,
     weekCents: week.get(k.id) ?? 0,
   }))
-  const selectedKidId =
-    kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+  const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+  const taskList = await getActiveTasks(accountId, selectedKidId)
 
   const rows = await db
-    .select({
-      taskId: completions.taskId,
-      doneOn: completions.doneOn,
-      valueCents: completions.valueCents,
-    })
+    .select({ taskId: completions.taskId, doneOn: completions.doneOn, valueCents: completions.valueCents })
     .from(completions)
     .where(
       and(
@@ -203,7 +223,7 @@ export async function getWeekGrid(anyDate: string, kidId?: number): Promise<Week
     weekCents += r.valueCents
   }
 
-  return { kids, tasks: taskList, selectedKidId, range, days, grid, dayCents, weekCents }
+  return { kids: kidsOut, tasks: taskList, selectedKidId, range, days, grid, dayCents, weekCents }
 }
 
 export type WeekHistory = {
@@ -211,24 +231,32 @@ export type WeekHistory = {
   end: string
   perKid: Record<number, { cents: number; count: number }>
 }
-
 export type HistoryData = {
   kids: Kid[]
   weeks: WeekHistory[]
   payouts: { id: number; kidId: number; amountCents: number; paidAt: Date; note: string | null }[]
 }
 
-export async function getHistory(limitWeeks = 16): Promise<HistoryData> {
+export async function getHistory(accountId: number, limitWeeks = 16): Promise<HistoryData> {
   const [kidList, comps, pays] = await Promise.all([
-    db.select().from(kids).orderBy(kids.sortOrder, kids.id),
+    db.select().from(kids).where(eq(kids.accountId, accountId)).orderBy(kids.sortOrder, kids.id),
+    db
+      .select({ kidId: completions.kidId, doneOn: completions.doneOn, valueCents: completions.valueCents })
+      .from(completions)
+      .innerJoin(kids, eq(kids.id, completions.kidId))
+      .where(eq(kids.accountId, accountId)),
     db
       .select({
-        kidId: completions.kidId,
-        doneOn: completions.doneOn,
-        valueCents: completions.valueCents,
+        id: payouts.id,
+        kidId: payouts.kidId,
+        amountCents: payouts.amountCents,
+        paidAt: payouts.paidAt,
+        note: payouts.note,
       })
-      .from(completions),
-    db.select().from(payouts).orderBy(desc(payouts.paidAt)),
+      .from(payouts)
+      .innerJoin(kids, eq(kids.id, payouts.kidId))
+      .where(eq(kids.accountId, accountId))
+      .orderBy(desc(payouts.paidAt)),
   ])
 
   const byWeek = new Map<string, WeekHistory>()
@@ -245,16 +273,17 @@ export async function getHistory(limitWeeks = 16): Promise<HistoryData> {
     w.perKid[c.kidId] = cur
   }
 
-  const weeks = [...byWeek.values()]
-    .sort((a, b) => (a.start < b.start ? 1 : -1))
-    .slice(0, limitWeeks)
-
+  const weeks = [...byWeek.values()].sort((a, b) => (a.start < b.start ? 1 : -1)).slice(0, limitWeeks)
   return { kids: kidList, weeks, payouts: pays }
 }
 
-// ── Recompensas ──────────────────────────────────────────────────────
-export async function getAllRewards(): Promise<Reward[]> {
-  return db.select().from(rewards).orderBy(rewards.sortOrder, rewards.id)
+// ── Recompensas (por hijo) ───────────────────────────────────────────
+export async function getAllRewards(accountId: number, kidId: number): Promise<Reward[]> {
+  return db
+    .select()
+    .from(rewards)
+    .where(and(eq(rewards.accountId, accountId), eq(rewards.kidId, kidId)))
+    .orderBy(rewards.sortOrder, rewards.id)
 }
 
 export type RewardKid = {
@@ -281,14 +310,20 @@ export type RewardsData = {
   redemptions: RecentRedemption[]
 }
 
-export async function getRewardsData(kidId?: number): Promise<RewardsData | null> {
-  const kidList = await getActiveKids()
+export async function getRewardsData(accountId: number, kidId?: number): Promise<RewardsData | null> {
+  const kidList = await getActiveKids(accountId)
   if (kidList.length === 0) return null
 
+  const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
+
   const [money, balances, rewardList, recent] = await Promise.all([
-    getMoneyConfig(),
-    kidBalances(),
-    db.select().from(rewards).where(eq(rewards.active, true)).orderBy(rewards.sortOrder, rewards.id),
+    getMoneyConfig(accountId),
+    kidBalances(accountId),
+    db
+      .select()
+      .from(rewards)
+      .where(and(eq(rewards.accountId, accountId), eq(rewards.kidId, selectedKidId), eq(rewards.active, true)))
+      .orderBy(rewards.sortOrder, rewards.id),
     db
       .select({
         id: redemptions.id,
@@ -299,11 +334,13 @@ export async function getRewardsData(kidId?: number): Promise<RewardsData | null
         createdAt: redemptions.createdAt,
       })
       .from(redemptions)
+      .innerJoin(kids, eq(kids.id, redemptions.kidId))
+      .where(eq(kids.accountId, accountId))
       .orderBy(desc(redemptions.createdAt))
       .limit(20),
   ])
 
-  const kids: RewardKid[] = kidList.map((k) => ({
+  const kidsOut: RewardKid[] = kidList.map((k) => ({
     id: k.id,
     name: k.name,
     emoji: k.emoji,
@@ -311,8 +348,6 @@ export async function getRewardsData(kidId?: number): Promise<RewardsData | null
     color: k.color,
     balanceCents: balances.get(k.id) ?? 0,
   }))
-  const selectedKidId =
-    kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
 
-  return { money, kids, selectedKidId, rewards: rewardList, redemptions: recent }
+  return { money, kids: kidsOut, selectedKidId, rewards: rewardList, redemptions: recent }
 }

@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { getBoardData } from '@/lib/data'
 import { getMoneyConfig } from '@/lib/settings'
+import { requireAccountPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { markTask, undoTask, payKid } from './actions'
 import { Nav } from '@/components/Nav'
+import { InstallPrompt } from '@/components/InstallPrompt'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
@@ -46,7 +48,11 @@ export default async function Page({
   const selectedDate = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const [data, money] = await Promise.all([getBoardData(selectedDate, kidParam), getMoneyConfig()])
+  const accountId = await requireAccountPage()
+  const [data, money] = await Promise.all([
+    getBoardData(accountId, selectedDate, kidParam),
+    getMoneyConfig(accountId),
+  ])
 
   if (!data) {
     return (
@@ -68,6 +74,7 @@ export default async function Page({
   return (
     <div className="mx-auto max-w-md pb-12">
       <Nav active="inicio" />
+      <InstallPrompt />
 
       {/* Selector de hijo */}
       <div className="grid grid-cols-2 gap-3 px-3">

@@ -1,6 +1,6 @@
-// Sesión mínima por PIN compartido. La cookie guarda "<exp>.<firma>" donde la
-// firma es HMAC-SHA256(secret, exp). Sin estado en BD. Web Crypto funciona tanto
-// en el middleware (edge) como en las Server Actions (node).
+// Sesión por cuenta. La cookie guarda "<accountId>.<exp>.<firma>" donde la firma
+// es HMAC-SHA256(secret, "<accountId>.<exp>"). Web Crypto funciona en el proxy
+// (edge) y en las Server Actions (node).
 
 export const SESSION_COOKIE = 'colaboro_session'
 const TTL_MS = 365 * 24 * 60 * 60 * 1000 // 1 año
@@ -32,26 +32,21 @@ function safeEqual(a: string, b: string): boolean {
   return out === 0
 }
 
-export async function makeSessionToken(secret: string): Promise<string> {
-  const exp = String(Date.now() + TTL_MS)
-  return `${exp}.${await sign(secret, exp)}`
+export async function makeSessionToken(secret: string, accountId: number): Promise<string> {
+  const payload = `${accountId}.${Date.now() + TTL_MS}`
+  return `${payload}.${await sign(secret, payload)}`
 }
 
-export async function verifySessionToken(
+// Devuelve el accountId si la cookie es válida y no ha caducado, si no null.
+export async function readSession(
   secret: string,
   token: string | undefined,
-): Promise<boolean> {
-  if (!token) return false
-  const dot = token.indexOf('.')
-  if (dot < 0) return false
-  const exp = token.slice(0, dot)
-  const sig = token.slice(dot + 1)
-  if (!/^\d+$/.test(exp) || Number(exp) < Date.now()) return false
-  return safeEqual(sig, await sign(secret, exp))
-}
-
-// Comparación de PIN en tiempo constante.
-export function pinMatches(input: string, expected: string | undefined): boolean {
-  if (!expected) return false
-  return safeEqual(input, expected)
+): Promise<number | null> {
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  const [accId, exp, sig] = parts
+  if (!/^\d+$/.test(accId) || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return null
+  if (!safeEqual(sig, await sign(secret, `${accId}.${exp}`))) return null
+  return Number(accId)
 }

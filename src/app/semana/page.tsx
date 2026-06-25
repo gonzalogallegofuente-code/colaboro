@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import Link from 'next/link'
 import { getWeekGrid } from '@/lib/data'
 import { getMoneyConfig } from '@/lib/settings'
+import { requireAccountPage } from '@/lib/session'
 import { todayYmd, formatRange, shiftWeek } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -33,7 +34,11 @@ export default async function SemanaPage({
   const anchor = sp.w && /^\d{4}-\d{2}-\d{2}$/.test(sp.w) ? sp.w : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
-  const [data, money] = await Promise.all([getWeekGrid(anchor, kidParam), getMoneyConfig()])
+  const accountId = await requireAccountPage()
+  const [data, money] = await Promise.all([
+    getWeekGrid(accountId, anchor, kidParam),
+    getMoneyConfig(accountId),
+  ])
 
   if (!data) {
     return (

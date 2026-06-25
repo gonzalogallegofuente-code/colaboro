@@ -3,6 +3,7 @@ import { Fredoka, Nunito, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { ServiceWorker } from '@/components/ServiceWorker'
 import { getTheme } from '@/lib/settings'
+import { getAccountId } from '@/lib/session'
 
 const fredoka = Fredoka({ subsets: ['latin'], variable: '--font-fredoka', weight: ['500', '600', '700'] })
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito' })
@@ -25,7 +26,8 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const theme = await getTheme()
+  const accountId = await getAccountId()
+  const theme = accountId ? await getTheme(accountId) : 'infantil'
   return (
     <html
       lang="es"

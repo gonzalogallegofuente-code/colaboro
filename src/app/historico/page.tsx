@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getHistory } from '@/lib/data'
 import { getMoneyConfig } from '@/lib/settings'
+import { requireAccountPage } from '@/lib/session'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
 import { formatAmount, unitIcon } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -9,7 +10,11 @@ import { Avatar } from '@/components/Avatar'
 export const dynamic = 'force-dynamic'
 
 export default async function HistoricoPage() {
-  const [{ kids, weeks, payouts }, money] = await Promise.all([getHistory(), getMoneyConfig()])
+  const accountId = await requireAccountPage()
+  const [{ kids, weeks, payouts }, money] = await Promise.all([
+    getHistory(accountId),
+    getMoneyConfig(accountId),
+  ])
   const currentStart = weekRange(todayYmd()).start
 
   return (

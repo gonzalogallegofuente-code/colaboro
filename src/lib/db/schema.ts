@@ -7,11 +7,23 @@ import {
   date,
   timestamp,
   index,
+  primaryKey,
 } from 'drizzle-orm/pg-core'
 
-// Los hijos (Leo, Eliot…). Se pueden añadir más.
+// Cuenta (una por familia). Cada cuenta está aislada de las demás.
+export const accounts = pgTable('accounts', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// Los hijos de una cuenta.
 export const kids = pgTable('kids', {
   id: serial('id').primaryKey(),
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   emoji: text('emoji').notNull().default('🙂'),
   avatarUrl: text('avatar_url'),
@@ -21,10 +33,15 @@ export const kids = pgTable('kids', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-// Las tareas y su valor. weekly_target = nº de veces esperadas por semana
-// (las casillas de la hoja de papel).
+// Tareas: ahora son PROPIAS de cada hijo (kid_id).
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  kidId: integer('kid_id')
+    .notNull()
+    .references(() => kids.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
   icon: text('icon').notNull().default('⭐'),
@@ -36,8 +53,6 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-// Cada vez que un hijo hace una tarea. done_on = el día al que se imputa
-// (puede ser ayer u otro día anterior). value_cents = foto del valor al marcar.
 export const completions = pgTable(
   'completions',
   {
@@ -47,7 +62,7 @@ export const completions = pgTable(
       .references(() => kids.id, { onDelete: 'cascade' }),
     taskId: integer('task_id')
       .notNull()
-      .references(() => tasks.id, { onDelete: 'restrict' }),
+      .references(() => tasks.id, { onDelete: 'cascade' }),
     doneOn: date('done_on').notNull(),
     valueCents: integer('value_cents').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -55,8 +70,6 @@ export const completions = pgTable(
   (t) => [index('completions_kid_date_idx').on(t.kidId, t.doneOn)],
 )
 
-// Liquidaciones: cuando se paga lo acumulado queda registrado aquí.
-// saldo de un hijo = sum(completions.value) - sum(payouts.amount).
 export const payouts = pgTable('payouts', {
   id: serial('id').primaryKey(),
   kidId: integer('kid_id')
@@ -67,15 +80,28 @@ export const payouts = pgTable('payouts', {
   paidAt: timestamp('paid_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-// Ajustes globales clave-valor (p.ej. unit = 'eur' | 'pts').
-export const settings = pgTable('settings', {
-  key: text('key').primaryKey(),
-  value: text('value').notNull(),
-})
+// Ajustes por cuenta (unit, points_name, points_icon, theme).
+export const settings = pgTable(
+  'settings',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => accounts.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    value: text('value').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.key] })],
+)
 
-// Recompensas que la familia rellena (canjeables por puntos/€).
+// Recompensas: también PROPIAS de cada hijo (kid_id).
 export const rewards = pgTable('rewards', {
   id: serial('id').primaryKey(),
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  kidId: integer('kid_id')
+    .notNull()
+    .references(() => kids.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   icon: text('icon').notNull().default('🎁'),
   costCents: integer('cost_cents').notNull().default(500),
@@ -84,8 +110,6 @@ export const rewards = pgTable('rewards', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-// Canje: un hijo cambia su saldo por una recompensa (resta del saldo).
-// Guardamos nombre/icono/coste como foto por si luego se borra la recompensa.
 export const redemptions = pgTable('redemptions', {
   id: serial('id').primaryKey(),
   kidId: integer('kid_id')
@@ -98,6 +122,7 @@ export const redemptions = pgTable('redemptions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect
 export type Task = typeof tasks.$inferSelect
 export type Completion = typeof completions.$inferSelect
