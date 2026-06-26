@@ -185,17 +185,21 @@ export async function removeSubscription(endpoint: string) {
 }
 
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────
+// [nombre, descripción, emoji, iconKey, valorCents, vecesSemana, color]
 const DEFAULT_TASKS = [
-  ['Aspirador casa', 'cocina + habitaciones + salón + pasillo', '🧹', 100, 7, '#f7d0e0'],
-  ['Cuarto de baño', 'aspirar, lavabo, váter, bañera, espejo, fregar suelo', '🚽', 100, 2, '#cfe0f5'],
-  ['Aspirar entrada', 'aspirar alfombra y suelo, limpiar polvo', '🚪', 100, 7, '#dde7dd'],
-  ['Cristales', 'limpiar polvo, despacho + salón + habitaciones', '🪟', 100, 2, '#f2ecc9'],
-  ['Tender la ropa', 'ropa estirada y bien colocada', '👕', 100, 7, '#ddd6f0'],
-  ['Limpiar el polvo', 'de toda la casa, sacudir plumero cada poco tiempo', '🪶', 100, 7, '#f3d4e1'],
-  ['Hacer la comida', '', '🍳', 100, 7, '#d2d8f0'],
-  ['Recoger ropa tendal', 'dejar ropa organizada', '🧺', 100, 7, '#d6e1d6'],
-  ['Recoger lavaplatos', 'sacar y colocar', '🍽️', 100, 7, '#e3e3c5'],
-  ['Tirar la basura', 'orgánico, plásticos, papel y vidrio', '🗑️', 50, 7, '#c5cfe2'],
+  ['Aspirador casa', 'cocina + habitaciones + salón + pasillo', '🧹', 'broom', 100, 7, '#f7d0e0'],
+  ['Cuarto de baño', 'aspirar, lavabo, váter, bañera, espejo, fregar suelo', '🚽', 'toilet', 100, 2, '#cfe0f5'],
+  ['Aspirar entrada', 'aspirar alfombra y suelo, limpiar polvo', '🚪', 'door', 100, 7, '#dde7dd'],
+  ['Cristales', 'limpiar polvo, despacho + salón + habitaciones', '🪟', 'sparkle', 100, 2, '#f2ecc9'],
+  ['Tender la ropa', 'ropa estirada y bien colocada', '👕', 't-shirt', 100, 7, '#ddd6f0'],
+  ['Limpiar el polvo', 'de toda la casa, sacudir plumero cada poco tiempo', '🪶', 'feather', 100, 7, '#f3d4e1'],
+  ['Hacer la comida', '', '🍳', 'cooking-pot', 100, 7, '#d2d8f0'],
+  ['Recoger ropa tendal', 'dejar ropa organizada', '🧺', 'basket', 100, 7, '#d6e1d6'],
+  ['Recoger lavaplatos', 'sacar y colocar', '🍽️', 'fork-knife', 100, 7, '#e3e3c5'],
+  ['Tirar la basura', 'orgánico, plásticos, papel y vidrio', '🗑️', 'trash', 50, 7, '#c5cfe2'],
+  ['Leer', 'un rato de lectura', '📖', 'book', 100, 7, '#d9e6f2'],
+  ['Estudiar', 'deberes y repaso', '🎓', 'graduation-cap', 100, 7, '#e6dcc0'],
+  ['No decir palabrotas', 'cuidar el vocabulario todo el día', '🤐', 'prohibit', 100, 7, '#f2d4dd'],
 ] as const
 
 const DEFAULT_REWARDS = [
@@ -213,9 +217,10 @@ async function seedKidDefaults(accountId: number, kidId: number) {
       name: t[0],
       description: t[1] || null,
       icon: t[2],
-      valueCents: t[3],
-      weeklyTarget: t[4],
-      color: t[5],
+      iconKey: t[3],
+      valueCents: t[4],
+      weeklyTarget: t[5],
+      color: t[6],
       sortOrder: i + 1,
     })),
   )
