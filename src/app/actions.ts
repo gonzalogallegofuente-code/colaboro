@@ -381,6 +381,30 @@ export async function clearKidAvatar(formData: FormData) {
   redirect(`/tareas/${kidId}`)
 }
 
+// Usar un EMOJI como avatar (quita la foto/personaje).
+export async function setKidEmoji(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  const emoji = String(formData.get('emoji') ?? '').trim()
+  if (!kidId || !emoji) throw new Error('Datos inválidos')
+  await assertKid(accountId, kidId)
+  await db
+    .update(kids)
+    .set({ emoji: emoji.slice(0, 8), avatarUrl: null })
+    .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}?avs=emoji`)
+}
+
+export async function setKidColor(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  const color = String(formData.get('color') ?? '')
+  if (!kidId || !/^#[0-9a-fA-F]{6}$/.test(color)) throw new Error('Datos inválidos')
+  await assertKid(accountId, kidId)
+  await db.update(kids).set({ color }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
+}
+
 export async function setIconStyle(formData: FormData) {
   const accountId = await requireAccount()
   const kidId = Number(formData.get('kidId'))
@@ -417,9 +441,10 @@ export async function updateKid(formData: FormData) {
   if (!id) throw new Error('Datos inválidos')
   const name = String(formData.get('name') ?? '').trim()
   if (!name) throw new Error('Falta el nombre')
-  const emoji = String(formData.get('emoji') ?? '').trim() || '🙂'
 
-  const set: { name: string; emoji: string; avatarUrl?: string | null; color?: string } = { name, emoji }
+  const set: { name: string; emoji?: string; avatarUrl?: string | null; color?: string } = { name }
+  const emoji = String(formData.get('emoji') ?? '').trim()
+  if (emoji) set.emoji = emoji.slice(0, 8)
   const avatarUrl = String(formData.get('avatarUrl') ?? '')
   if (formData.get('clearAvatar') === '1') set.avatarUrl = null
   else if (avatarUrl.startsWith('data:image/')) {

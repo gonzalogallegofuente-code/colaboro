@@ -4,12 +4,13 @@ import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import {
-  clearKidAvatar,
   deleteKid,
   enterKid,
   setGoal,
   setIconStyle,
   setKidAvatar,
+  setKidColor,
+  setKidEmoji,
   setKidPin,
   setPointsName,
   setTheme,
@@ -29,7 +30,11 @@ import { ColorPicker } from '@/components/ColorPicker'
 
 export const dynamic = 'force-dynamic'
 
-const KID_EMOJIS = ['🦁', '🦊', '🐯', '🐻', '🐼', '🦄', '🚀', '⚽', '🎮', '🦖', '🐶', '🐱']
+const KID_EMOJIS = [
+  '😀', '😎', '🤩', '🥳', '😺', '🦁', '🦊', '🐯', '🐻', '🐼', '🐨', '🐸',
+  '🐵', '🦄', '🐶', '🐱', '🐰', '🐲', '🦖', '🐙', '🦋', '🦉', '🐳', '🦈',
+  '🤖', '👾', '👻', '🚀', '⚽', '🎮', '🍕', '🌟',
+]
 const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
 const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
@@ -51,13 +56,17 @@ export default async function KidSettingsPage({
   const money = moneyOf(k)
   const theme = themeOf(k)
 
-  // "Personaje": se elige un estilo y se ven MUCHAS variantes de ese estilo.
+  // Avatar: un emoji o un personaje generado. Se elige el tipo y se ven variantes.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
-  const avsKey = sp.avs && AVATAR_STYLES.some((s) => s.key === sp.avs) ? sp.avs : 'garabatos'
-  const avatarOptions = Array.from({ length: 20 }, (_, i) => {
-    const seed = `${k.name}-${avSalt}-${i}`
-    return { seed, uri: avatarDataUri(avsKey, seed)! }
-  })
+  const isStyle = !!sp.avs && AVATAR_STYLES.some((s) => s.key === sp.avs)
+  const avsKey = isStyle ? (sp.avs as string) : 'emoji'
+  const avatarOptions =
+    avsKey === 'emoji'
+      ? []
+      : Array.from({ length: 20 }, (_, i) => {
+          const seed = `${k.name}-${avSalt}-${i}`
+          return { seed, uri: avatarDataUri(avsKey, seed)! }
+        })
 
   const unitPill = (on: boolean) =>
     `tap-bounce rounded-xl border-2 px-4 py-1.5 font-display text-sm font-bold ${
@@ -80,38 +89,30 @@ export default async function KidSettingsPage({
           </Link>
         </div>
 
-        {/* Editar hijo */}
+        {/* Editar hijo: nombre + foto */}
         <form action={updateKid} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <input type="hidden" name="id" value={k.id} />
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             <AvatarUpload emoji={k.emoji} initialUrl={k.avatarUrl} />
             <div className="flex-1 space-y-2">
               <input name="name" defaultValue={k.name} className={`${inputCls} font-display font-bold`} />
-              <div>
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Emoji (si no hay foto)</span>
-                <EmojiInput name="emoji" defaultValue={k.emoji} suggestions={KID_EMOJIS} />
-              </div>
-              <div>
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Color</span>
-                <ColorPicker name="color" defaultValue={k.color} />
-              </div>
               <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                Guardar
+                Guardar nombre
               </SubmitButton>
             </div>
           </div>
         </form>
 
-        {/* Personaje (avatar generado, licencia libre) */}
+        {/* Avatar: emoji o personaje */}
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Personaje</span>
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Avatar</span>
           <p className="text-[11px] text-[var(--ink-3)]">
-            Avatar de {k.name} con un dibujo (sustituye a la foto o el emoji). Elige un estilo y luego una carita.
+            La carita de {k.name}: un emoji o un personaje. Elige el tipo y toca uno.
           </p>
 
-          {/* Estilos (en varias filas, sin scroll) */}
+          {/* Tipos: Emoji + estilos de personaje (varias filas, sin scroll) */}
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {AVATAR_STYLES.map((s) => {
+            {[{ key: 'emoji', label: 'Emoji' }, ...AVATAR_STYLES].map((s) => {
               const on = s.key === avsKey
               return (
                 <Link
@@ -128,38 +129,65 @@ export default async function KidSettingsPage({
             })}
           </div>
 
-          {/* Caritas del estilo elegido */}
-          <div className="mt-2 grid grid-cols-5 gap-2">
-            {avatarOptions.map((o) => (
-              <form key={o.seed} action={setKidAvatar}>
-                <input type="hidden" name="kidId" value={k.id} />
-                <input type="hidden" name="avStyle" value={avsKey} />
-                <input type="hidden" name="seed" value={o.seed} />
-                <button className="tap-bounce flex w-full items-center justify-center rounded-2xl border-2 border-indigo-100 p-1 hover:border-indigo-400">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={o.uri} alt="" width={52} height={52} className="rounded-full" />
-                </button>
-              </form>
-            ))}
-          </div>
-
-          {/* Acciones */}
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <Link
-              href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
-              replace
-              className="tap-bounce rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
-            >
-              🎲 Ver otras caras
-            </Link>
-            <form action={clearKidAvatar}>
-              <input type="hidden" name="kidId" value={k.id} />
-              <button className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-bold text-[var(--ink-2)]">
-                Quitar (volver al emoji)
-              </button>
-            </form>
-          </div>
+          {avsKey === 'emoji' ? (
+            <div className="mt-2 grid grid-cols-8 gap-1.5">
+              {KID_EMOJIS.map((em) => {
+                const on = !k.avatarUrl && k.emoji === em
+                return (
+                  <form key={em} action={setKidEmoji}>
+                    <input type="hidden" name="kidId" value={k.id} />
+                    <input type="hidden" name="emoji" value={em} />
+                    <button
+                      className={`tap-bounce flex aspect-square w-full items-center justify-center rounded-xl text-xl ${
+                        on ? 'bg-indigo-100 ring-2 ring-indigo-500' : 'bg-[var(--card)] hover:bg-indigo-50'
+                      }`}
+                    >
+                      {em}
+                    </button>
+                  </form>
+                )
+              })}
+            </div>
+          ) : (
+            <>
+              <div className="mt-2 grid grid-cols-5 gap-2">
+                {avatarOptions.map((o) => (
+                  <form key={o.seed} action={setKidAvatar}>
+                    <input type="hidden" name="kidId" value={k.id} />
+                    <input type="hidden" name="avStyle" value={avsKey} />
+                    <input type="hidden" name="seed" value={o.seed} />
+                    <button className="tap-bounce flex w-full items-center justify-center rounded-2xl border-2 border-indigo-100 p-1 hover:border-indigo-400">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={o.uri} alt="" width={52} height={52} className="rounded-full" />
+                    </button>
+                  </form>
+                ))}
+              </div>
+              <Link
+                href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
+                replace
+                className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
+              >
+                🎲 Ver otras caras
+              </Link>
+            </>
+          )}
         </div>
+
+        {/* Color */}
+        <form action={setKidColor} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <input type="hidden" name="kidId" value={k.id} />
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🎨 Color</span>
+          <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas.</p>
+          <div className="mt-2 flex items-end gap-2">
+            <div className="flex-1">
+              <ColorPicker name="color" defaultValue={k.color} />
+            </div>
+            <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+              Guardar
+            </SubmitButton>
+          </div>
+        </form>
 
         {/* Diseño */}
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
@@ -168,18 +196,12 @@ export default async function KidSettingsPage({
             <form action={setTheme} className="flex-1">
               <input type="hidden" name="kidId" value={k.id} />
               <input type="hidden" name="theme" value="infantil" />
-              <button className={themePill(theme === 'infantil')}>
-                🧸 Infantil
-                <span className="block text-[11px] font-normal opacity-80">hasta 9 años</span>
-              </button>
+              <button className={themePill(theme === 'infantil')}>☀️ Claro</button>
             </form>
             <form action={setTheme} className="flex-1">
               <input type="hidden" name="kidId" value={k.id} />
               <input type="hidden" name="theme" value="juvenil" />
-              <button className={themePill(theme === 'juvenil')}>
-                🎮 Juvenil
-                <span className="block text-[11px] font-normal opacity-80">10 años en adelante</span>
-              </button>
+              <button className={themePill(theme === 'juvenil')}>🌙 Oscuro</button>
             </form>
           </div>
         </div>

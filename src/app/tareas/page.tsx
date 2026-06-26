@@ -75,7 +75,7 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
                   {k.name}
                 </div>
                 <div className="text-[11px] font-semibold text-[var(--ink-3)]">
-                  {k.theme === 'juvenil' ? '🎮 Juvenil' : '🧸 Infantil'} ·{' '}
+                  {k.theme === 'juvenil' ? '🌙 Oscuro' : '☀️ Claro'} ·{' '}
                   {k.unit === 'pts' ? `⭐ ${k.pointsName}` : '🪙 Euros'}
                 </div>
               </div>

@@ -47,7 +47,7 @@ export function TaskGlyph({
     if (im) {
       return (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={im} alt="" width={size} height={size} className={className} style={{ objectFit: 'contain' }} />
+        <img src={im} alt="" width={size} height={size} className={className} style={{ objectFit: 'contain', display: 'block' }} />
       )
     }
     return (

@@ -12,13 +12,13 @@ import {
 // Estilos de avatar "personaje" (DiceBear, licencias libres CC0 / CC BY 4.0).
 // CC0: bottts, pixel-art, open-peeps. CC BY 4.0: adventurer, fun-emoji, croodles, big-smile.
 export const AVATAR_STYLES = [
-  { key: 'bottts', label: 'Robots', style: botttsNeutral },
-  { key: 'pixel', label: 'Pixel', style: pixelArt },
   { key: 'adventurer', label: 'Aventura', style: adventurer },
-  { key: 'fun', label: 'Caras', style: funEmoji },
   { key: 'garabatos', label: 'Garabatos', style: croodles },
+  { key: 'pixel', label: 'Pixel', style: pixelArt },
   { key: 'peeps', label: 'Personas', style: openPeeps },
   { key: 'smile', label: 'Sonrisas', style: bigSmile },
+  { key: 'fun', label: 'Caras', style: funEmoji },
+  { key: 'bottts', label: 'Robots', style: botttsNeutral },
 ] as const
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
