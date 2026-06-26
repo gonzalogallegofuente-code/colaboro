@@ -39,7 +39,7 @@ export default async function KidSettingsPage({
   searchParams,
 }: {
   params: Promise<{ kid: string }>
-  searchParams: Promise<{ pin?: string; av?: string }>
+  searchParams: Promise<{ pin?: string; av?: string; avs?: string }>
 }) {
   const { kid } = await params
   const sp = await searchParams
@@ -51,14 +51,13 @@ export default async function KidSettingsPage({
   const money = moneyOf(k)
   const theme = themeOf(k)
 
-  // Opciones de "personaje" (avatar generado): 6 estilos × 2 variantes.
+  // "Personaje": se elige un estilo y se ven MUCHAS variantes de ese estilo.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
-  const avatarOptions = AVATAR_STYLES.flatMap((s, si) =>
-    [0, 1].map((v) => {
-      const seed = `${k.name}-${avSalt}-${si}-${v}`
-      return { style: s.key, label: s.label, seed, uri: avatarDataUri(s.key, seed)! }
-    }),
-  )
+  const avsKey = sp.avs && AVATAR_STYLES.some((s) => s.key === sp.avs) ? sp.avs : 'garabatos'
+  const avatarOptions = Array.from({ length: 20 }, (_, i) => {
+    const seed = `${k.name}-${avSalt}-${i}`
+    return { seed, uri: avatarDataUri(avsKey, seed)! }
+  })
 
   const unitPill = (on: boolean) =>
     `tap-bounce rounded-xl border-2 px-4 py-1.5 font-display text-sm font-bold ${
@@ -113,7 +112,7 @@ export default async function KidSettingsPage({
                 <button className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-[var(--ink-2)]">🙂 Emoji</button>
               </form>
               <Link
-                href={`/tareas/${k.id}?av=${avSalt + 1}`}
+                href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
                 replace
                 className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"
               >
@@ -121,17 +120,40 @@ export default async function KidSettingsPage({
               </Link>
             </div>
           </div>
-          <p className="text-[11px] text-[var(--ink-3)]">Elige un personaje como avatar (sustituye a la foto o el emoji).</p>
-          <div className="mt-2 grid grid-cols-4 gap-2">
+
+          {/* Estilos */}
+          <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+            {AVATAR_STYLES.map((s) => {
+              const on = s.key === avsKey
+              return (
+                <Link
+                  key={s.key}
+                  href={`/tareas/${k.id}?avs=${s.key}&av=${avSalt}`}
+                  replace
+                  className={`tap-bounce shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+                    on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
+                  }`}
+                >
+                  {s.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          <p className="mt-1 text-[11px] text-[var(--ink-3)]">
+            Toca una carita para usarla de avatar (sustituye a la foto o el emoji). Pulsa 🎲 Más para ver otras.
+          </p>
+
+          {/* Rejilla de variantes del estilo elegido */}
+          <div className="mt-2 grid grid-cols-5 gap-2">
             {avatarOptions.map((o) => (
-              <form key={`${o.style}-${o.seed}`} action={setKidAvatar}>
+              <form key={o.seed} action={setKidAvatar}>
                 <input type="hidden" name="kidId" value={k.id} />
-                <input type="hidden" name="avStyle" value={o.style} />
+                <input type="hidden" name="avStyle" value={avsKey} />
                 <input type="hidden" name="seed" value={o.seed} />
-                <button className="tap-bounce flex w-full flex-col items-center gap-1 rounded-2xl border-2 border-indigo-100 p-1.5 hover:border-indigo-400">
+                <button className="tap-bounce flex w-full items-center justify-center rounded-2xl border-2 border-indigo-100 p-1 hover:border-indigo-400">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={o.uri} alt={o.label} width={46} height={46} className="rounded-full" />
-                  <span className="text-[9px] font-semibold text-[var(--ink-3)]">{o.label}</span>
+                  <img src={o.uri} alt="" width={52} height={52} className="rounded-full" />
                 </button>
               </form>
             ))}
