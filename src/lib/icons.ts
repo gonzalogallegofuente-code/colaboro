@@ -99,6 +99,24 @@ export const ICON_CATALOG: IconCategory[] = [
     ],
   },
   {
+    label: 'Cole y hábitos',
+    icons: [
+      { key: 'graduation-cap', emoji: '🎓', label: 'Estudiar' },
+      { key: 'notebook', emoji: '📓', label: 'Deberes' },
+      { key: 'calculator', emoji: '🧮', label: 'Mates' },
+      { key: 'brain', emoji: '🧠', label: 'Aprender' },
+      { key: 'alarm', emoji: '⏰', label: 'Madrugar' },
+      { key: 'clock', emoji: '🕐', label: 'Puntual' },
+      { key: 'tooth', emoji: '🦷', label: 'Dientes' },
+      { key: 'barbell', emoji: '🏋️', label: 'Ejercicio' },
+      { key: 'person-simple-run', emoji: '🏃', label: 'Correr' },
+      { key: 'hand-heart', emoji: '🫶', label: 'Ser amable' },
+      { key: 'handshake', emoji: '🤝', label: 'Compartir' },
+      { key: 'prohibit', emoji: '🤐', label: 'No palabrotas' },
+      { key: 'chat-circle', emoji: '💬', label: 'Hablar bien' },
+    ],
+  },
+  {
     label: 'General',
     icons: [
       { key: 'star', emoji: '⭐', label: 'Estrella' },
