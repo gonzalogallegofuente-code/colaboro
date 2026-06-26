@@ -33,6 +33,8 @@ export const kids = pgTable('kids', {
   unit: text('unit').notNull().default('eur'),
   pointsName: text('points_name').notNull().default('gemas'),
   pointsIcon: text('points_icon').notNull().default('💎'),
+  // Estilo de iconos de las tareas: 'emoji' | 'line' | 'fill'.
+  iconStyle: text('icon_style').notNull().default('emoji'),
   // Meta de ahorro (opcional): un objetivo al que ahorrar.
   goalName: text('goal_name'),
   goalIcon: text('goal_icon'),
@@ -56,6 +58,8 @@ export const tasks = pgTable('tasks', {
   name: text('name').notNull(),
   description: text('description'),
   icon: text('icon').notNull().default('⭐'),
+  // Clave del icono en el catálogo (icons.ts); permite estilos línea/relleno.
+  iconKey: text('icon_key'),
   valueCents: integer('value_cents').notNull().default(100),
   weeklyTarget: integer('weekly_target').notNull().default(7),
   color: text('color').notNull().default('#e9d5ff'),

@@ -18,6 +18,7 @@ import {
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
+import { ICON_BY_KEY } from '@/lib/icons'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
 import { getViewer, requireAccount } from '@/lib/session'
@@ -299,6 +300,8 @@ export async function addTask(formData: FormData) {
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
   const icon = String(formData.get('icon') ?? '').trim() || '⭐'
+  const ikRaw = String(formData.get('iconKey') ?? '').trim()
+  const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -310,6 +313,7 @@ export async function addTask(formData: FormData) {
     name,
     description,
     icon,
+    iconKey,
     valueCents,
     weeklyTarget,
     color: '#e9d5ff',
@@ -328,10 +332,12 @@ export async function updateTask(formData: FormData) {
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
   const icon = String(formData.get('icon') ?? '').trim() || '⭐'
+  const ikRaw = String(formData.get('iconKey') ?? '').trim()
+  const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
   const [row] = await db
     .update(tasks)
-    .set({ name, description, icon, valueCents, weeklyTarget })
+    .set({ name, description, icon, iconKey, valueCents, weeklyTarget })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
   redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)
@@ -344,6 +350,15 @@ export async function setTaskActive(formData: FormData) {
   if (!id) throw new Error('Datos inválidos')
   await db.update(tasks).set({ active }).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
   refresh()
+}
+
+export async function setIconStyle(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  const style = String(formData.get('iconStyle') ?? '')
+  if (!kidId || !['emoji', 'line', 'fill'].includes(style)) throw new Error('Datos inválidos')
+  await db.update(kids).set({ iconStyle: style }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
 }
 
 // ── Hijos ────────────────────────────────────────────────────────────

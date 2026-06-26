@@ -7,6 +7,8 @@ import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
+import { TaskGlyph } from '@/components/TaskGlyph'
+import type { IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -139,10 +141,10 @@ export default async function SemanaPage({
             <Fragment key={t.id}>
               <div className="flex items-center gap-1.5 pr-1">
                 <span
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-base"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
                   style={{ background: t.color }}
                 >
-                  {t.icon}
+                  <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={18} color="#3f3f55" />
                 </span>
                 <span className="truncate text-[11px] font-semibold leading-tight text-[var(--ink)]">{t.name}</span>
               </div>

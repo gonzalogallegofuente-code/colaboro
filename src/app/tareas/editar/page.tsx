@@ -7,11 +7,12 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
-import { EmojiInput } from '@/components/EmojiInput'
+import { IconPicker } from '@/components/IconPicker'
+import { TaskGlyph } from '@/components/TaskGlyph'
+import type { IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
-const TASK_ICONS = ['🧹', '🚽', '🚪', '🪟', '👕', '🪶', '🍳', '🧺', '🍽️', '🗑️', '🛏️', '🌱', '🐕', '📚', '🧽', '♻️']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
 function eurosInput(cents: number): string {
@@ -87,13 +88,15 @@ export default async function EditarTareasPage({
               <form action={updateTask}>
                 <input type="hidden" name="id" value={t.id} />
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{t.icon}</span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
+                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={22} color="#3f3f55" />
+                  </span>
                   <input name="name" defaultValue={t.name} className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre" />
                 </div>
                 <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
                 <div className="mt-2">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <EmojiInput name="icon" defaultValue={t.icon} suggestions={TASK_ICONS} />
+                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={selKid.iconStyle as IconStyle} />
                 </div>
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
@@ -119,7 +122,7 @@ export default async function EditarTareasPage({
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
             <div className="mt-2">
               <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-              <EmojiInput name="icon" defaultValue="⭐" suggestions={TASK_ICONS} />
+              <IconPicker defaultIcon="⭐" defaultKey={null} style={selKid.iconStyle as IconStyle} />
             </div>
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">

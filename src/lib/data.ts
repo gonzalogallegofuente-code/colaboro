@@ -158,6 +158,7 @@ export type WeekGridKid = {
   unit: string
   pointsName: string
   pointsIcon: string
+  iconStyle: string
   weekCents: number
 }
 export type WeekGrid = {
@@ -200,6 +201,7 @@ export async function getWeekGrid(
     unit: k.unit,
     pointsName: k.pointsName,
     pointsIcon: k.pointsIcon,
+    iconStyle: k.iconStyle,
     weekCents: week.get(k.id) ?? 0,
   }))
   const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id

@@ -3,8 +3,20 @@ import { redirect } from 'next/navigation'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
-import { deleteKid, enterKid, setGoal, setKidPin, setPointsName, setTheme, setUnit, updateKid } from '@/app/actions'
+import {
+  deleteKid,
+  enterKid,
+  setGoal,
+  setIconStyle,
+  setKidPin,
+  setPointsName,
+  setTheme,
+  setUnit,
+  updateKid,
+} from '@/app/actions'
 import { Nav } from '@/components/Nav'
+import { TaskGlyph } from '@/components/TaskGlyph'
+import type { IconStyle } from '@/lib/icons'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
@@ -130,6 +142,37 @@ export default async function KidSettingsPage({
             </div>
           </div>
         </form>
+
+        {/* Estilo de los iconos de las tareas */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">Estilo de los iconos</span>
+          <p className="text-[11px] text-[var(--ink-3)]">Cómo se ven los iconos de las tareas de {k.name}.</p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(
+              [
+                ['emoji', 'Emoji'],
+                ['line', 'Línea'],
+                ['fill', 'Relleno'],
+              ] as const
+            ).map(([val, label]) => {
+              const on = k.iconStyle === val
+              return (
+                <form key={val} action={setIconStyle}>
+                  <input type="hidden" name="kidId" value={k.id} />
+                  <input type="hidden" name="iconStyle" value={val} />
+                  <button
+                    className={`tap-bounce flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2 ${
+                      on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
+                    }`}
+                  >
+                    <TaskGlyph iconKey="broom" emoji="🧹" style={val as IconStyle} size={26} color={on ? '#fff' : '#3f3f55'} />
+                    <span className="font-display text-xs font-bold">{label}</span>
+                  </button>
+                </form>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Meta de ahorro */}
         <form action={setGoal} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
