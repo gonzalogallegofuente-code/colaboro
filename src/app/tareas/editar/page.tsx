@@ -10,7 +10,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { IconPicker } from '@/components/IconPicker'
 import { IconDefs, keysForStyle } from '@/components/IconDefs'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import type { IconStyle } from '@/lib/icons'
+import { iconColor, type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,7 +94,7 @@ export default async function EditarTareasPage({
                 <input type="hidden" name="id" value={t.id} />
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={22} color="#3f3f55" />
+                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={22} color={iconColor(t.color)} />
                   </span>
                   <input name="name" defaultValue={t.name} className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre" />
                 </div>

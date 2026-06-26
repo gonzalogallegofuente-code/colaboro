@@ -369,7 +369,7 @@ export async function setKidAvatar(formData: FormData) {
   const uri = avatarDataUri(style, seed)
   if (!uri) throw new Error('Estilo no válido')
   await db.update(kids).set({ avatarUrl: uri }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}`)
+  refresh()
 }
 
 export async function clearKidAvatar(formData: FormData) {
@@ -392,7 +392,7 @@ export async function setKidEmoji(formData: FormData) {
     .update(kids)
     .set({ emoji: emoji.slice(0, 8), avatarUrl: null })
     .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}?avs=emoji`)
+  refresh()
 }
 
 export async function setKidColor(formData: FormData) {
@@ -402,7 +402,7 @@ export async function setKidColor(formData: FormData) {
   if (!kidId || !/^#[0-9a-fA-F]{6}$/.test(color)) throw new Error('Datos inválidos')
   await assertKid(accountId, kidId)
   await db.update(kids).set({ color }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}`)
+  refresh()
 }
 
 export async function setIconStyle(formData: FormData) {
@@ -412,7 +412,7 @@ export async function setIconStyle(formData: FormData) {
   if (!kidId || !['emoji', 'line', 'fill', 'openmoji', 'game', 'dibujos'].includes(style))
     throw new Error('Datos inválidos')
   await db.update(kids).set({ iconStyle: style }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}`)
+  refresh()
 }
 
 // ── Hijos ────────────────────────────────────────────────────────────

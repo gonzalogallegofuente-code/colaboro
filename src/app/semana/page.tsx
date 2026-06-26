@@ -8,7 +8,7 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import type { IconStyle } from '@/lib/icons'
+import { iconColor, type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,7 +144,7 @@ export default async function SemanaPage({
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
                   style={{ background: t.color }}
                 >
-                  <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={18} color="#3f3f55" />
+                  <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={18} color={iconColor(t.color)} />
                 </span>
                 <span className="truncate text-[11px] font-semibold leading-tight text-[var(--ink)]">{t.name}</span>
               </div>

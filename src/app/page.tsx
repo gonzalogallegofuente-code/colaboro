@@ -10,7 +10,7 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { Avatar } from '@/components/Avatar'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import type { IconStyle } from '@/lib/icons'
+import { iconColor, type IconStyle } from '@/lib/icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
 import { PayButton } from '@/components/PayButton'
@@ -247,7 +247,7 @@ export default async function Page({
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-inner"
                 style={{ background: t.color }}
               >
-                <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={34} color="#3f3f55" />
+                <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={34} color={iconColor(t.color)} />
               </div>
 
               <div className="min-w-0 flex-1">

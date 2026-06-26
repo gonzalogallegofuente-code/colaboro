@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getActiveKids } from '@/lib/data'
+import { getActiveKids, getActiveTasks } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import {
@@ -20,7 +20,7 @@ import {
 import { AVATAR_STYLES, avatarDataUri } from '@/lib/avatars'
 import { Nav } from '@/components/Nav'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import type { IconStyle } from '@/lib/icons'
+import { iconColor, type IconStyle } from '@/lib/icons'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
@@ -55,6 +55,7 @@ export default async function KidSettingsPage({
 
   const money = moneyOf(k)
   const theme = themeOf(k)
+  const styleTasks = await getActiveTasks(accountId, k.id)
 
   // Avatar: un emoji o un personaje generado. Se elige el tipo y se ven variantes.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
@@ -119,6 +120,7 @@ export default async function KidSettingsPage({
                   key={s.key}
                   href={`/tareas/${k.id}?avs=${s.key}&av=${avSalt}`}
                   replace
+                  scroll={false}
                   className={`tap-bounce rounded-full px-3 py-1 text-xs font-bold ${
                     on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
                   }`}
@@ -166,6 +168,7 @@ export default async function KidSettingsPage({
               <Link
                 href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
                 replace
+                scroll={false}
                 className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
               >
                 🎲 Ver otras caras
@@ -269,6 +272,24 @@ export default async function KidSettingsPage({
               )
             })}
           </div>
+
+          {styleTasks.length > 0 && (
+            <div className="mt-3 border-t-2 border-indigo-50 pt-2">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Así quedan las tareas de {k.name}:</span>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {styleTasks.map((t) => (
+                  <span
+                    key={t.id}
+                    title={t.name}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl shadow-inner"
+                    style={{ background: t.color }}
+                  >
+                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={k.iconStyle as IconStyle} size={26} color={iconColor(t.color)} />
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Meta de ahorro */}

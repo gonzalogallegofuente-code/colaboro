@@ -133,6 +133,43 @@ export const ICON_CATALOG: IconCategory[] = [
   },
 ]
 
+// Color "vivo" para los iconos monocromos (línea/relleno/gamer): toma el tono
+// del color pastel de la tarea y lo satura/oscurece para que se vea con color
+// y contraste sobre el cuadro pastel (en vez de un gris plano).
+export function iconColor(hex: string): string {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex)
+  if (!m) return '#3f3f55'
+  const n = parseInt(m[1], 16)
+  const r = (n >> 16) / 255
+  const g = ((n >> 8) & 255) / 255
+  const b = (n & 255) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const l = (max + min) / 2
+  const d = max - min
+  let h = 0
+  let s = 0
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1))
+    if (max === r) h = (((g - b) / d) % 6 + 6) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+    h *= 60
+  }
+  if (s < 0.05) return '#3f3f55' // gris/acromático: deja el slate por defecto
+  const S = Math.max(s, 0.62)
+  const L = 0.42
+  const c = (1 - Math.abs(2 * L - 1)) * S
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const mm = L - c / 2
+  let rr = 0
+  let gg = 0
+  let bb = 0
+  if (h < 60) { rr = c; gg = x } else if (h < 120) { rr = x; gg = c } else if (h < 180) { gg = c; bb = x } else if (h < 240) { gg = x; bb = c } else if (h < 300) { rr = x; bb = c } else { rr = c; bb = x }
+  const to = (v: number) => Math.round((v + mm) * 255).toString(16).padStart(2, '0')
+  return `#${to(rr)}${to(gg)}${to(bb)}`
+}
+
 const ALL = ICON_CATALOG.flatMap((c) => c.icons)
 
 export const ICON_BY_KEY: Record<string, IconDef> = Object.fromEntries(ALL.map((i) => [i.key, i]))
