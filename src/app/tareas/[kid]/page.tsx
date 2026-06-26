@@ -61,7 +61,7 @@ export default async function KidSettingsPage({
   // Avatar: un emoji o un personaje generado. Se elige el tipo y se ven variantes.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
   const isStyle = !!sp.avs && AVATAR_STYLES.some((s) => s.key === sp.avs)
-  const avsKey = isStyle ? (sp.avs as string) : 'emoji'
+  const avsKey = isStyle ? (sp.avs as string) : sp.avs === 'emoji' ? 'emoji' : AVATAR_STYLES[0].key
   const avatarOptions =
     avsKey === 'emoji'
       ? []
