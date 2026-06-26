@@ -104,25 +104,13 @@ export default async function KidSettingsPage({
 
         {/* Personaje (avatar generado, licencia libre) */}
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Personaje</span>
-            <div className="flex items-center gap-2">
-              <form action={clearKidAvatar}>
-                <input type="hidden" name="kidId" value={k.id} />
-                <button className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-[var(--ink-2)]">🙂 Emoji</button>
-              </form>
-              <Link
-                href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
-                replace
-                className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"
-              >
-                🎲 Más
-              </Link>
-            </div>
-          </div>
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Personaje</span>
+          <p className="text-[11px] text-[var(--ink-3)]">
+            Avatar de {k.name} con un dibujo (sustituye a la foto o el emoji). Elige un estilo y luego una carita.
+          </p>
 
-          {/* Estilos */}
-          <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+          {/* Estilos (en varias filas, sin scroll) */}
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {AVATAR_STYLES.map((s) => {
               const on = s.key === avsKey
               return (
@@ -130,7 +118,7 @@ export default async function KidSettingsPage({
                   key={s.key}
                   href={`/tareas/${k.id}?avs=${s.key}&av=${avSalt}`}
                   replace
-                  className={`tap-bounce shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+                  className={`tap-bounce rounded-full px-3 py-1 text-xs font-bold ${
                     on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
                   }`}
                 >
@@ -140,11 +128,7 @@ export default async function KidSettingsPage({
             })}
           </div>
 
-          <p className="mt-1 text-[11px] text-[var(--ink-3)]">
-            Toca una carita para usarla de avatar (sustituye a la foto o el emoji). Pulsa 🎲 Más para ver otras.
-          </p>
-
-          {/* Rejilla de variantes del estilo elegido */}
+          {/* Caritas del estilo elegido */}
           <div className="mt-2 grid grid-cols-5 gap-2">
             {avatarOptions.map((o) => (
               <form key={o.seed} action={setKidAvatar}>
@@ -157,6 +141,23 @@ export default async function KidSettingsPage({
                 </button>
               </form>
             ))}
+          </div>
+
+          {/* Acciones */}
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <Link
+              href={`/tareas/${k.id}?avs=${avsKey}&av=${avSalt + 1}`}
+              replace
+              className="tap-bounce rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
+            >
+              🎲 Ver otras caras
+            </Link>
+            <form action={clearKidAvatar}>
+              <input type="hidden" name="kidId" value={k.id} />
+              <button className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-bold text-[var(--ink-2)]">
+                Quitar (volver al emoji)
+              </button>
+            </form>
           </div>
         </div>
 
@@ -216,7 +217,7 @@ export default async function KidSettingsPage({
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <span className="font-display text-sm font-bold text-[var(--ink)]">Estilo de los iconos</span>
           <p className="text-[11px] text-[var(--ink-3)]">Cómo se ven los iconos de las tareas de {k.name}.</p>
-          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          <div className="mt-2 flex flex-wrap gap-2">
             {(
               [
                 ['emoji', 'Emoji'],
