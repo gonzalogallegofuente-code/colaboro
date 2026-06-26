@@ -19,6 +19,7 @@ import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
 import { ICON_BY_KEY } from '@/lib/icons'
+import { avatarDataUri } from '@/lib/avatars'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
 import { getViewer, requireAccount } from '@/lib/session'
@@ -355,6 +356,29 @@ export async function setTaskActive(formData: FormData) {
   if (!id) throw new Error('Datos inválidos')
   await db.update(tasks).set({ active }).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
   refresh()
+}
+
+// Pone como avatar un "personaje" generado (DiceBear). Reusa avatarUrl.
+export async function setKidAvatar(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  const style = String(formData.get('avStyle') ?? '')
+  const seed = String(formData.get('seed') ?? '')
+  if (!kidId || !seed) throw new Error('Datos inválidos')
+  await assertKid(accountId, kidId)
+  const uri = avatarDataUri(style, seed)
+  if (!uri) throw new Error('Estilo no válido')
+  await db.update(kids).set({ avatarUrl: uri }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
+}
+
+export async function clearKidAvatar(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await assertKid(accountId, kidId)
+  await db.update(kids).set({ avatarUrl: null }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  redirect(`/tareas/${kidId}`)
 }
 
 export async function setIconStyle(formData: FormData) {

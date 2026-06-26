@@ -4,16 +4,19 @@ import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import {
+  clearKidAvatar,
   deleteKid,
   enterKid,
   setGoal,
   setIconStyle,
+  setKidAvatar,
   setKidPin,
   setPointsName,
   setTheme,
   setUnit,
   updateKid,
 } from '@/app/actions'
+import { AVATAR_STYLES, avatarDataUri } from '@/lib/avatars'
 import { Nav } from '@/components/Nav'
 import { TaskGlyph } from '@/components/TaskGlyph'
 import type { IconStyle } from '@/lib/icons'
@@ -36,7 +39,7 @@ export default async function KidSettingsPage({
   searchParams,
 }: {
   params: Promise<{ kid: string }>
-  searchParams: Promise<{ pin?: string }>
+  searchParams: Promise<{ pin?: string; av?: string }>
 }) {
   const { kid } = await params
   const sp = await searchParams
@@ -47,6 +50,15 @@ export default async function KidSettingsPage({
 
   const money = moneyOf(k)
   const theme = themeOf(k)
+
+  // Opciones de "personaje" (avatar generado): 6 estilos × 2 variantes.
+  const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
+  const avatarOptions = AVATAR_STYLES.flatMap((s, si) =>
+    [0, 1].map((v) => {
+      const seed = `${k.name}-${avSalt}-${si}-${v}`
+      return { style: s.key, label: s.label, seed, uri: avatarDataUri(s.key, seed)! }
+    }),
+  )
 
   const unitPill = (on: boolean) =>
     `tap-bounce rounded-xl border-2 px-4 py-1.5 font-display text-sm font-bold ${
@@ -90,6 +102,41 @@ export default async function KidSettingsPage({
             </div>
           </div>
         </form>
+
+        {/* Personaje (avatar generado, licencia libre) */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Personaje</span>
+            <div className="flex items-center gap-2">
+              <form action={clearKidAvatar}>
+                <input type="hidden" name="kidId" value={k.id} />
+                <button className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-[var(--ink-2)]">🙂 Emoji</button>
+              </form>
+              <Link
+                href={`/tareas/${k.id}?av=${avSalt + 1}`}
+                replace
+                className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"
+              >
+                🎲 Más
+              </Link>
+            </div>
+          </div>
+          <p className="text-[11px] text-[var(--ink-3)]">Elige un personaje como avatar (sustituye a la foto o el emoji).</p>
+          <div className="mt-2 grid grid-cols-4 gap-2">
+            {avatarOptions.map((o) => (
+              <form key={`${o.style}-${o.seed}`} action={setKidAvatar}>
+                <input type="hidden" name="kidId" value={k.id} />
+                <input type="hidden" name="avStyle" value={o.style} />
+                <input type="hidden" name="seed" value={o.seed} />
+                <button className="tap-bounce flex w-full flex-col items-center gap-1 rounded-2xl border-2 border-indigo-100 p-1.5 hover:border-indigo-400">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={o.uri} alt={o.label} width={46} height={46} className="rounded-full" />
+                  <span className="text-[9px] font-semibold text-[var(--ink-3)]">{o.label}</span>
+                </button>
+              </form>
+            ))}
+          </div>
+        </div>
 
         {/* Diseño */}
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
