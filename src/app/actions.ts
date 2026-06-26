@@ -385,7 +385,7 @@ export async function setIconStyle(formData: FormData) {
   const accountId = await requireAccount()
   const kidId = Number(formData.get('kidId'))
   const style = String(formData.get('iconStyle') ?? '')
-  if (!kidId || !['emoji', 'line', 'fill'].includes(style)) throw new Error('Datos inválidos')
+  if (!kidId || !['emoji', 'line', 'fill', 'openmoji', 'game'].includes(style)) throw new Error('Datos inválidos')
   await db.update(kids).set({ iconStyle: style }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   redirect(`/tareas/${kidId}`)
 }

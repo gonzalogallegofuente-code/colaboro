@@ -96,7 +96,7 @@ export default async function EditarTareasPage({
                 <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
                 <div className="mt-2">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={selKid.iconStyle as IconStyle} />
+                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} />
                 </div>
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
@@ -122,7 +122,7 @@ export default async function EditarTareasPage({
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
             <div className="mt-2">
               <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-              <IconPicker defaultIcon="⭐" defaultKey={null} style={selKid.iconStyle as IconStyle} />
+              <IconPicker defaultIcon="⭐" defaultKey={null} />
             </div>
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">

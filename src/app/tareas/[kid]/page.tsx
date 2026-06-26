@@ -194,21 +194,23 @@ export default async function KidSettingsPage({
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <span className="font-display text-sm font-bold text-[var(--ink)]">Estilo de los iconos</span>
           <p className="text-[11px] text-[var(--ink-3)]">Cómo se ven los iconos de las tareas de {k.name}.</p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {(
               [
                 ['emoji', 'Emoji'],
                 ['line', 'Línea'],
                 ['fill', 'Relleno'],
+                ['openmoji', 'Pegatina'],
+                ['game', 'Gamer'],
               ] as const
             ).map(([val, label]) => {
               const on = k.iconStyle === val
               return (
-                <form key={val} action={setIconStyle} className="h-full">
+                <form key={val} action={setIconStyle} className="shrink-0">
                   <input type="hidden" name="kidId" value={k.id} />
                   <input type="hidden" name="iconStyle" value={val} />
                   <button
-                    className={`tap-bounce flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-2 ${
+                    className={`tap-bounce flex w-[78px] flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-2 ${
                       on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
                     }`}
                   >
