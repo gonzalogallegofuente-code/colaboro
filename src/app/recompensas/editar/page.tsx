@@ -7,11 +7,11 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
-import { EmojiInput } from '@/components/EmojiInput'
+import { RewardGlyph } from '@/components/RewardGlyph'
+import { RewardIconDefs } from '@/components/RewardIconDefs'
+import { RewardIconPicker } from '@/components/RewardIconPicker'
 
 export const dynamic = 'force-dynamic'
-
-const REWARD_ICONS = ['🎮', '🍦', '🍫', '🌙', '🎬', '🛝', '📱', '🧸', '💶', '🍕', '🎨', '⚽', '🎟️', '🚲', '📚', '🎤']
 
 function costInput(cents: number): string {
   return (cents / 100).toString().replace('.', ',')
@@ -81,13 +81,17 @@ export default async function EditarRecompensasPage({
         })}
       </div>
 
+      <RewardIconDefs />
+
       <div className="mx-3 mt-3 space-y-2.5">
         {rewards.map((r) => (
           <div key={r.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${r.active ? '' : 'opacity-60'}`}>
             <form action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{r.icon}</span>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={26} />
+                </span>
                 <input name="name" defaultValue={r.name} className={`${inputCls} flex-1 font-display font-bold`} />
               </div>
               <label className="mt-2 block">
@@ -96,7 +100,7 @@ export default async function EditarRecompensasPage({
               </label>
               <div className="mt-2">
                 <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                <EmojiInput name="icon" defaultValue={r.icon} suggestions={REWARD_ICONS} />
+                <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey} />
               </div>
               <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                 Guardar
@@ -116,7 +120,7 @@ export default async function EditarRecompensasPage({
           </label>
           <div className="mt-2">
             <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-            <EmojiInput name="icon" defaultValue="🎁" suggestions={REWARD_ICONS} />
+            <RewardIconPicker defaultIcon="🎁" defaultKey={null} />
           </div>
           <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
             Añadir recompensa

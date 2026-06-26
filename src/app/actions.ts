@@ -19,6 +19,7 @@ import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
 import { ICON_BY_KEY } from '@/lib/icons'
+import { REWARD_BY_KEY } from '@/lib/reward-icons'
 import { avatarDataUri } from '@/lib/avatars'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
@@ -550,12 +551,14 @@ export async function addReward(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
   if (!name) throw new Error('Falta el nombre')
   const icon = String(formData.get('icon') ?? '').trim() || '🎁'
+  const ikRaw = String(formData.get('iconKey') ?? '').trim()
+  const iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${rewards.sortOrder}),0)::int` })
     .from(rewards)
     .where(and(eq(rewards.accountId, accountId), eq(rewards.kidId, kidId)))
-  await db.insert(rewards).values({ accountId, kidId, name, icon, costCents, sortOrder: (max ?? 0) + 1 })
+  await db.insert(rewards).values({ accountId, kidId, name, icon, iconKey, costCents, sortOrder: (max ?? 0) + 1 })
   redirect(`/recompensas/editar?kid=${kidId}`)
 }
 
@@ -566,10 +569,12 @@ export async function updateReward(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
   if (!name) throw new Error('Falta el nombre')
   const icon = String(formData.get('icon') ?? '').trim() || '🎁'
+  const ikRaw = String(formData.get('iconKey') ?? '').trim()
+  const iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
   const [row] = await db
     .update(rewards)
-    .set({ name, icon, costCents })
+    .set({ name, icon, iconKey, costCents })
     .where(and(eq(rewards.id, id), eq(rewards.accountId, accountId)))
     .returning({ kidId: rewards.kidId })
   redirect(`/recompensas/editar?kid=${row?.kidId ?? ''}`)

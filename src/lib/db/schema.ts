@@ -119,6 +119,8 @@ export const rewards = pgTable('rewards', {
     .references(() => kids.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   icon: text('icon').notNull().default('🎁'),
+  // Clave del icono de recompensa (reward-icons.ts) para mostrar el dibujo.
+  iconKey: text('icon_key'),
   costCents: integer('cost_cents').notNull().default(500),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),

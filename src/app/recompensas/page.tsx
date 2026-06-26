@@ -6,6 +6,7 @@ import { redeemReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
+import { RewardGlyph } from '@/components/RewardGlyph'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 
 export const dynamic = 'force-dynamic'
@@ -93,8 +94,8 @@ export default async function RecompensasPage({
           const enough = selKid.balanceCents >= r.costCents
           return (
             <div key={r.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-3xl shadow-inner">
-                {r.icon}
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50 shadow-inner">
+                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={38} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display font-bold text-[var(--ink)]">{r.name}</div>
