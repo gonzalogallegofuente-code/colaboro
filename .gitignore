@@ -16,3 +16,6 @@
 *.tsbuildinfo
 next-env.d.ts
 .claude/settings.local.json
+
+# Carpeta de fuentes de iconos/logos (no desplegar)
+links/

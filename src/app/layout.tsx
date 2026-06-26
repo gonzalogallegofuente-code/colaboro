@@ -12,7 +12,14 @@ export const metadata: Metadata = {
   description: 'Tareas de casa — ¡gana premios ayudando!',
   applicationName: 'Colaboro',
   appleWebApp: { capable: true, title: 'Colaboro', statusBarStyle: 'default' },
-  icons: { icon: '/icon-192.png', apple: '/apple-icon.png' },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-icon.png',
+  },
 }
 
 export const viewport: Viewport = {
