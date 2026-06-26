@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getActiveKids, getActiveTasks } from '@/lib/data'
+import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import {
@@ -20,7 +20,7 @@ import {
 import { AVATAR_STYLES, avatarDataUri } from '@/lib/avatars'
 import { Nav } from '@/components/Nav'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import { iconColor, type IconStyle } from '@/lib/icons'
+import { ICON_CATALOG, iconColor, type IconStyle } from '@/lib/icons'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
@@ -38,6 +38,7 @@ const KID_EMOJIS = [
 const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
 const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
+const ICON_PREVIEW_PASTELS = ['#f7d0e0', '#cfe0f5', '#dde7dd', '#f2ecc9', '#ddd6f0', '#f3d4e1', '#d2d8f0', '#d6e1d6', '#e3e3c5', '#c5cfe2']
 
 export default async function KidSettingsPage({
   params,
@@ -55,7 +56,7 @@ export default async function KidSettingsPage({
 
   const money = moneyOf(k)
   const theme = themeOf(k)
-  const styleTasks = await getActiveTasks(accountId, k.id)
+  const allIcons = ICON_CATALOG.flatMap((c) => c.icons)
 
   // Avatar: un emoji o un personaje generado. Se elige el tipo y se ven variantes.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
@@ -113,7 +114,7 @@ export default async function KidSettingsPage({
 
           {/* Tipos: Emoji + estilos de personaje (varias filas, sin scroll) */}
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {[{ key: 'emoji', label: 'Emoji' }, ...AVATAR_STYLES].map((s) => {
+            {[...AVATAR_STYLES.slice(0, 3), { key: 'emoji', label: 'Emoji' }, ...AVATAR_STYLES.slice(3)].map((s) => {
               const on = s.key === avsKey
               return (
                 <Link
@@ -132,7 +133,7 @@ export default async function KidSettingsPage({
           </div>
 
           {avsKey === 'emoji' ? (
-            <div className="mt-2 grid grid-cols-8 gap-1.5">
+            <div className="mt-2 grid grid-cols-5 gap-2">
               {KID_EMOJIS.map((em) => {
                 const on = !k.avatarUrl && k.emoji === em
                 return (
@@ -140,7 +141,7 @@ export default async function KidSettingsPage({
                     <input type="hidden" name="kidId" value={k.id} />
                     <input type="hidden" name="emoji" value={em} />
                     <button
-                      className={`tap-bounce flex aspect-square w-full items-center justify-center rounded-xl text-xl ${
+                      className={`tap-bounce flex aspect-square w-full items-center justify-center rounded-2xl text-4xl ${
                         on ? 'bg-indigo-100 ring-2 ring-indigo-500' : 'bg-[var(--card)] hover:bg-indigo-50'
                       }`}
                     >
@@ -273,23 +274,24 @@ export default async function KidSettingsPage({
             })}
           </div>
 
-          {styleTasks.length > 0 && (
-            <div className="mt-3 border-t-2 border-indigo-50 pt-2">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Así quedan las tareas de {k.name}:</span>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {styleTasks.map((t) => (
+          <div className="mt-3 border-t-2 border-indigo-50 pt-2">
+            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Todos los iconos en este estilo:</span>
+            <div className="mt-1.5 grid max-h-60 grid-cols-7 gap-1.5 overflow-y-auto">
+              {allIcons.map((ic, i) => {
+                const bg = ICON_PREVIEW_PASTELS[i % ICON_PREVIEW_PASTELS.length]
+                return (
                   <span
-                    key={t.id}
-                    title={t.name}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl shadow-inner"
-                    style={{ background: t.color }}
+                    key={ic.key}
+                    title={ic.label}
+                    className="flex aspect-square items-center justify-center rounded-xl shadow-inner"
+                    style={{ background: bg }}
                   >
-                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={k.iconStyle as IconStyle} size={26} color={iconColor(t.color)} />
+                    <TaskGlyph iconKey={ic.key} emoji={ic.emoji} style={k.iconStyle as IconStyle} size={24} color={iconColor(bg)} />
                   </span>
-                ))}
-              </div>
+                )
+              })}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Meta de ahorro */}
