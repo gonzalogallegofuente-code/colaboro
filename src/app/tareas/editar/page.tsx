@@ -8,6 +8,7 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { IconPicker } from '@/components/IconPicker'
+import { IconDefs, keysForStyle } from '@/components/IconDefs'
 import { TaskGlyph } from '@/components/TaskGlyph'
 import type { IconStyle } from '@/lib/icons'
 
@@ -49,6 +50,8 @@ export default async function EditarTareasPage({
   const selKid = kids.find((k) => k.id === kidParam) ?? kids[0]
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
+  const iconStyle = selKid.iconStyle as IconStyle
+  const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
 
   return (
@@ -82,6 +85,8 @@ export default async function EditarTareasPage({
           })}
         </div>
 
+        <IconDefs style={iconStyle} />
+
         <div className="mx-3 mt-3 space-y-2.5">
           {tasks.map((t) => (
             <div key={t.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}>
@@ -96,7 +101,7 @@ export default async function EditarTareasPage({
                 <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
                 <div className="mt-2">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} />
+                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} />
                 </div>
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
@@ -122,7 +127,7 @@ export default async function EditarTareasPage({
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
             <div className="mt-2">
               <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-              <IconPicker defaultIcon="⭐" defaultKey={null} />
+              <IconPicker defaultIcon="⭐" defaultKey={null} style={iconStyle} availableKeys={availableKeys} />
             </div>
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">

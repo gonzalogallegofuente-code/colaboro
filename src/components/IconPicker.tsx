@@ -1,20 +1,54 @@
 'use client'
 import { useState } from 'react'
-import { ICON_CATALOG } from '@/lib/icons'
+import { ICON_CATALOG, type IconStyle } from '@/lib/icons'
+
+// Pinta un icono del catálogo en el estilo del hijo reutilizando los <symbol>
+// definidos por <IconDefs> (vía <use>), o el emoji si no hay icono / estilo emoji.
+function Glyph({
+  iconKey,
+  emoji,
+  style,
+  available,
+  size = 24,
+}: {
+  iconKey: string
+  emoji: string
+  style: IconStyle
+  available: Set<string>
+  size?: number
+}) {
+  if (style !== 'emoji' && available.has(iconKey)) {
+    const mono = style === 'line' || style === 'fill' || style === 'game'
+    return (
+      <svg
+        width={size}
+        height={size}
+        fill={mono ? 'currentColor' : undefined}
+        style={mono ? { color: '#3f3f55' } : undefined}
+      >
+        <use href={`#ic-${iconKey}`} />
+      </svg>
+    )
+  }
+  return <span style={{ fontSize: size * 0.85, lineHeight: 1 }}>{emoji}</span>
+}
 
 // Selector de icono para una tarea: rejilla del catálogo (fija icon + iconKey)
-// con la opción de escribir un emoji libre. Muestra los emojis (el estilo real
-// —línea/relleno/pegatina— se ve en el tablero, renderizado en el servidor; así
-// no cargamos los mapas de SVG en el navegador).
+// en el estilo del hijo, con opción de escribir un emoji libre.
 export function IconPicker({
   defaultIcon = '⭐',
   defaultKey = null,
+  style = 'emoji',
+  availableKeys = [],
 }: {
   defaultIcon?: string
   defaultKey?: string | null
+  style?: IconStyle
+  availableKeys?: string[]
 }) {
   const [icon, setIcon] = useState(defaultIcon)
   const [key, setKey] = useState<string | null>(defaultKey)
+  const available = new Set(availableKeys)
 
   return (
     <div>
@@ -22,8 +56,8 @@ export function IconPicker({
       <input type="hidden" name="iconKey" value={key ?? ''} />
 
       <div className="flex items-center gap-2">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-2xl">
-          {icon}
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
+          {key ? <Glyph iconKey={key} emoji={icon} style={style} available={available} size={28} /> : <span className="text-2xl">{icon}</span>}
         </span>
         <input
           value={key ? '' : icon}
@@ -54,11 +88,11 @@ export function IconPicker({
                       setIcon(ic.emoji)
                       setKey(ic.key)
                     }}
-                    className={`tap-bounce flex aspect-square items-center justify-center rounded-lg text-xl ${
-                      on ? 'bg-indigo-600 ring-2 ring-indigo-300' : 'bg-[var(--card)] hover:bg-indigo-50'
+                    className={`tap-bounce flex aspect-square items-center justify-center rounded-lg ${
+                      on ? 'bg-indigo-100 ring-2 ring-indigo-500' : 'bg-[var(--card)] hover:bg-indigo-50'
                     }`}
                   >
-                    {ic.emoji}
+                    <Glyph iconKey={ic.key} emoji={ic.emoji} style={style} available={available} size={22} />
                   </button>
                 )
               })}
