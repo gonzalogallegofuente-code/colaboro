@@ -49,12 +49,12 @@ export default async function KidSettingsPage({
   const theme = themeOf(k)
 
   const unitPill = (on: boolean) =>
-    `tap-bounce rounded-xl px-4 py-1.5 font-display text-sm font-bold ${
-      on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
+    `tap-bounce rounded-xl border-2 px-4 py-1.5 font-display text-sm font-bold ${
+      on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
     }`
   const themePill = (on: boolean) =>
-    `tap-bounce w-full rounded-xl px-3 py-2 font-display text-sm font-bold leading-tight ${
-      on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
+    `tap-bounce w-full rounded-xl border-2 px-3 py-2 font-display text-sm font-bold leading-tight ${
+      on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
     }`
 
   return (
@@ -157,15 +157,17 @@ export default async function KidSettingsPage({
             ).map(([val, label]) => {
               const on = k.iconStyle === val
               return (
-                <form key={val} action={setIconStyle}>
+                <form key={val} action={setIconStyle} className="h-full">
                   <input type="hidden" name="kidId" value={k.id} />
                   <input type="hidden" name="iconStyle" value={val} />
                   <button
-                    className={`tap-bounce flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2 ${
-                      on ? 'bg-indigo-600 text-white shadow-sm' : 'border-2 border-indigo-200 text-[var(--head)]'
+                    className={`tap-bounce flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-2 ${
+                      on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
                     }`}
                   >
-                    <TaskGlyph iconKey="broom" emoji="🧹" style={val as IconStyle} size={26} color={on ? '#fff' : '#3f3f55'} />
+                    <span className="flex h-7 items-center justify-center">
+                      <TaskGlyph iconKey="broom" emoji="🧹" style={val as IconStyle} size={26} color={on ? '#fff' : '#3f3f55'} />
+                    </span>
                     <span className="font-display text-xs font-bold">{label}</span>
                   </button>
                 </form>
