@@ -1,6 +1,7 @@
 import { ICON_PATHS } from '@/lib/icon-paths'
 import { ICON_OPENMOJI } from '@/lib/icon-openmoji'
 import { ICON_GAME } from '@/lib/icon-game'
+import { ICON_SHUTTERSTOCK } from '@/lib/icon-shutterstock'
 import type { IconStyle } from '@/lib/icons'
 
 // Pinta el icono de una tarea según el estilo del hijo: emoji, línea, relleno o pegatina.
@@ -31,6 +32,22 @@ export function TaskGlyph({
           className={className}
           dangerouslySetInnerHTML={{ __html: om }}
         />
+      )
+    }
+    return (
+      <span className={className} style={{ fontSize: size * 0.8, lineHeight: 1 }}>
+        {emoji}
+      </span>
+    )
+  }
+
+  // Dibujos (set "Kids Chores Icons"): imagen PNG a todo color.
+  if (style === 'dibujos') {
+    const im = iconKey ? ICON_SHUTTERSTOCK[iconKey] : undefined
+    if (im) {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={im} alt="" width={size} height={size} className={className} style={{ objectFit: 'contain' }} />
       )
     }
     return (

@@ -224,6 +224,7 @@ export default async function KidSettingsPage({
                 ['fill', 'Relleno'],
                 ['openmoji', 'Pegatina'],
                 ['game', 'Gamer'],
+                ['dibujos', 'Dibujos'],
               ] as const
             ).map(([val, label]) => {
               const on = k.iconStyle === val

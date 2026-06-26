@@ -1,7 +1,7 @@
 // Catálogo de iconos elegibles para las tareas. Cada icono tiene una CLAVE
 // (nombre Phosphor, ver icon-paths.ts), un emoji equivalente (estilo "Emoji")
 // y una etiqueta en español. El estilo se elige por hijo (kids.icon_style).
-export type IconStyle = 'emoji' | 'line' | 'fill' | 'openmoji' | 'game'
+export type IconStyle = 'emoji' | 'line' | 'fill' | 'openmoji' | 'game' | 'dibujos'
 export type IconDef = { key: string; emoji: string; label: string }
 export type IconCategory = { label: string; icons: IconDef[] }
 
