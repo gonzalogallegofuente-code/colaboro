@@ -1,4 +1,4 @@
-// Utilidades de fecha. Las semanas van de SÁBADO a VIERNES.
+// Utilidades de fecha. Semana NATURAL: de LUNES a DOMINGO.
 // Trabajamos con cadenas 'YYYY-MM-DD' para casar con la columna `date` de Postgres.
 
 export function ymd(d: Date): string {
@@ -21,14 +21,14 @@ export function todayYmd(): string {
   return ymd(new Date())
 }
 
-// Sábado (inicio) de la semana que contiene a `d`.
+// Lunes (inicio) de la semana NATURAL (lun→dom) que contiene a `d`.
 export function weekStartOf(d: Date): Date {
-  const day = d.getDay() // 0 dom … 6 sáb
-  const diff = (day - 6 + 7) % 7 // días transcurridos desde el sábado
+  const day = d.getDay() // 0 dom · 1 lun · … · 6 sáb
+  const diff = (day - 1 + 7) % 7 // días transcurridos desde el lunes
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff)
 }
 
-// Rango sáb–vie (cadenas) de la semana que contiene a la fecha `s` (YYYY-MM-DD).
+// Rango lun–dom (cadenas) de la semana que contiene a la fecha `s` (YYYY-MM-DD).
 export function weekRange(s: string): { start: string; end: string } {
   const start = weekStartOf(parseYmd(s))
   const end = addDays(start, 6)
@@ -69,7 +69,7 @@ export function friendlyDay(s: string): string {
 
 const DOW2 = ['do', 'lu', 'ma', 'mi', 'ju', 'vi', 'sá']
 
-// Los 7 días de la semana (sáb→vie) que empieza en `startYmd`.
+// Los 7 días de la semana (lun→dom) que empieza en `startYmd`.
 export function weekDays(startYmd: string): { ymd: string; dow: string; dom: number }[] {
   const start = parseYmd(startYmd)
   return Array.from({ length: 7 }, (_, i) => {
@@ -78,7 +78,7 @@ export function weekDays(startYmd: string): { ymd: string; dow: string; dom: num
   })
 }
 
-// Sábado de la semana anterior / siguiente a la que contiene `anyDate`.
+// Lunes de la semana anterior / siguiente a la que contiene `anyDate`.
 export function shiftWeek(anyDate: string, weeks: number): string {
   const start = weekStartOf(parseYmd(anyDate))
   return ymd(addDays(start, weeks * 7))
