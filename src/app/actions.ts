@@ -290,11 +290,18 @@ export async function removeCompletion(formData: FormData) {
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
   const [row] = await db
-    .select({ id: completions.id })
+    .select({ id: completions.id, kidId: completions.kidId })
     .from(completions)
     .innerJoin(kids, eq(kids.id, completions.kidId))
     .where(and(eq(completions.id, id), eq(kids.accountId, accountId)))
-  if (row) await db.delete(completions).where(eq(completions.id, row.id))
+  if (row) {
+    await db.delete(completions).where(eq(completions.id, row.id))
+    // Si la marca ya estaba pagada, el saldo quedaría negativo: lo dejamos en 0.
+    const bal = (await kidBalances(accountId)).get(row.kidId) ?? 0
+    if (bal < 0) {
+      await db.insert(payouts).values({ kidId: row.kidId, amountCents: bal, note: 'Ajuste (marca quitada ya pagada)' })
+    }
+  }
   refresh()
 }
 
