@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { logout, exitKidMode } from '@/app/actions'
+import { ConfirmButton } from '@/components/ConfirmButton'
 
 export function Nav({
   active,
@@ -47,9 +48,13 @@ export function Nav({
           </form>
         ) : (
           <form action={logout}>
-            <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir">
+            <ConfirmButton
+              message="¿Seguro que quieres cerrar sesión?"
+              className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]"
+              ariaLabel="Salir"
+            >
               🚪
-            </button>
+            </ConfirmButton>
           </form>
         )}
       </nav>

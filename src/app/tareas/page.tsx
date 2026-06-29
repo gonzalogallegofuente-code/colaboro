@@ -10,6 +10,7 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { ConfirmButton } from '@/components/ConfirmButton'
 import { EmojiInput } from '@/components/EmojiInput'
 import { ColorPicker } from '@/components/ColorPicker'
 import { PushToggle } from '@/components/PushToggle'
@@ -126,9 +127,12 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
             </SubmitButton>
           </form>
           <form action={logout} className="mt-3">
-            <SubmitButton className="rounded-xl border-2 border-gray-200 px-3 py-1.5 text-sm font-semibold text-[var(--ink-2)]">
+            <ConfirmButton
+              message="¿Seguro que quieres cerrar sesión?"
+              className="rounded-xl border-2 border-gray-200 px-3 py-1.5 text-sm font-semibold text-[var(--ink-2)]"
+            >
               Cerrar sesión
-            </SubmitButton>
+            </ConfirmButton>
           </form>
         </div>
       </div>
