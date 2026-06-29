@@ -283,6 +283,21 @@ export async function undoTask(formData: FormData) {
   refresh()
 }
 
+// Quita un apunte concreto marcado por error (solo el padre).
+// El saldo es calculado (Σ completions − Σ payouts), así que basta con borrar.
+export async function removeCompletion(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const [row] = await db
+    .select({ id: completions.id })
+    .from(completions)
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(and(eq(completions.id, id), eq(kids.accountId, accountId)))
+  if (row) await db.delete(completions).where(eq(completions.id, row.id))
+  refresh()
+}
+
 export async function payKid(formData: FormData) {
   const accountId = await requireAccount()
   const kidId = Number(formData.get('kidId'))

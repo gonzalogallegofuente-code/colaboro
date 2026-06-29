@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { getBoardData, getKidStats } from '@/lib/data'
+import { getBoardData, getKidStats, getRecentCompletions } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask, payKid, exitKidMode } from './actions'
+import { markTask, undoTask, payKid, exitKidMode, removeCompletion } from './actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -78,6 +78,7 @@ export default async function Page({
   const inThisWeek = selectedDate >= data.range.start && selectedDate <= data.range.end
 
   const stats = await getKidStats(selKid.id)
+  const recientes = isKid ? [] : await getRecentCompletions(accountId, selKid.id, 20)
   const badges = computeBadges({ bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
 
@@ -284,6 +285,43 @@ export default async function Page({
           )
         })}
       </div>
+
+      {/* Últimos apuntes — para corregir errores (solo el padre) */}
+      {!isKid && recientes.length > 0 && (
+        <div className="mx-3 mt-5">
+          <h2 className="px-1 font-display text-sm font-bold text-[var(--ink-2)]">📝 Últimos apuntes</h2>
+          <p className="px-1 text-[11px] font-semibold text-[var(--ink-3)]">
+            ¿Te has equivocado? Quítalo con la ✕ (devuelve el dinero). Para cambiarlo, quítalo y vuelve a marcarlo bien.
+          </p>
+          <div className="mt-2 space-y-1.5">
+            {recientes.map((c) => (
+              <div key={c.id} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-inner"
+                  style={{ background: c.color }}
+                >
+                  <TaskGlyph iconKey={c.iconKey} emoji={c.icon} style={selKid.iconStyle as IconStyle} size={22} color={iconColor(c.color)} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-display text-sm font-bold text-[var(--ink)]">{c.taskName}</div>
+                  <div className="text-[11px] font-semibold text-[var(--ink-3)]">
+                    {friendlyDay(c.doneOn)} · {formatAmount(c.valueCents, money)}
+                  </div>
+                </div>
+                <form action={removeCompletion}>
+                  <input type="hidden" name="id" value={c.id} />
+                  <SubmitButton
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
+                    aria-label={`Quitar ${c.taskName} de ${friendlyDay(c.doneOn)}`}
+                  >
+                    ✕
+                  </SubmitButton>
+                </form>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
     </ThemeShell>
   )
