@@ -141,10 +141,12 @@ export default async function Page({
 
       {/* Meta de ahorro */}
       {hasGoal && (
-        <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+        <>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🎯 Meta de ahorro</h2>
+        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <div className="flex items-center justify-between text-sm font-bold text-[var(--ink)]">
             <span className="truncate">
-              🎯 {selKid.goalIcon} {selKid.goalName}
+              {selKid.goalIcon} {selKid.goalName}
             </span>
             <span className="shrink-0">
               {formatAmount(goalBal, money)} / {formatAmount(goalCost, money)}
@@ -157,12 +159,14 @@ export default async function Page({
             {goalDone ? '¡Meta conseguida! 🎉' : `Te faltan ${formatAmount(goalCost - goalBal, money)}`}
           </div>
         </div>
+        </>
       )}
 
       {/* Logros */}
+      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🏅 Logros</h2>
       <Link
         href={`/logros?kid=${selKid.id}`}
-        className="tap-bounce mx-3 mt-3 flex items-center gap-2 rounded-3xl bg-[var(--card)] p-3 shadow-md"
+        className="tap-bounce mx-3 flex items-center gap-2 rounded-3xl bg-[var(--card)] p-3 shadow-md"
       >
         {stats.currentStreak > 0 && (
           <span className="shrink-0 rounded-full bg-orange-100 px-2 py-1 text-sm font-bold text-orange-600">
@@ -186,7 +190,8 @@ export default async function Page({
       </Link>
 
       {/* Tareas */}
-      <div className="mx-3 mt-2 space-y-2.5">
+      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">✅ Tareas</h2>
+      <div className="mx-3 space-y-2.5">
         {data.tasks.length === 0 && (
           <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             No hay tareas todavía.{' '}
