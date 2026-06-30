@@ -23,7 +23,7 @@ import { REWARD_BY_KEY } from '@/lib/reward-icons'
 import { avatarDataUri } from '@/lib/avatars'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
-import { getViewer, requireAccount } from '@/lib/session'
+import { getViewer, getKidMode, requireAccount } from '@/lib/session'
 
 const isYmd = (s: unknown): s is string => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)
 
@@ -145,8 +145,15 @@ export async function enterKid(formData: FormData) {
 }
 
 export async function exitKidMode() {
+  const kid = await getKidMode() // sabemos la cuenta del padre por el token de niño
   const c = await cookies()
   c.delete(KID_COOKIE)
+  if (kid) {
+    // Reabrimos la sesión del padre (en pausa durante el modo niño): se vuelve
+    // a tu cuenta sin tener que iniciar sesión otra vez.
+    await setSessionCookie(kid.accountId)
+    redirect('/')
+  }
   redirect('/login')
 }
 
