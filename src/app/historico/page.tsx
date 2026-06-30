@@ -38,6 +38,7 @@ export default async function HistoricoPage({
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📅 Histórico semanal</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
         Pulsa una semana para ver el parte (qué día se hizo cada cosa). Lun → dom.
+        {!viewer.isKid && ' Toca una casilla para corregir un día.'}
       </p>
 
       <div className="mx-3 mt-3 space-y-2.5">
@@ -95,7 +96,7 @@ export default async function HistoricoPage({
               {isOpen && (
                 <div className="mt-3 space-y-4 border-t border-gray-100 pt-3">
                   {openGrids.map(({ kid, data }) =>
-                    data ? <KidWeekGrid key={kid.id} kid={kid} data={data} today={today} /> : null,
+                    data ? <KidWeekGrid key={kid.id} kid={kid} data={data} today={today} editable={!viewer.isKid} /> : null,
                   )}
                 </div>
               )}

@@ -5,6 +5,7 @@ import { iconColor, type IconStyle } from '@/lib/icons'
 import { moneyOf } from '@/lib/money'
 import type { WeekGrid } from '@/lib/data'
 import type { Kid } from '@/lib/db/schema'
+import { markTask, undoTask } from '@/app/actions'
 
 const cols = { gridTemplateColumns: '1.35fr repeat(7, 1fr)' }
 
@@ -22,8 +23,56 @@ function Cell({ count, today }: { count: number; today: boolean }) {
   )
 }
 
+// Casilla editable (solo el padre, desde el histórico): tocar marca/quita esa
+// tarea ese día. Vacía → marca (+1); con marca → quita una (−1).
+function EditCell({
+  kidId,
+  taskId,
+  doneOn,
+  count,
+  today,
+}: {
+  kidId: number
+  taskId: number
+  doneOn: string
+  count: number
+  today: boolean
+}) {
+  const has = count > 0
+  return (
+    <form action={has ? undoTask : markTask}>
+      <input type="hidden" name="kidId" value={kidId} />
+      <input type="hidden" name="taskId" value={taskId} />
+      <input type="hidden" name="doneOn" value={doneOn} />
+      <button
+        type="submit"
+        aria-label={has ? 'Quitar de este día' : 'Marcar este día'}
+        className={`tap-bounce flex h-9 w-full items-center justify-center rounded-lg ${today ? 'bg-indigo-50' : 'bg-black/[0.03]'}`}
+      >
+        {has ? (
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-[10px] font-bold text-amber-900 shadow-sm">
+            {count > 1 ? count : '✓'}
+          </span>
+        ) : (
+          <span className="text-sm font-bold leading-none text-gray-300">＋</span>
+        )}
+      </button>
+    </form>
+  )
+}
+
 // Parte de un hijo en una semana: cuadrícula tareas × días (lun→dom).
-export function KidWeekGrid({ kid, data, today }: { kid: Kid; data: WeekGrid; today: string }) {
+export function KidWeekGrid({
+  kid,
+  data,
+  today,
+  editable,
+}: {
+  kid: Kid
+  data: WeekGrid
+  today: string
+  editable?: boolean
+}) {
   const { tasks, days, grid, dayCents } = data
   const money = moneyOf(kid)
   return (
@@ -54,9 +103,14 @@ export function KidWeekGrid({ kid, data, today }: { kid: Kid; data: WeekGrid; to
                 </span>
                 <span className="truncate text-[11px] font-semibold leading-tight text-[var(--ink)]">{t.name}</span>
               </div>
-              {days.map((d, i) => (
-                <Cell key={d.ymd} count={grid[t.id]?.[i] ?? 0} today={d.ymd === today} />
-              ))}
+              {days.map((d, i) => {
+                const c = grid[t.id]?.[i] ?? 0
+                return editable ? (
+                  <EditCell key={d.ymd} kidId={kid.id} taskId={t.id} doneOn={d.ymd} count={c} today={d.ymd === today} />
+                ) : (
+                  <Cell key={d.ymd} count={c} today={d.ymd === today} />
+                )
+              })}
             </Fragment>
           ))}
 

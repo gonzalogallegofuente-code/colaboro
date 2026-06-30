@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getBoardData, getKidStats } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
-import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
+import { todayYmd } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { markTask, undoTask } from './actions'
 import { Nav } from '@/components/Nav'
@@ -13,7 +13,6 @@ import { TaskGlyph } from '@/components/TaskGlyph'
 import { iconColor, type IconStyle } from '@/lib/icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
-import { DateNav } from '@/components/DateNav'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,18 +41,16 @@ function ProgressCoins({ count, target }: { count: number; target: number }) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ kid?: string; d?: string }>
+  searchParams: Promise<{ kid?: string }>
 }) {
   const sp = await searchParams
   const today = todayYmd()
-  const yesterday = ymd(addDays(parseYmd(today), -1))
-  const selectedDate = sp.d && /^\d{4}-\d{2}-\d{2}$/.test(sp.d) ? sp.d : today
   const kidParam = sp.kid ? Number(sp.kid) : undefined
 
   const viewer = await requireViewerPage()
   const accountId = viewer.accountId
   const isKid = viewer.isKid
-  const data = await getBoardData(accountId, selectedDate, isKid ? viewer.kidId! : kidParam)
+  const data = await getBoardData(accountId, today, isKid ? viewer.kidId! : kidParam)
 
   if (!data) {
     return (
@@ -74,7 +71,6 @@ export default async function Page({
   const selKid = data.kids.find((k) => k.id === data.selectedKidId)!
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
-  const inThisWeek = selectedDate >= data.range.start && selectedDate <= data.range.end
 
   const stats = await getKidStats(selKid.id)
   const badges = computeBadges({ bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
@@ -107,7 +103,7 @@ export default async function Page({
           return (
             <Link
               key={k.id}
-              href={`/?kid=${k.id}&d=${selectedDate}`}
+              href={`/?kid=${k.id}`}
               replace
               className={`tap-bounce relative overflow-hidden rounded-3xl p-3 text-center shadow-md transition ${
                 on ? 'scale-[1.03] shadow-xl ring-4 ring-white' : 'opacity-90'
@@ -128,16 +124,6 @@ export default async function Page({
         })}
       </div>
       )}
-
-      {/* Día */}
-      <div className="mx-3 mt-4">
-        <DateNav kidId={selKid.id} selectedDate={selectedDate} today={today} yesterday={yesterday} />
-        <p className="mt-1.5 px-1 text-[11px] font-semibold text-[var(--ink-3)]">
-          Apuntando para <span className="text-[var(--ink-2)]">{friendlyDay(selectedDate)}</span>
-          {' · '}semana {formatRange(data.range.start, data.range.end)}
-          {!inThisWeek ? ' (anterior)' : ''}
-        </p>
-      </div>
 
       {/* Meta de ahorro */}
       {hasGoal && (
@@ -224,14 +210,14 @@ export default async function Page({
                 <form action={markTask}>
                   <input type="hidden" name="kidId" value={selKid.id} />
                   <input type="hidden" name="taskId" value={t.id} />
-                  <input type="hidden" name="doneOn" value={selectedDate} />
+                  <input type="hidden" name="doneOn" value={today} />
                   <CoinButton color={selKid.color} label={`Marcar ${t.name} para ${selKid.name}`} />
                 </form>
                 {day > 0 && (
                   <form action={undoTask} className="flex items-center gap-1">
                     <input type="hidden" name="kidId" value={selKid.id} />
                     <input type="hidden" name="taskId" value={t.id} />
-                    <input type="hidden" name="doneOn" value={selectedDate} />
+                    <input type="hidden" name="doneOn" value={today} />
                     <SubmitButton
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-lg leading-none text-[var(--ink-2)]"
                       aria-label="Quitar una"
