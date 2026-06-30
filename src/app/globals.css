@@ -63,6 +63,15 @@ button {
   font-family: var(--font-display);
 }
 
+/* La tipografía pesaba demasiado. Aligeramos el grosor en toda la app:
+   estas reglas van sin @layer, así que ganan a las utilidades de Tailwind. */
+.font-bold {
+  font-weight: 600;
+}
+.font-semibold {
+  font-weight: 500;
+}
+
 /* En modo juvenil, los campos heredan el esquema oscuro. */
 .theme-juvenil input,
 .theme-juvenil textarea {
