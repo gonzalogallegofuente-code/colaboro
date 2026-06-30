@@ -122,22 +122,19 @@ export async function changePassword(formData: FormData) {
 }
 
 // ── Modo niño ────────────────────────────────────────────────────────
-// Entra en modo niño (kiosco) como un hijo. Desde la cuenta del padre no
-// pide PIN; al cambiar entre hermanos sí se exige el PIN del destino.
+// Entra en modo niño (kiosco) como un hijo. Solo desde la cuenta del padre:
+// en modo niño NO se puede cambiar de hijo (cada uno solo toca lo suyo).
 export async function enterKid(formData: FormData) {
   const v = await getViewer()
   if (!v) throw new Error('No autorizado')
+  if (v.isKid) redirect('/') // en modo niño no se cambia de hijo
   const kidId = Number(formData.get('kidId'))
   if (!kidId) throw new Error('Datos inválidos')
   const [k] = await db
-    .select({ id: kids.id, pin: kids.pin })
+    .select({ id: kids.id })
     .from(kids)
     .where(and(eq(kids.id, kidId), eq(kids.accountId, v.accountId), eq(kids.active, true)))
   if (!k) throw new Error('No autorizado')
-  if (v.isKid && k.pin) {
-    const pin = String(formData.get('pin') ?? '')
-    if (pin !== k.pin) redirect('/modo?e=pin')
-  }
   await setKidCookie(v.accountId, kidId)
   const c = await cookies()
   c.delete(SESSION_COOKIE) // excluyente: se sale de la cuenta del padre

@@ -7,7 +7,6 @@ const PUBLIC = ['/login', '/registro']
 function isParentOnly(pathname: string): boolean {
   return (
     pathname.startsWith('/tareas') ||
-    pathname.startsWith('/historico') ||
     pathname === '/recompensas/editar'
   )
 }

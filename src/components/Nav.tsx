@@ -27,11 +27,9 @@ export function Nav({
             🏅
           </Link>
         )}
-        {!kidMode && (
-          <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
-            🏆
-          </Link>
-        )}
+        <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
+          🏆
+        </Link>
         {!kidMode && (
           <Link href="/tareas" className={tab(active === 'tareas')} aria-label="Tareas">
             ⚙️

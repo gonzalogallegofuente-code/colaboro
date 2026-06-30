@@ -97,12 +97,7 @@ export default async function Page({
       {isKid && (
         <div className="mx-3 mb-1 flex items-center justify-between rounded-2xl bg-[var(--card)] px-3 py-1.5 text-xs shadow-sm">
           <span className="font-bold text-[var(--ink-3)]">👦 Modo niño</span>
-          <div className="flex items-center gap-3">
-            <Link href="/modo" className="font-bold text-[var(--ink-2)]">
-              🔄 Cambiar
-            </Link>
-            <Link href="/salir" className="font-bold text-red-500">🚪 Salir</Link>
-          </div>
+          <Link href="/salir" className="font-bold text-red-500">🚪 Salir</Link>
         </div>
       )}
 

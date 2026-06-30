@@ -4,20 +4,16 @@ import { db } from '@/lib/db'
 import { accounts } from '@/lib/db/schema'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { themeOf } from '@/lib/money'
 import { addKid, changePassword, logout } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmButton } from '@/components/ConfirmButton'
-import { EmojiInput } from '@/components/EmojiInput'
-import { ColorPicker } from '@/components/ColorPicker'
 import { PushToggle } from '@/components/PushToggle'
 
 export const dynamic = 'force-dynamic'
 
-const KID_EMOJIS = ['🦁', '🦊', '🐯', '🐻', '🐼', '🦄', '🚀', '⚽', '🎮', '🦖', '🐶', '🐱']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
 export default async function AjustesPage({ searchParams }: { searchParams: Promise<{ pw?: string }> }) {
@@ -28,7 +24,7 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
     db.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, accountId)),
   ])
   const accEmail = accRows[0]?.email ?? ''
-  const theme = kids.length ? themeOf(kids[0]) : 'infantil'
+  const theme = 'infantil' // Ajustes siempre en tono claro (no hereda del hijo)
 
   return (
     <ThemeShell theme={theme}>
@@ -87,14 +83,9 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           {/* Añadir hijo */}
           <form action={addKid} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             <input name="name" placeholder="Nombre del hijo" className={`${inputCls} font-display font-bold`} required />
-            <div className="mt-2">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Emoji</span>
-              <EmojiInput name="emoji" defaultValue="🙂" suggestions={KID_EMOJIS} />
-            </div>
-            <div className="mt-2">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Color</span>
-              <ColorPicker name="color" defaultValue="#16a34a" />
-            </div>
+            <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
+              Su emoji, color y avatar se eligen después, en los ajustes del hijo.
+            </p>
             <SubmitButton className="tap-bounce mt-2 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
               Añadir hijo (con tareas de ejemplo)
             </SubmitButton>

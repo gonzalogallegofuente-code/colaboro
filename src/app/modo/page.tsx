@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { getActiveKids } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
 import { enterKid } from '@/app/actions'
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic'
 export default async function ModoPage({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
   const sp = await searchParams
   const viewer = await requireViewerPage()
+  if (viewer.isKid) redirect('/') // en modo niño no se cambia de hijo
   const isKid = viewer.isKid
   const kids = await getActiveKids(viewer.accountId)
 

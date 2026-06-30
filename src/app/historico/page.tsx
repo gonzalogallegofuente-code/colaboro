@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getHistory, getWeekGrid } from '@/lib/data'
-import { requireAccountPage } from '@/lib/session'
+import { requireViewerPage } from '@/lib/session'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
@@ -16,7 +16,8 @@ export default async function HistoricoPage({
   searchParams: Promise<{ open?: string }>
 }) {
   const sp = await searchParams
-  const accountId = await requireAccountPage()
+  const viewer = await requireViewerPage()
+  const accountId = viewer.accountId
   const { kids, weeks, payouts } = await getHistory(accountId)
   const theme = kids.length ? themeOf(kids[0]) : 'infantil'
   const today = todayYmd()
@@ -32,7 +33,7 @@ export default async function HistoricoPage({
   return (
     <ThemeShell theme={theme}>
     <div className="mx-auto max-w-md pb-12">
-      <Nav active="historico" />
+      <Nav active="historico" kidMode={viewer.isKid} />
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🏆 Histórico semanal</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
