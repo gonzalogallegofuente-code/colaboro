@@ -43,9 +43,7 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
         <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🏅 Logros</h1>
         <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
           🔥 <span className="text-[var(--ink-2)]">Racha</span>: días seguidos haciendo alguna tarea (no se
-          rompe si hoy aún no ha apuntado nada).{' '}
-          🏅 <span className="text-[var(--ink-2)]">Medallas</span>: se ganan por hitos (tareas, racha o
-          dinero) y no se pierden. Las grises aún no están conseguidas.
+          rompe si hoy aún no ha apuntado nada).
         </p>
 
         {/* Hijo (oculto en modo niño) */}
@@ -90,6 +88,9 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
 
         {/* Medallas */}
         <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">Medallas</h2>
+        <p className="px-4 pt-0.5 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+          Se ganan por hitos (tareas hechas, mejor racha o dinero ganado) y no se pierden. Las grises aún no están conseguidas.
+        </p>
         <div className="mx-3 mt-2 grid grid-cols-3 gap-2.5">
           {badges.map((b) => (
             <div
