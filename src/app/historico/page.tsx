@@ -1,19 +1,33 @@
 import Link from 'next/link'
-import { getHistory } from '@/lib/data'
+import { getHistory, getWeekGrid } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { formatRange, todayYmd, weekRange } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
+import { KidWeekGrid } from '@/components/KidWeekGrid'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HistoricoPage() {
+export default async function HistoricoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ open?: string }>
+}) {
+  const sp = await searchParams
   const accountId = await requireAccountPage()
   const { kids, weeks, payouts } = await getHistory(accountId)
   const theme = kids.length ? themeOf(kids[0]) : 'infantil'
-  const currentStart = weekRange(todayYmd()).start
+  const today = todayYmd()
+  const currentStart = weekRange(today).start
+
+  // Semana desplegada (su parte por hijo se carga solo al abrirla).
+  const openStart =
+    sp.open && /^\d{4}-\d{2}-\d{2}$/.test(sp.open) && weeks.some((w) => w.start === sp.open) ? sp.open : null
+  const openGrids = openStart
+    ? await Promise.all(kids.map(async (k) => ({ kid: k, data: await getWeekGrid(accountId, openStart, k.id) })))
+    : []
 
   return (
     <ThemeShell theme={theme}>
@@ -21,7 +35,9 @@ export default async function HistoricoPage() {
       <Nav active="historico" />
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🏆 Histórico semanal</h1>
-      <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">Las semanas van de lunes a domingo.</p>
+      <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
+        Pulsa una semana para ver el parte (qué día se hizo cada cosa). Lun → dom.
+      </p>
 
       <div className="mx-3 mt-3 space-y-2.5">
         {weeks.length === 0 && (
@@ -31,9 +47,15 @@ export default async function HistoricoPage() {
         )}
         {weeks.map((w) => {
           const isCurrent = w.start === currentStart
+          const isOpen = w.start === openStart
           return (
             <div key={w.start} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <div className="mb-2 flex items-center justify-between">
+              <Link
+                href={isOpen ? '/historico' : `/historico?open=${w.start}`}
+                replace
+                scroll={false}
+                className="mb-2 flex items-center justify-between"
+              >
                 <span className="font-display text-sm font-bold text-[var(--ink)]">
                   {formatRange(w.start, w.end)}
                 </span>
@@ -43,23 +65,17 @@ export default async function HistoricoPage() {
                       en curso
                     </span>
                   )}
-                  <Link
-                    href={`/semana?w=${w.start}`}
-                    className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600"
-                  >
-                    📅 ver días
-                  </Link>
+                  <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600">
+                    📅 {isOpen ? 'ocultar ▲' : 'ver días ▼'}
+                  </span>
                 </div>
-              </div>
+              </Link>
+
               <div className="grid grid-cols-2 gap-2">
                 {kids.map((k) => {
                   const cell = w.perKid[k.id]
                   return (
-                    <div
-                      key={k.id}
-                      className="rounded-2xl p-2.5"
-                      style={{ background: `${k.color}14` }}
-                    >
+                    <div key={k.id} className="rounded-2xl p-2.5" style={{ background: `${k.color}14` }}>
                       <div className="flex items-center gap-1 font-display text-sm font-bold" style={{ color: k.color }}>
                         <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={18} />
                         {k.name}
@@ -74,6 +90,14 @@ export default async function HistoricoPage() {
                   )
                 })}
               </div>
+
+              {isOpen && (
+                <div className="mt-3 space-y-4 border-t border-gray-100 pt-3">
+                  {openGrids.map(({ kid, data }) =>
+                    data ? <KidWeekGrid key={kid.id} kid={kid} data={data} today={today} /> : null,
+                  )}
+                </div>
+              )}
             </div>
           )
         })}

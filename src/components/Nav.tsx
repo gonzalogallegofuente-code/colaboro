@@ -16,12 +16,9 @@ export function Nav({
   return (
     <header className="sticky top-0 z-30 mb-2 flex items-center justify-between bg-[var(--nav)] px-3 py-3 backdrop-blur-md">
       <Link href="/" className="font-display text-2xl font-bold tracking-tight text-[var(--head)]">
-        ✨ Colaboro
+        Colaboro
       </Link>
       <nav className="flex items-center gap-1.5">
-        <Link href="/semana" className={tab(active === 'semana')} aria-label="Parte semanal">
-          📅
-        </Link>
         <Link href="/recompensas" className={tab(active === 'recompensas')} aria-label="Recompensas">
           🎁
         </Link>
