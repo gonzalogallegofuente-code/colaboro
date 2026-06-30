@@ -54,7 +54,7 @@ export function PayButton({
           setParty(true)
           window.setTimeout(() => setParty(false), 2500)
         }}
-        className={`tap-bounce rounded-2xl bg-white/95 px-4 py-2.5 font-display text-base font-bold text-emerald-600 shadow-md ring-2 ring-white disabled:opacity-50${pending ? ' opacity-60' : ''}`}
+        className={`tap-bounce rounded-2xl bg-emerald-600 px-4 py-2.5 font-display text-base font-bold text-white shadow-md disabled:opacity-50${pending ? ' opacity-60' : ''}`}
       >
         💸 Pagar
       </button>

@@ -4,7 +4,7 @@ import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask, payKid } from './actions'
+import { markTask, undoTask } from './actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -13,7 +13,6 @@ import { TaskGlyph } from '@/components/TaskGlyph'
 import { iconColor, type IconStyle } from '@/lib/icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
-import { PayButton } from '@/components/PayButton'
 import { DateNav } from '@/components/DateNav'
 
 export const dynamic = 'force-dynamic'
@@ -129,41 +128,6 @@ export default async function Page({
         })}
       </div>
       )}
-
-      {/* Dinero del hijo seleccionado */}
-      <div
-        className="mx-3 mt-3 flex items-center justify-between overflow-hidden rounded-3xl p-4 text-white shadow-lg"
-        style={{ background: `linear-gradient(135deg, ${selKid.color}, ${selKid.color}cc)` }}
-      >
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5 font-display text-sm font-semibold text-white/85">
-            <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={22} className="ring-1 ring-white/60" />
-            {selKid.name} lleva ganado
-          </div>
-          <div className="font-display text-[2.6rem] font-bold leading-tight drop-shadow-sm">
-            {formatAmount(selKid.balanceCents, money)}
-          </div>
-          <div className="text-xs font-semibold text-white/85">
-            Esta semana {formatAmount(selKid.weekCents, money)}
-          </div>
-        </div>
-        {money.unit === 'eur' && !isKid ? (
-          <form action={payKid}>
-            <input type="hidden" name="kidId" value={selKid.id} />
-            <PayButton
-              message={`¿Pagar ${formatAmount(selKid.balanceCents, money)} a ${selKid.name} y poner su contador a 0?`}
-              disabled={selKid.balanceCents <= 0}
-            />
-          </form>
-        ) : (
-          <Link
-            href={`/recompensas?kid=${selKid.id}`}
-            className="tap-bounce shrink-0 rounded-2xl bg-white/95 px-4 py-2.5 font-display text-base font-bold text-indigo-600 shadow-md ring-2 ring-white"
-          >
-            🎁 Canjear
-          </Link>
-        )}
-      </div>
 
       {/* Día */}
       <div className="mx-3 mt-4">

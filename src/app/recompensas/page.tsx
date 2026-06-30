@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { getRewardsData } from '@/lib/data'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { requireViewerPage } from '@/lib/session'
-import { redeemReward } from '@/app/actions'
+import { redeemReward, payKid } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { RewardGlyph } from '@/components/RewardGlyph'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
+import { PayButton } from '@/components/PayButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,10 +79,22 @@ export default async function RecompensasPage({
       </div>
       )}
 
-      <p className="mx-4 mt-3 text-center font-display text-sm font-semibold text-[var(--ink-2)]">
-        {selKid.name} tiene{' '}
-        <span className="font-bold text-[var(--head)]">{formatAmount(selKid.balanceCents, money)}</span> para gastar
-      </p>
+      {/* Saldo del hijo + botón de pagar (movido desde el tablero) */}
+      <div className="mx-3 mt-3 flex items-center justify-between gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+        <p className="font-display text-sm font-semibold text-[var(--ink-2)]">
+          {selKid.name} tiene{' '}
+          <span className="font-bold text-[var(--head)]">{formatAmount(selKid.balanceCents, money)}</span> para gastar
+        </p>
+        {money.unit === 'eur' && !isKid && (
+          <form action={payKid} className="shrink-0">
+            <input type="hidden" name="kidId" value={selKid.id} />
+            <PayButton
+              message={`¿Pagar ${formatAmount(selKid.balanceCents, money)} a ${selKid.name} y poner su contador a 0?`}
+              disabled={selKid.balanceCents <= 0}
+            />
+          </form>
+        )}
+      </div>
 
       {/* Lista canjeable */}
       <div className="mx-3 mt-2 space-y-2.5">
