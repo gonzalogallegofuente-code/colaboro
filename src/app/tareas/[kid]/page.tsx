@@ -70,10 +70,6 @@ export default async function KidSettingsPage({
           return { seed, uri: avatarDataUri(avsKey, seed)! }
         })
 
-  const unitPill = (on: boolean) =>
-    `tap-bounce rounded-xl border-2 px-4 py-1.5 font-display text-sm font-bold ${
-      on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
-    }`
   const themePill = (on: boolean) =>
     `tap-bounce w-full rounded-xl border-2 px-3 py-2 font-display text-sm font-bold leading-tight ${
       on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
@@ -211,18 +207,20 @@ export default async function KidSettingsPage({
         </div>
 
         {/* Forma de contar */}
-        <div className="mx-3 mt-2 flex items-center gap-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <span className="font-display text-sm font-bold text-[var(--ink)]">Contar en:</span>
-          <form action={setUnit}>
-            <input type="hidden" name="kidId" value={k.id} />
-            <input type="hidden" name="unit" value="eur" />
-            <button className={unitPill(money.unit === 'eur')}>🪙 Euros</button>
-          </form>
-          <form action={setUnit}>
-            <input type="hidden" name="kidId" value={k.id} />
-            <input type="hidden" name="unit" value="pts" />
-            <button className={unitPill(money.unit === 'pts')}>{money.pointsIcon} Puntos</button>
-          </form>
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">Contar en</span>
+          <div className="mt-2 flex gap-2">
+            <form action={setUnit} className="flex-1">
+              <input type="hidden" name="kidId" value={k.id} />
+              <input type="hidden" name="unit" value="eur" />
+              <button className={themePill(money.unit === 'eur')}>🪙 Euros</button>
+            </form>
+            <form action={setUnit} className="flex-1">
+              <input type="hidden" name="kidId" value={k.id} />
+              <input type="hidden" name="unit" value="pts" />
+              <button className={themePill(money.unit === 'pts')}>{money.pointsIcon} Puntos</button>
+            </form>
+          </div>
         </div>
 
         <form action={setPointsName} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
