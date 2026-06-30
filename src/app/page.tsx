@@ -190,7 +190,7 @@ export default async function Page({
       </Link>
 
       {/* Tareas */}
-      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">✅ Tareas</h2>
+      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">📋 Tareas</h2>
       <div className="mx-3 space-y-2.5">
         {data.tasks.length === 0 && (
           <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
