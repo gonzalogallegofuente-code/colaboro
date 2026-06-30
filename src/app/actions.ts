@@ -272,7 +272,7 @@ export async function markTask(formData: FormData) {
 }
 
 export async function undoTask(formData: FormData) {
-  const { kidId } = await actingKid(Number(formData.get('kidId')))
+  const { accountId, kidId } = await actingKid(Number(formData.get('kidId')))
   const taskId = Number(formData.get('taskId'))
   const doneOn = formData.get('doneOn')
   if (!taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
@@ -283,27 +283,12 @@ export async function undoTask(formData: FormData) {
     .where(and(eq(completions.kidId, kidId), eq(completions.taskId, taskId), eq(completions.doneOn, doneOn)))
     .orderBy(desc(completions.id))
     .limit(1)
-  if (row) await db.delete(completions).where(eq(completions.id, row.id))
-  refresh()
-}
-
-// Quita un apunte concreto marcado por error (solo el padre).
-// El saldo es calculado (Σ completions − Σ payouts), así que basta con borrar.
-export async function removeCompletion(formData: FormData) {
-  const accountId = await requireAccount()
-  const id = Number(formData.get('id'))
-  if (!id) throw new Error('Datos inválidos')
-  const [row] = await db
-    .select({ id: completions.id, kidId: completions.kidId })
-    .from(completions)
-    .innerJoin(kids, eq(kids.id, completions.kidId))
-    .where(and(eq(completions.id, id), eq(kids.accountId, accountId)))
   if (row) {
     await db.delete(completions).where(eq(completions.id, row.id))
-    // Si la marca ya estaba pagada, el saldo quedaría negativo: lo dejamos en 0.
-    const bal = (await kidBalances(accountId)).get(row.kidId) ?? 0
+    // Si esa marca ya estaba pagada, el saldo quedaría negativo: lo dejamos en 0.
+    const bal = (await kidBalances(accountId)).get(kidId) ?? 0
     if (bal < 0) {
-      await db.insert(payouts).values({ kidId: row.kidId, amountCents: bal, note: 'Ajuste (marca quitada ya pagada)' })
+      await db.insert(payouts).values({ kidId, amountCents: bal, note: 'Ajuste (marca quitada ya pagada)' })
     }
   }
   refresh()

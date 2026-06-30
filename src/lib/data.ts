@@ -13,40 +13,6 @@ import {
 } from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd } from './week'
 
-export type RecentCompletion = {
-  id: number
-  taskName: string
-  icon: string
-  iconKey: string | null
-  color: string
-  doneOn: string
-  valueCents: number
-}
-
-// Últimos apuntes de un hijo (para corregir errores). Más recientes primero.
-export async function getRecentCompletions(
-  accountId: number,
-  kidId: number,
-  limit = 20,
-): Promise<RecentCompletion[]> {
-  return db
-    .select({
-      id: completions.id,
-      taskName: tasks.name,
-      icon: tasks.icon,
-      iconKey: tasks.iconKey,
-      color: tasks.color,
-      doneOn: completions.doneOn,
-      valueCents: completions.valueCents,
-    })
-    .from(completions)
-    .innerJoin(tasks, eq(tasks.id, completions.taskId))
-    .innerJoin(kids, eq(kids.id, completions.kidId))
-    .where(and(eq(completions.kidId, kidId), eq(kids.accountId, accountId)))
-    .orderBy(desc(completions.doneOn), desc(completions.id))
-    .limit(limit)
-}
-
 export async function getActiveKids(accountId: number): Promise<Kid[]> {
   return db
     .select()
