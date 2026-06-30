@@ -4,7 +4,7 @@ import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, ymd, addDays, parseYmd, formatRange, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask, payKid, exitKidMode, removeCompletion } from './actions'
+import { markTask, undoTask, payKid, removeCompletion } from './actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -101,9 +101,7 @@ export default async function Page({
             <Link href="/modo" className="font-bold text-[var(--ink-2)]">
               🔄 Cambiar
             </Link>
-            <form action={exitKidMode}>
-              <button className="font-bold text-red-500">🚪 Salir</button>
-            </form>
+            <Link href="/salir" className="font-bold text-red-500">🚪 Salir</Link>
           </div>
         </div>
       )}

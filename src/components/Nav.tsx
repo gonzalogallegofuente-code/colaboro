@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { logout, exitKidMode } from '@/app/actions'
+import { logout } from '@/app/actions'
 import { ConfirmButton } from '@/components/ConfirmButton'
 
 export function Nav({
@@ -41,11 +41,9 @@ export function Nav({
           </Link>
         )}
         {kidMode ? (
-          <form action={exitKidMode}>
-            <button className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
-              🚪
-            </button>
-          </form>
+          <Link href="/salir" className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
+            🚪
+          </Link>
         ) : (
           <form action={logout}>
             <ConfirmButton

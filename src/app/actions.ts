@@ -144,17 +144,17 @@ export async function enterKid(formData: FormData) {
   redirect('/')
 }
 
-export async function exitKidMode() {
+export async function exitKidMode(formData: FormData) {
   const kid = await getKidMode() // sabemos la cuenta del padre por el token de niño
+  if (!kid) redirect('/login')
+  // Para volver al panel del padre se exige su contraseña (que un niño no sabe).
+  const password = String(formData.get('password') ?? '')
+  const [acc] = await db.select().from(accounts).where(eq(accounts.id, kid.accountId))
+  if (!acc || !verifyPassword(password, acc.passwordHash)) redirect('/salir?e=bad')
   const c = await cookies()
   c.delete(KID_COOKIE)
-  if (kid) {
-    // Reabrimos la sesión del padre (en pausa durante el modo niño): se vuelve
-    // a tu cuenta sin tener que iniciar sesión otra vez.
-    await setSessionCookie(kid.accountId)
-    redirect('/')
-  }
-  redirect('/login')
+  await setSessionCookie(kid.accountId) // reabre la sesión del padre, sin re-login completo
+  redirect('/')
 }
 
 export async function setKidPin(formData: FormData) {

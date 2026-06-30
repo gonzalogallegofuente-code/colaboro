@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getActiveKids } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
-import { enterKid, exitKidMode } from '@/app/actions'
+import { enterKid } from '@/app/actions'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -57,9 +57,9 @@ export default async function ModoPage({ searchParams }: { searchParams: Promise
 
         <div className="mt-auto pt-10 text-center">
           {isKid ? (
-            <form action={exitKidMode}>
-              <button className="text-sm font-bold text-[var(--ink-3)]">🚪 Salir del modo niño</button>
-            </form>
+            <Link href="/salir" className="text-sm font-bold text-[var(--ink-3)]">
+              🚪 Salir del modo niño
+            </Link>
           ) : (
             <Link href="/" className="text-sm font-bold text-[var(--ink-3)]">
               ← Volver
