@@ -10,6 +10,7 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmButton } from '@/components/ConfirmButton'
+import { RegisterFingerprint } from '@/components/RegisterFingerprint'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,6 +92,12 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               Cambiar contraseña
             </SubmitButton>
           </form>
+
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <span className="font-display text-sm font-bold text-[var(--ink)]">👆 Huella</span>
+            <RegisterFingerprint />
+          </div>
+
           <form action={logout} className="mt-3">
             <ConfirmButton
               message="¿Seguro que quieres cerrar sesión?"

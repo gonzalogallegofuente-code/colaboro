@@ -151,6 +151,18 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Credenciales WebAuthn / passkeys (huella) por cuenta.
+export const webauthnCredentials = pgTable('webauthn_credentials', {
+  id: text('id').primaryKey(), // credential ID (base64url)
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  publicKey: text('public_key').notNull(), // clave pública (base64url)
+  counter: integer('counter').notNull().default(0),
+  transports: text('transports'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect
 export type Task = typeof tasks.$inferSelect

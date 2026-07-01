@@ -4,6 +4,7 @@ import { requireViewerPage } from '@/lib/session'
 import { exitKidMode } from '@/app/actions'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
+import { ExitWithFingerprint } from '@/components/ExitWithFingerprint'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,7 @@ export default async function SalirPage({ searchParams }: { searchParams: Promis
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-8">
         <h1 className="text-center font-display text-2xl font-bold text-[var(--head)]">🔒 Salir del modo niño</h1>
         <p className="mt-1 text-center text-sm font-semibold text-[var(--ink-3)]">
-          Introduce la contraseña de la cuenta para volver al panel de los padres.
+          Usa tu huella o la contraseña de la cuenta para volver al panel de los padres.
         </p>
         {sp.e === 'bad' && (
           <p className="mt-3 rounded-2xl bg-rose-100 px-3 py-2 text-center text-sm font-bold text-rose-600">
@@ -25,7 +26,15 @@ export default async function SalirPage({ searchParams }: { searchParams: Promis
           </p>
         )}
 
-        <form action={exitKidMode} className="mt-6 space-y-3">
+        <div className="mt-6">
+          <ExitWithFingerprint />
+        </div>
+
+        <div className="my-4 flex items-center gap-3 text-[11px] font-bold text-[var(--ink-3)]">
+          <span className="h-px flex-1 bg-gray-200" />o con la contraseña<span className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <form action={exitKidMode} className="space-y-3">
           <input
             name="password"
             type="password"
