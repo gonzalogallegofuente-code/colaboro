@@ -110,10 +110,10 @@ export default async function Page({
               }`}
               style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
             >
-              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={56} className="float-soft mx-auto" />
+              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={56} className="mx-auto" />
               <div className="mt-1 font-display text-lg font-bold">{k.name}</div>
               <div
-                className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-bold ${
+                className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-base font-bold ${
                   on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'
                 }`}
               >

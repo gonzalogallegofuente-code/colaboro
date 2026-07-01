@@ -38,7 +38,7 @@ export default async function ModoPage({ searchParams }: { searchParams: Promise
               style={{ borderTop: `5px solid ${k.color}` }}
             >
               <input type="hidden" name="kidId" value={k.id} />
-              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={64} className="float-soft mx-auto" />
+              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={64} className="mx-auto" />
               <div className="mt-1 font-display text-lg font-bold text-[var(--ink)]">{k.name}</div>
               {isKid && k.pin ? (
                 <input
