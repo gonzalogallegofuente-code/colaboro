@@ -6,7 +6,7 @@ export function Nav({
   active,
   kidMode,
 }: {
-  active?: 'inicio' | 'semana' | 'recompensas' | 'historico' | 'tareas' | 'logros'
+  active?: 'inicio' | 'modo' | 'recompensas' | 'historico' | 'tareas' | 'logros'
   kidMode?: boolean
 }) {
   const tab = (on?: boolean) =>
@@ -36,7 +36,7 @@ export function Nav({
           📅
         </Link>
         {!kidMode && (
-          <Link href="/modo" className={tab(false)} aria-label="Modo niño">
+          <Link href="/modo" className={tab(active === 'modo')} aria-label="Modo niño">
             📱
           </Link>
         )}
