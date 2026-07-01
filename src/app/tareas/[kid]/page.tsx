@@ -26,6 +26,7 @@ import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { EmojiInput } from '@/components/EmojiInput'
 import { ColorPicker } from '@/components/ColorPicker'
 import { PushToggle } from '@/components/PushToggle'
+import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
 
@@ -155,10 +156,15 @@ export default async function KidSettingsPage({
             </form>
 
             <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Avatar</span>
-              <p className="text-[11px] text-[var(--ink-3)]">
-                La carita de {k.name}: un emoji o un personaje. Elige el tipo y toca uno.
-              </p>
+              <div className="flex items-center gap-2.5">
+                <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={44} className="shrink-0" />
+                <div className="min-w-0">
+                  <span className="font-display text-sm font-bold text-[var(--ink)]">🎭 Avatar</span>
+                  <p className="text-[11px] text-[var(--ink-3)]">
+                    La de la izquierda es la actual. Elige el tipo y toca una para cambiarla.
+                  </p>
+                </div>
+              </div>
 
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {[...AVATAR_STYLES.slice(0, 3), { key: 'emoji', label: 'Emoji' }, ...AVATAR_STYLES.slice(3)].map((s) => {
@@ -201,17 +207,20 @@ export default async function KidSettingsPage({
               ) : (
                 <>
                   <div className="mt-2 grid grid-cols-5 gap-2">
-                    {avatarOptions.map((o) => (
+                    {avatarOptions.map((o) => {
+                      const on = k.avatarUrl === o.uri
+                      return (
                       <form key={o.seed} action={setKidAvatar}>
                         <input type="hidden" name="kidId" value={k.id} />
                         <input type="hidden" name="avStyle" value={avsKey} />
                         <input type="hidden" name="seed" value={o.seed} />
-                        <button className="tap-bounce flex w-full items-center justify-center rounded-2xl border-2 border-indigo-100 p-1 hover:border-indigo-400">
+                        <button className={`tap-bounce flex w-full items-center justify-center rounded-2xl border-2 p-1 ${on ? 'border-indigo-500 bg-indigo-100 ring-2 ring-indigo-500' : 'border-indigo-100 hover:border-indigo-400'}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={o.uri} alt="" width={52} height={52} className="rounded-full" />
                         </button>
                       </form>
-                    ))}
+                      )
+                    })}
                   </div>
                   <Link
                     href={`/tareas/${k.id}?sec=avatar&avs=${avsKey}&av=${avSalt + 1}`}
