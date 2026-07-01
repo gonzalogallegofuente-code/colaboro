@@ -25,7 +25,6 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { EmojiInput } from '@/components/EmojiInput'
-import { AvatarUpload } from '@/components/AvatarUpload'
 import { ColorPicker } from '@/components/ColorPicker'
 
 export const dynamic = 'force-dynamic'
@@ -146,14 +145,12 @@ export default async function KidSettingsPage({
           <>
             <form action={updateKid} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <input type="hidden" name="id" value={k.id} />
-              <div className="flex items-center gap-3">
-                <AvatarUpload key={k.avatarUrl ?? k.emoji} emoji={k.emoji} initialUrl={k.avatarUrl} />
-                <div className="flex-1 space-y-2">
-                  <input name="name" defaultValue={k.name} className={`${inputCls} font-display font-bold`} />
-                  <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                    Guardar nombre
-                  </SubmitButton>
-                </div>
+              <span className="font-display text-sm font-bold text-[var(--ink)]">Nombre</span>
+              <div className="mt-2 flex items-center gap-2">
+                <input name="name" defaultValue={k.name} className={`${inputCls} font-display font-bold`} />
+                <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+                  Guardar
+                </SubmitButton>
               </div>
             </form>
 

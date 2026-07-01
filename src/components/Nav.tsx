@@ -10,7 +10,7 @@ export function Nav({
   kidMode?: boolean
 }) {
   const tab = (on?: boolean) =>
-    `flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+    `flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-semibold transition ${
       on ? 'bg-[var(--card)] text-[var(--head)] shadow-sm' : 'text-[var(--ink-2)]'
     }`
   return (
@@ -36,19 +36,24 @@ export function Nav({
           📅
         </Link>
         {!kidMode && (
+          <Link href="/modo" className={tab(false)} aria-label="Modo niño">
+            📱
+          </Link>
+        )}
+        {!kidMode && (
           <Link href="/tareas" className={tab(active === 'tareas')} aria-label="Tareas">
             ⚙️
           </Link>
         )}
         {kidMode ? (
-          <Link href="/salir" className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
+          <Link href="/salir" className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
             🚪
           </Link>
         ) : (
           <form action={logout}>
             <ConfirmButton
               message="¿Seguro que quieres cerrar sesión?"
-              className="rounded-full px-3 py-1.5 text-sm text-[var(--ink-3)]"
+              className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]"
               ariaLabel="Salir"
             >
               🚪

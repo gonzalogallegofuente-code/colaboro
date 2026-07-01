@@ -6,6 +6,7 @@ import { enterKid } from '@/app/actions'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { PushToggle } from '@/components/PushToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,6 +56,15 @@ export default async function ModoPage({ searchParams }: { searchParams: Promise
               </SubmitButton>
             </form>
           ))}
+        </div>
+
+        {/* Avisos (recordatorios y aviso cuando un hijo apunta en modo niño) */}
+        <div className="mt-6 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🔔 Avisos</span>
+          <p className="mb-2 mt-0.5 text-[11px] font-semibold text-[var(--ink-3)]">
+            Recibe un recordatorio diario y un aviso cuando un hijo apunte una tarea desde el modo niño.
+          </p>
+          <PushToggle />
         </div>
 
         <div className="mt-auto pt-10 text-center">

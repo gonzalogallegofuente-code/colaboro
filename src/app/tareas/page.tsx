@@ -10,7 +10,6 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmButton } from '@/components/ConfirmButton'
-import { PushToggle } from '@/components/PushToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,23 +34,6 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
         <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
           Elige un hijo para ajustar su diseño, su forma de contar, sus tareas y sus recompensas.
         </p>
-
-        {/* Entrar en modo niño (kiosco) */}
-        {kids.length > 0 && (
-          <Link
-            href="/modo"
-            className="tap-bounce mx-3 mt-3 flex items-center gap-3 rounded-3xl bg-gradient-to-r from-indigo-500 to-violet-500 p-3 text-white shadow-md"
-          >
-            <span className="text-2xl">📱</span>
-            <div className="flex-1">
-              <div className="font-display font-bold">Modo niño</div>
-              <div className="text-[11px] font-semibold text-white/85">
-                Pantalla sencilla para que cada hijo apunte solo lo suyo. Para volver, sal y entra con tu cuenta.
-              </div>
-            </div>
-            <span className="font-display text-lg font-bold text-white/80">›</span>
-          </Link>
-        )}
 
         {/* Niños → cada uno a sus ajustes */}
         <div className="mx-3 mt-3 space-y-2.5">
@@ -82,23 +64,15 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
 
           {/* Añadir hijo */}
           <form action={addKid} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
-            <input name="name" placeholder="Nombre del hijo" className={`${inputCls} font-display font-bold`} required />
+            <span className="font-display text-sm font-bold text-[var(--ink)]">➕ Añadir hijo</span>
+            <input name="name" placeholder="Nombre del hijo" className={`${inputCls} mt-2 font-display font-bold`} required />
             <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
               Su emoji, color y avatar se eligen después, en los ajustes del hijo.
             </p>
             <SubmitButton className="tap-bounce mt-2 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
-              Añadir hijo (con tareas de ejemplo)
+              Añadir (con tareas de ejemplo)
             </SubmitButton>
           </form>
-        </div>
-
-        {/* Avisos */}
-        <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">🔔 Avisos</h2>
-        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <p className="mb-2 text-[11px] font-semibold text-[var(--ink-3)]">
-            Recibe un recordatorio diario y un aviso cuando un hijo apunte una tarea desde el modo niño.
-          </p>
-          <PushToggle />
         </div>
 
         {/* Cuenta */}
