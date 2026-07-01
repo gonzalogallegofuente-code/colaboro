@@ -11,7 +11,6 @@ import {
   setKidAvatar,
   setKidColor,
   setKidEmoji,
-  setKidPin,
   setPointsName,
   setTheme,
   setUnit,
@@ -65,7 +64,7 @@ export default async function KidSettingsPage({
   searchParams,
 }: {
   params: Promise<{ kid: string }>
-  searchParams: Promise<{ pin?: string; av?: string; avs?: string; sec?: string }>
+  searchParams: Promise<{ av?: string; avs?: string; sec?: string }>
 }) {
   const { kid } = await params
   const sp = await searchParams
@@ -392,28 +391,9 @@ export default async function KidSettingsPage({
           <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <span className="font-display text-sm font-bold text-[var(--ink)]">📱 Modo niño</span>
             <p className="text-[11px] text-[var(--ink-3)]">
-              PIN opcional de 4 dígitos para {k.name} (evita que al cambiar de hermano se cuele en otra cuenta). Déjalo
-              vacío para no pedir PIN.
+              Abre una pantalla sencilla para que {k.name} apunte solo sus tareas. Para volver a tu cuenta hará
+              falta tu contraseña.
             </p>
-            <form action={setKidPin} className="mt-2 flex items-end gap-2">
-              <input type="hidden" name="kidId" value={k.id} />
-              <label className="flex-1">
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">PIN (4 dígitos)</span>
-                <input
-                  name="pin"
-                  inputMode="numeric"
-                  maxLength={4}
-                  defaultValue={k.pin ?? ''}
-                  placeholder="sin PIN"
-                  className={`${inputCls} tracking-[0.3em]`}
-                />
-              </label>
-              <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                Guardar
-              </SubmitButton>
-            </form>
-            {sp.pin === 'ok' && <p className="mt-1 text-[11px] font-bold text-emerald-600">✓ PIN guardado.</p>}
-            {sp.pin === 'short' && <p className="mt-1 text-[11px] font-bold text-rose-500">El PIN debe tener 4 dígitos.</p>}
             <form action={enterKid} className="mt-2">
               <input type="hidden" name="kidId" value={k.id} />
               <SubmitButton className="tap-bounce w-full rounded-xl border-2 border-indigo-200 py-2 font-display text-sm font-bold text-indigo-600">

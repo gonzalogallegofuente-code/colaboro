@@ -154,18 +154,6 @@ export async function exitKidMode(formData: FormData) {
   redirect('/')
 }
 
-export async function setKidPin(formData: FormData) {
-  const accountId = await requireAccount()
-  const kidId = Number(formData.get('kidId'))
-  if (!kidId) throw new Error('Datos inválidos')
-  await assertKid(accountId, kidId)
-  const raw = String(formData.get('pin') ?? '').trim()
-  const pin = raw === '' ? null : raw.replace(/\D/g, '').slice(0, 4)
-  if (pin !== null && pin.length < 4) redirect(`/tareas/${kidId}?sec=modo&pin=short`)
-  await db.update(kids).set({ pin }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}?sec=modo&pin=ok`)
-}
-
 // ── Avisos push ──────────────────────────────────────────────────────
 export async function saveSubscription(sub: {
   endpoint: string
