@@ -244,12 +244,12 @@ export default async function KidSettingsPage({
           <div className="mt-2 flex flex-wrap gap-2">
             {(
               [
+                ['dibujos', 'Dibujos'],
+                ['openmoji', 'Pegatina'],
+                ['game', 'Gamer'],
                 ['emoji', 'Emoji'],
                 ['line', 'Línea'],
                 ['fill', 'Relleno'],
-                ['openmoji', 'Pegatina'],
-                ['game', 'Gamer'],
-                ['dibujos', 'Dibujos'],
               ] as const
             ).map(([val, label]) => {
               const on = k.iconStyle === val

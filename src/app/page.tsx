@@ -113,7 +113,7 @@ export default async function Page({
               <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={56} className="mx-auto" />
               <div className="mt-1 font-display text-lg font-bold">{k.name}</div>
               <div
-                className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-base font-bold ${
+                className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-lg font-extrabold ${
                   on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'
                 }`}
               >
