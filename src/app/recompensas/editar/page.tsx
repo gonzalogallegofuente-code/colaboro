@@ -57,8 +57,8 @@ export default async function EditarRecompensasPage({
 
       <div className="flex items-center justify-between px-4 pt-2">
         <h1 className="font-display text-xl font-bold text-[var(--head)]">✏️ Editar recompensas</h1>
-        <Link href="/tareas" className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm">
-          ← Ajustes
+        <Link href={`/tareas/${selKid.id}`} className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm">
+          ← Volver
         </Link>
       </div>
 

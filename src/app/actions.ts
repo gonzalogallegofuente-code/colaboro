@@ -161,9 +161,9 @@ export async function setKidPin(formData: FormData) {
   await assertKid(accountId, kidId)
   const raw = String(formData.get('pin') ?? '').trim()
   const pin = raw === '' ? null : raw.replace(/\D/g, '').slice(0, 4)
-  if (pin !== null && pin.length < 4) redirect(`/tareas/${kidId}?pin=short`)
+  if (pin !== null && pin.length < 4) redirect(`/tareas/${kidId}?sec=modo&pin=short`)
   await db.update(kids).set({ pin }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}?pin=ok`)
+  redirect(`/tareas/${kidId}?sec=modo&pin=ok`)
 }
 
 // ── Avisos push ──────────────────────────────────────────────────────
@@ -467,7 +467,7 @@ export async function updateKid(formData: FormData) {
   if (/^#[0-9a-fA-F]{6}$/.test(color)) set.color = color
 
   await db.update(kids).set(set).where(and(eq(kids.id, id), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${id}`)
+  redirect(`/tareas/${id}?sec=avatar`)
 }
 
 export async function deleteKid(formData: FormData) {
@@ -531,7 +531,7 @@ export async function setGoal(formData: FormData) {
       .update(kids)
       .set({ goalName: null, goalIcon: null, goalCostCents: null })
       .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-    redirect(`/tareas/${kidId}`)
+    redirect(`/tareas/${kidId}?sec=meta`)
   }
   const icon = String(formData.get('goalIcon') ?? '').trim() || '🎯'
   const cost = parseEurosToCents(String(formData.get('goalCost') ?? '')) ?? 0
@@ -539,7 +539,7 @@ export async function setGoal(formData: FormData) {
     .update(kids)
     .set({ goalName: name.slice(0, 30), goalIcon: icon.slice(0, 8), goalCostCents: cost })
     .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}`)
+  redirect(`/tareas/${kidId}?sec=meta`)
 }
 
 export async function clearGoal(formData: FormData) {
