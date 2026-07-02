@@ -59,17 +59,7 @@ export function IconPicker({
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
           {key ? <Glyph iconKey={key} emoji={icon} style={style} available={available} size={28} /> : <span className="text-2xl">{icon}</span>}
         </span>
-        <input
-          value={key ? '' : icon}
-          onChange={(e) => {
-            setIcon(e.target.value || '⭐')
-            setKey(null)
-          }}
-          maxLength={4}
-          placeholder="…o tu emoji"
-          className="w-24 rounded-xl border-2 border-indigo-100 px-2 py-1.5 text-center text-lg outline-none focus:border-indigo-500"
-        />
-        <span className="text-[11px] font-semibold text-[var(--ink-3)]">Elige abajo o escribe un emoji</span>
+        <span className="text-[11px] font-semibold text-[var(--ink-3)]">Toca uno de abajo para elegir el icono.</span>
       </div>
 
       <div className="mt-2 max-h-52 space-y-2 overflow-y-auto rounded-2xl border-2 border-indigo-50 p-2">

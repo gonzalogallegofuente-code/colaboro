@@ -65,6 +65,10 @@ export default async function EditarTareasPage({
             ← Volver
           </Link>
         </div>
+        <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+          Puedes cambiar o añadir tareas: el nombre, el valor (lo que gana) y las veces por semana. Haz los cambios que
+          quieras en cada tarea y dale a <span className="text-[var(--ink-2)]">Guardar</span>.
+        </p>
 
         {/* Hijo (cambiar sin salir) */}
         <div className="mt-3 flex gap-2 px-3">
