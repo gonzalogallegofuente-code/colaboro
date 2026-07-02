@@ -7,11 +7,50 @@ import {
   payouts,
   rewards,
   redemptions,
+  badges as badgeDefsTable,
   type Kid,
   type Task,
   type Reward,
 } from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd } from './week'
+import { DEFAULT_BADGES, isMetric, type BadgeDef } from './badges'
+
+// Medallas de la cuenta (las suyas si las ha personalizado, si no las por defecto).
+export async function getBadgeDefs(accountId: number): Promise<BadgeDef[]> {
+  const rows = await db
+    .select()
+    .from(badgeDefsTable)
+    .where(eq(badgeDefsTable.accountId, accountId))
+    .orderBy(badgeDefsTable.sortOrder, badgeDefsTable.id)
+  if (rows.length === 0) return DEFAULT_BADGES
+  return rows.map((r) => ({
+    id: r.id,
+    metric: isMetric(r.metric) ? r.metric : 'tasks',
+    threshold: r.threshold,
+    icon: r.icon,
+    label: r.label,
+  }))
+}
+
+// Si la cuenta no tiene medallas propias, siembra las por defecto (para editarlas).
+export async function seedBadgesIfEmpty(accountId: number): Promise<void> {
+  const existing = await db
+    .select({ id: badgeDefsTable.id })
+    .from(badgeDefsTable)
+    .where(eq(badgeDefsTable.accountId, accountId))
+    .limit(1)
+  if (existing.length > 0) return
+  await db.insert(badgeDefsTable).values(
+    DEFAULT_BADGES.map((b, i) => ({
+      accountId,
+      metric: b.metric,
+      threshold: b.threshold,
+      icon: b.icon,
+      label: b.label,
+      sortOrder: i,
+    })),
+  )
+}
 
 export async function getActiveKids(accountId: number): Promise<Kid[]> {
   return db

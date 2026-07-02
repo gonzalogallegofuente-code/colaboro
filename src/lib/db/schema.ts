@@ -171,6 +171,19 @@ export const suggestions = pgTable('suggestions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Medallas / logros personalizables por cuenta.
+export const badges = pgTable('badges', {
+  id: serial('id').primaryKey(),
+  accountId: integer('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  metric: text('metric').notNull(), // 'tasks' | 'streak' | 'earned'
+  threshold: integer('threshold').notNull(),
+  icon: text('icon').notNull().default('🏅'),
+  label: text('label').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+})
+
 export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect
 export type Task = typeof tasks.$inferSelect

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getActiveKids, getKidStats } from '@/lib/data'
+import { getActiveKids, getKidStats, getBadgeDefs } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
 import { formatAmount, moneyOf, themeOf } from '@/lib/money'
 import { computeBadges } from '@/lib/badges'
@@ -33,7 +33,8 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
   const stats = await getKidStats(selKid.id)
-  const badges = computeBadges({ bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
+  const badgeDefs = await getBadgeDefs(viewer.accountId)
+  const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
 
   return (
     <ThemeShell theme={theme}>

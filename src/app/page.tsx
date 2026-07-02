@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBoardData, getKidStats } from '@/lib/data'
+import { getBoardData, getKidStats, getBadgeDefs } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd } from '@/lib/week'
@@ -73,7 +73,8 @@ export default async function Page({
   const theme = themeOf(selKid)
 
   const stats = await getKidStats(selKid.id)
-  const badges = computeBadges({ bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
+  const badgeDefs = await getBadgeDefs(accountId)
+  const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
 
   const goalCost = selKid.goalCostCents ?? 0

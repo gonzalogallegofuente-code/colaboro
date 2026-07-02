@@ -15,7 +15,9 @@ import {
   redemptions,
   pushSubscriptions,
   suggestions,
+  badges,
 } from '@/lib/db/schema'
+import { isMetric } from '@/lib/badges'
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
@@ -189,6 +191,51 @@ export async function sendSuggestion(formData: FormData) {
   const ownerId = Number(process.env.SUGGESTIONS_ACCOUNT_ID) || 1
   void sendToAccount(ownerId, { title: '💡 Nueva sugerencia', body: text.slice(0, 120), url: '/sugerencias' })
   redirect('/sugerencias?sent=1')
+}
+
+// ── Logros / medallas (editables por cuenta) ─────────────────────────
+export async function addBadge(formData: FormData) {
+  const accountId = await requireAccount()
+  const metric = String(formData.get('metric') ?? 'tasks')
+  const threshold = Math.max(1, Math.round(Number(formData.get('threshold')) || 1))
+  const icon = String(formData.get('icon') ?? '🏅').trim().slice(0, 8) || '🏅'
+  const label = String(formData.get('label') ?? '').trim().slice(0, 40) || 'Logro'
+  const [{ max }] = await db
+    .select({ max: sql<number>`coalesce(max(${badges.sortOrder}),0)::int` })
+    .from(badges)
+    .where(eq(badges.accountId, accountId))
+  await db.insert(badges).values({
+    accountId,
+    metric: isMetric(metric) ? metric : 'tasks',
+    threshold,
+    icon,
+    label,
+    sortOrder: (max ?? 0) + 1,
+  })
+  redirect('/logros/editar')
+}
+
+export async function updateBadge(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const metric = String(formData.get('metric') ?? 'tasks')
+  const threshold = Math.max(1, Math.round(Number(formData.get('threshold')) || 1))
+  const icon = String(formData.get('icon') ?? '🏅').trim().slice(0, 8) || '🏅'
+  const label = String(formData.get('label') ?? '').trim().slice(0, 40) || 'Logro'
+  await db
+    .update(badges)
+    .set({ metric: isMetric(metric) ? metric : 'tasks', threshold, icon, label })
+    .where(and(eq(badges.id, id), eq(badges.accountId, accountId)))
+  redirect('/logros/editar')
+}
+
+export async function deleteBadge(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  await db.delete(badges).where(and(eq(badges.id, id), eq(badges.accountId, accountId)))
+  redirect('/logros/editar')
 }
 
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────
