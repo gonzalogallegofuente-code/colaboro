@@ -76,6 +76,15 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           </form>
         </div>
 
+        {/* Sugerencias y peticiones */}
+        <Link
+          href="/sugerencias"
+          className="tap-bounce mx-3 mt-4 flex items-center justify-between rounded-3xl bg-[var(--card)] p-4 shadow-md"
+        >
+          <span className="font-display text-sm font-bold text-[var(--ink)]">💡 Sugerencias y peticiones</span>
+          <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
+        </Link>
+
         {/* Cuenta */}
         <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">👤 Cuenta</h2>
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">

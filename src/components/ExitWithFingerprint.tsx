@@ -38,7 +38,7 @@ export function ExitWithFingerprint() {
         disabled={status === 'busy'}
         className="tap-bounce w-full rounded-xl bg-indigo-600 py-2.5 font-display text-base font-bold text-white disabled:opacity-50"
       >
-        {status === 'busy' ? 'Comprobando…' : '👆 Salir con huella'}
+        {status === 'busy' ? 'Comprobando…' : '👆 Modo adulto con huella'}
       </button>
       {status === 'none' && (
         <p className="mt-1 text-center text-[11px] font-semibold text-[var(--ink-3)]">

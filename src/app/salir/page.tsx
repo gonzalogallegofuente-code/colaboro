@@ -16,7 +16,7 @@ export default async function SalirPage({ searchParams }: { searchParams: Promis
   return (
     <ThemeShell theme="infantil">
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-8">
-        <h1 className="text-center font-display text-2xl font-bold text-[var(--head)]">🔒 Salir del modo niño</h1>
+        <h1 className="text-center font-display text-2xl font-bold text-[var(--head)]">🔓 Modo adulto</h1>
         <p className="mt-1 text-center text-sm font-semibold text-[var(--ink-3)]">
           Usa tu huella o la contraseña de la cuenta para volver al panel de los padres.
         </p>
@@ -44,7 +44,7 @@ export default async function SalirPage({ searchParams }: { searchParams: Promis
             required
           />
           <SubmitButton className="tap-bounce w-full rounded-xl bg-indigo-600 py-2.5 font-display text-base font-bold text-white">
-            Salir 🔓
+            Modo adulto 🔓
           </SubmitButton>
         </form>
 

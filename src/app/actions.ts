@@ -14,6 +14,7 @@ import {
   rewards,
   redemptions,
   pushSubscriptions,
+  suggestions,
 } from '@/lib/db/schema'
 import { parseEurosToCents } from '@/lib/money'
 import { kidBalances } from '@/lib/data'
@@ -176,6 +177,18 @@ export async function removeSubscription(endpoint: string) {
   await db
     .delete(pushSubscriptions)
     .where(and(eq(pushSubscriptions.endpoint, endpoint), eq(pushSubscriptions.accountId, accountId)))
+}
+
+// ── Sugerencias y peticiones ─────────────────────────────────────────
+// Se guardan en BD y se avisa por push a la cuenta "dueña" (por defecto la 1).
+export async function sendSuggestion(formData: FormData) {
+  const accountId = await requireAccount()
+  const text = String(formData.get('text') ?? '').trim().slice(0, 2000)
+  if (!text) redirect('/sugerencias')
+  await db.insert(suggestions).values({ accountId, text })
+  const ownerId = Number(process.env.SUGGESTIONS_ACCOUNT_ID) || 1
+  void sendToAccount(ownerId, { title: '💡 Nueva sugerencia', body: text.slice(0, 120), url: '/sugerencias' })
+  redirect('/sugerencias?sent=1')
 }
 
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────

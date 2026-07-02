@@ -46,8 +46,8 @@ export function Nav({
           </Link>
         )}
         {kidMode ? (
-          <Link href="/salir" className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Salir del modo niño">
-            🚪
+          <Link href="/salir" className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Modo adulto">
+            👤
           </Link>
         ) : (
           <form action={logout}>

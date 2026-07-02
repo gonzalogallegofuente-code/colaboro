@@ -163,6 +163,14 @@ export const webauthnCredentials = pgTable('webauthn_credentials', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Sugerencias y peticiones de los usuarios (anónimas para el resto).
+export const suggestions = pgTable('suggestions', {
+  id: serial('id').primaryKey(),
+  accountId: integer('account_id').references(() => accounts.id, { onDelete: 'set null' }),
+  text: text('text').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect
 export type Task = typeof tasks.$inferSelect
