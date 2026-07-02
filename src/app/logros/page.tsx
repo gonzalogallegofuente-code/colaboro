@@ -102,6 +102,9 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
             >
               <span className="text-3xl">{b.icon}</span>
               <span className="text-[11px] font-semibold leading-tight text-[var(--ink-2)]">{b.label}</span>
+              {b.rewardCents > 0 && (
+                <span className="text-[10px] font-bold text-emerald-600">+{formatAmount(b.rewardCents, money)}</span>
+              )}
             </div>
           ))}
         </div>

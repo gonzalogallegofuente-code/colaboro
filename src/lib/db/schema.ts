@@ -8,6 +8,7 @@ import {
   timestamp,
   index,
   primaryKey,
+  unique,
 } from 'drizzle-orm/pg-core'
 
 // Cuenta (una por familia). Cada cuenta está aislada de las demás.
@@ -181,8 +182,26 @@ export const badges = pgTable('badges', {
   threshold: integer('threshold').notNull(),
   icon: text('icon').notNull().default('🏅'),
   label: text('label').notNull(),
+  // Premio opcional al conseguirlo: se abona una vez a la hucha del hijo.
+  rewardCents: integer('reward_cents').notNull().default(0),
   sortOrder: integer('sort_order').notNull().default(0),
 })
+
+// Premios de logros ya abonados (una fila por hijo+logro; evita pagar dos veces).
+// Si se borra el logro, el premio ya dado se conserva (badge_id queda a NULL).
+export const badgeAwards = pgTable(
+  'badge_awards',
+  {
+    id: serial('id').primaryKey(),
+    kidId: integer('kid_id')
+      .notNull()
+      .references(() => kids.id, { onDelete: 'cascade' }),
+    badgeId: integer('badge_id').references(() => badges.id, { onDelete: 'set null' }),
+    cents: integer('cents').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique('badge_awards_kid_badge_uq').on(t.kidId, t.badgeId)],
+)
 
 export type Account = typeof accounts.$inferSelect
 export type Kid = typeof kids.$inferSelect

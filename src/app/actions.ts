@@ -19,7 +19,7 @@ import {
 } from '@/lib/db/schema'
 import { isMetric } from '@/lib/badges'
 import { parseEurosToCents } from '@/lib/money'
-import { kidBalances } from '@/lib/data'
+import { kidBalances, getActiveKids, awardEarnedBadges } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
 import { ICON_BY_KEY } from '@/lib/icons'
 import { REWARD_BY_KEY } from '@/lib/reward-icons'
@@ -206,6 +206,7 @@ export async function addBadge(formData: FormData) {
   const threshold = Math.max(1, Math.round(Number(formData.get('threshold')) || 1))
   const icon = String(formData.get('icon') ?? '🏅').trim().slice(0, 8) || '🏅'
   const label = String(formData.get('label') ?? '').trim().slice(0, 40) || 'Logro'
+  const rewardCents = parseEurosToCents(String(formData.get('reward') ?? '')) ?? 0
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${badges.sortOrder}),0)::int` })
     .from(badges)
@@ -216,8 +217,11 @@ export async function addBadge(formData: FormData) {
     threshold,
     icon,
     label,
+    rewardCents,
     sortOrder: (max ?? 0) + 1,
   })
+  // Si algún hijo ya cumplía la meta, se le abona el premio ahora.
+  for (const k of await getActiveKids(accountId)) await awardEarnedBadges(accountId, k.id)
   badgesBack(formData)
 }
 
@@ -229,10 +233,13 @@ export async function updateBadge(formData: FormData) {
   const threshold = Math.max(1, Math.round(Number(formData.get('threshold')) || 1))
   const icon = String(formData.get('icon') ?? '🏅').trim().slice(0, 8) || '🏅'
   const label = String(formData.get('label') ?? '').trim().slice(0, 40) || 'Logro'
+  const rewardCents = parseEurosToCents(String(formData.get('reward') ?? '')) ?? 0
   await db
     .update(badges)
-    .set({ metric: isMetric(metric) ? metric : 'tasks', threshold, icon, label })
+    .set({ metric: isMetric(metric) ? metric : 'tasks', threshold, icon, label, rewardCents })
     .where(and(eq(badges.id, id), eq(badges.accountId, accountId)))
+  // Si algún hijo ya cumplía la meta, se le abona el premio ahora.
+  for (const k of await getActiveKids(accountId)) await awardEarnedBadges(accountId, k.id)
   badgesBack(formData)
 }
 
@@ -312,6 +319,7 @@ export async function markTask(formData: FormData) {
   if (!t) throw new Error('Tarea no encontrada')
 
   await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v })
+  await awardEarnedBadges(v.accountId, kidId) // ¿ha desbloqueado un logro con premio?
   refresh()
 
   // En modo niño, avisa al padre (sin bloquear).

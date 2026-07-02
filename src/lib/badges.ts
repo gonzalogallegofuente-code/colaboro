@@ -1,7 +1,15 @@
 export type BadgeStats = { bestStreak: number; total: number; earnedUnits: number }
 export type BadgeMetric = 'tasks' | 'streak' | 'earned'
-export type BadgeDef = { id?: number; metric: BadgeMetric; threshold: number; icon: string; label: string }
-export type Badge = { id: string; icon: string; label: string; earned: boolean }
+export type BadgeDef = {
+  id?: number
+  metric: BadgeMetric
+  threshold: number
+  icon: string
+  label: string
+  // Premio (céntimos/centi-puntos) que se abona al conseguirlo. 0 = sin premio.
+  rewardCents?: number
+}
+export type Badge = { id: string; icon: string; label: string; earned: boolean; rewardCents: number }
 
 // Medallas por defecto (si una cuenta no ha personalizado las suyas).
 export const DEFAULT_BADGES: BadgeDef[] = [
@@ -39,5 +47,6 @@ export function computeBadges(defs: BadgeDef[], s: BadgeStats): Badge[] {
     icon: d.icon,
     label: d.label,
     earned: metricValue(s, d.metric) >= d.threshold,
+    rewardCents: d.rewardCents ?? 0,
   }))
 }

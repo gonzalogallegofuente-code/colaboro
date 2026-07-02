@@ -43,7 +43,8 @@ export default async function EditarLogrosPage({
         <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
           Los logros son medallas que los niños ganan al llegar a una meta. Puedes cambiar la meta (el valor), el icono
           y el nombre, o añadir y quitar logros. Cada uno se gana según un dato: <b>tareas hechas</b>,{' '}
-          <b>mejor racha (días)</b> o <b>dinero/puntos ganados</b>. Son los mismos para todos los hijos.
+          <b>mejor racha (días)</b> o <b>dinero/puntos ganados</b>. Son los mismos para todos los hijos. Además, un
+          logro puede tener <b>premio</b>: al conseguirlo, ese dinero (o puntos) se suma solo a la hucha del niño.
         </p>
 
         <div className="mx-3 mt-3 space-y-2.5">
@@ -70,6 +71,18 @@ export default async function EditarLogrosPage({
                     <input name="threshold" type="number" min={1} defaultValue={b.threshold} className={inputCls} />
                   </label>
                 </div>
+                <label className="mt-2 block">
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">
+                    Premio al conseguirlo (€ o puntos · vacío = sin premio)
+                  </span>
+                  <input
+                    name="reward"
+                    inputMode="decimal"
+                    defaultValue={b.rewardCents ? String(b.rewardCents / 100).replace('.', ',') : ''}
+                    placeholder="0"
+                    className={inputCls}
+                  />
+                </label>
                 <SubmitButton className="tap-bounce mt-2 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                   Guardar
                 </SubmitButton>
@@ -109,6 +122,12 @@ export default async function EditarLogrosPage({
                 <input name="threshold" type="number" min={1} defaultValue={10} className={inputCls} />
               </label>
             </div>
+            <label className="mt-2 block">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">
+                Premio al conseguirlo (€ o puntos · vacío = sin premio)
+              </span>
+              <input name="reward" inputMode="decimal" placeholder="0" className={inputCls} />
+            </label>
             <SubmitButton className="tap-bounce mt-2 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
               Añadir logro
             </SubmitButton>

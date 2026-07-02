@@ -8,12 +8,15 @@ import {
   rewards,
   redemptions,
   badges as badgeDefsTable,
+  badgeAwards,
   type Kid,
   type Task,
   type Reward,
 } from './db/schema'
 import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd } from './week'
-import { DEFAULT_BADGES, isMetric, type BadgeDef } from './badges'
+import { DEFAULT_BADGES, isMetric, metricValue, type BadgeDef } from './badges'
+import { moneyOf, formatAmount } from './money'
+import { sendToAccount } from './push'
 
 // Medallas de la cuenta (las suyas si las ha personalizado, si no las por defecto).
 export async function getBadgeDefs(accountId: number): Promise<BadgeDef[]> {
@@ -29,7 +32,35 @@ export async function getBadgeDefs(accountId: number): Promise<BadgeDef[]> {
     threshold: r.threshold,
     icon: r.icon,
     label: r.label,
+    rewardCents: r.rewardCents,
   }))
+}
+
+// Abona (una sola vez) los premios de los logros que el hijo ya ha conseguido.
+// Se llama al marcar tareas y al cambiar los logros; avisa por push al abonar.
+export async function awardEarnedBadges(accountId: number, kidId: number): Promise<void> {
+  const defs = (await getBadgeDefs(accountId)).filter((d) => d.id && (d.rewardCents ?? 0) > 0)
+  if (defs.length === 0) return
+  const stats = await getKidStats(kidId)
+  const s = { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 }
+  const won = defs.filter((d) => metricValue(s, d.metric) >= d.threshold)
+  if (won.length === 0) return
+  const inserted = await db
+    .insert(badgeAwards)
+    .values(won.map((d) => ({ kidId, badgeId: d.id!, cents: d.rewardCents ?? 0 })))
+    .onConflictDoNothing()
+    .returning({ badgeId: badgeAwards.badgeId, cents: badgeAwards.cents })
+  if (inserted.length === 0) return
+  const [k] = await db.select().from(kids).where(eq(kids.id, kidId))
+  if (!k) return
+  for (const row of inserted) {
+    const def = won.find((d) => d.id === row.badgeId)
+    void sendToAccount(accountId, {
+      title: '🏅 ¡Logro conseguido!',
+      body: `${k.name} ha ganado «${def?.label ?? 'un logro'}» y su premio: +${formatAmount(row.cents, moneyOf(k))}`,
+      url: '/logros',
+    })
+  }
 }
 
 // Si la cuenta no tiene medallas propias, siembra las por defecto (para editarlas).
@@ -76,9 +107,9 @@ export async function getAllTasks(accountId: number, kidId: number): Promise<Tas
     .orderBy(tasks.sortOrder, tasks.id)
 }
 
-// Saldo por hijo = ganado − pagado − canjeado (en céntimos), solo de la cuenta.
+// Saldo por hijo = ganado + premios de logros − pagado − canjeado (en céntimos).
 export async function kidBalances(accountId: number): Promise<Map<number, number>> {
-  const [earned, paid, redeemed] = await Promise.all([
+  const [earned, paid, redeemed, awards] = await Promise.all([
     db
       .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
       .from(completions)
@@ -97,11 +128,18 @@ export async function kidBalances(accountId: number): Promise<Map<number, number
       .innerJoin(kids, eq(kids.id, redemptions.kidId))
       .where(eq(kids.accountId, accountId))
       .groupBy(redemptions.kidId),
+    db
+      .select({ kidId: badgeAwards.kidId, c: sql<number>`coalesce(sum(${badgeAwards.cents}),0)::int` })
+      .from(badgeAwards)
+      .innerJoin(kids, eq(kids.id, badgeAwards.kidId))
+      .where(eq(kids.accountId, accountId))
+      .groupBy(badgeAwards.kidId),
   ])
   const m = new Map<number, number>()
   for (const r of earned) m.set(r.kidId, (m.get(r.kidId) ?? 0) + r.c)
   for (const r of paid) m.set(r.kidId, (m.get(r.kidId) ?? 0) - r.c)
   for (const r of redeemed) m.set(r.kidId, (m.get(r.kidId) ?? 0) - r.c)
+  for (const r of awards) m.set(r.kidId, (m.get(r.kidId) ?? 0) + r.c)
   return m
 }
 
