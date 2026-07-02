@@ -62,8 +62,8 @@ export default async function EditarRecompensasPage({
         </Link>
       </div>
 
-      {/* Hijo */}
-      <div className="mt-3 flex gap-2 px-3">
+      {/* Hijo — fijo al hacer scroll */}
+      <div className="sticky top-14 z-20 flex gap-2 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">
         {kids.map((k) => {
           const on = k.id === selKid.id
           return (

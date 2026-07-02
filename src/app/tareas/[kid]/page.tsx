@@ -228,7 +228,7 @@ export default async function KidSettingsPage({
                     scroll={false}
                     className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
                   >
-                    🎲 Ver otras caras
+                    Ver otras caras
                   </Link>
                 </>
               )}
@@ -345,7 +345,7 @@ export default async function KidSettingsPage({
 
             <div className="mt-3 border-t-2 border-indigo-50 pt-2">
               <span className="text-[11px] font-semibold text-[var(--ink-3)]">Todos los iconos en este estilo:</span>
-              <div className="mt-1.5 grid max-h-60 grid-cols-7 gap-1.5 overflow-y-auto">
+              <div className="mt-1.5 grid grid-cols-7 gap-1.5">
                 {allIcons.map((ic, i) => {
                   const bg = ICON_PREVIEW_PASTELS[i % ICON_PREVIEW_PASTELS.length]
                   return (

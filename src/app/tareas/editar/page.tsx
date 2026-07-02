@@ -70,8 +70,8 @@ export default async function EditarTareasPage({
           quieras en cada tarea y dale a <span className="text-[var(--ink-2)]">Guardar</span>.
         </p>
 
-        {/* Hijo (cambiar sin salir) */}
-        <div className="mt-3 flex gap-2 px-3">
+        {/* Hijo (cambiar sin salir) — fijo al hacer scroll */}
+        <div className="sticky top-14 z-20 flex gap-2 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">
           {kids.map((k) => {
             const on = k.id === selKid.id
             return (
