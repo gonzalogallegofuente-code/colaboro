@@ -1,11 +1,23 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { SESSION_COOKIE, KID_COOKIE, readSession, readKidToken } from './auth'
+import { eq } from 'drizzle-orm'
+import { db } from './db'
+import { accounts } from './db/schema'
+import { SESSION_COOKIE, KID_COOKIE, readSession, readKidToken, pwvOf } from './auth'
 
-// Cuenta del usuario logueado (o null). Solo la cookie de cuenta.
+// Cuenta del usuario logueado (o null). Además de la firma, contrasta la
+// "versión de contraseña" con la BD: cambiar la contraseña invalida las
+// sesiones antiguas.
 export async function getAccountId(): Promise<number | null> {
   const c = await cookies()
-  return readSession(process.env.COLABORO_SECRET!, c.get(SESSION_COOKIE)?.value)
+  const s = await readSession(process.env.COLABORO_SECRET!, c.get(SESSION_COOKIE)?.value)
+  if (!s) return null
+  const [acc] = await db
+    .select({ passwordHash: accounts.passwordHash })
+    .from(accounts)
+    .where(eq(accounts.id, s.accountId))
+  if (!acc || (await pwvOf(acc.passwordHash)) !== s.pwv) return null
+  return s.accountId
 }
 
 // Sesión de modo niño (o null).

@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic'
 type Sub = typeof pushSubscriptions.$inferSelect
 
 async function run(req: Request): Promise<Response> {
+  // Solo por cabecera (un secreto en la URL puede acabar en logs).
   const secret = process.env.CRON_SECRET
-  const url = new URL(req.url)
-  const given = req.headers.get('x-cron-secret') ?? url.searchParams.get('secret')
+  const given = req.headers.get('x-cron-secret')
   if (!secret || given !== secret) return new Response('no autorizado', { status: 401 })
 
   const today = todayYmd()

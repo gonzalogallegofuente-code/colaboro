@@ -25,6 +25,11 @@ export default async function SalirPage({ searchParams }: { searchParams: Promis
             Contraseña incorrecta, inténtalo otra vez.
           </p>
         )}
+        {sp.e === 'rl' && (
+          <p className="mt-3 rounded-2xl bg-rose-100 px-3 py-2 text-center text-sm font-bold text-rose-600">
+            Demasiados intentos. Espera 15 minutos.
+          </p>
+        )}
 
         <div className="mt-6">
           <ExitWithFingerprint />

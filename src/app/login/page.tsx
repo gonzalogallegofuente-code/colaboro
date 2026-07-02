@@ -25,7 +25,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Contraseña
           <input name="password" type="password" autoComplete="current-password" className={inputCls} />
         </label>
-        {e && <p className="mt-2 text-center text-sm font-semibold text-red-600">Email o contraseña incorrectos 🙈</p>}
+        {e && (
+          <p className="mt-2 text-center text-sm font-semibold text-red-600">
+            {e === 'rl' ? 'Demasiados intentos. Espera 15 minutos e inténtalo otra vez.' : 'Email o contraseña incorrectos 🙈'}
+          </p>
+        )}
         <SubmitButton className="tap-bounce mt-4 w-full rounded-2xl bg-indigo-600 py-3 font-display text-lg font-bold text-white">
           Entrar 🚀
         </SubmitButton>

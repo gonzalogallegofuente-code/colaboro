@@ -1,6 +1,8 @@
-// Sesión por cuenta. La cookie guarda "<accountId>.<exp>.<firma>" donde la firma
-// es HMAC-SHA256(secret, "<accountId>.<exp>"). Web Crypto funciona en el proxy
-// (edge) y en las Server Actions (node).
+// Sesión por cuenta. La cookie guarda "<accountId>.<pwv>.<exp>.<firma>" donde
+// la firma es HMAC-SHA256(secret, "<accountId>.<pwv>.<exp>") y <pwv> es la
+// "versión de contraseña" (huella corta del hash): al cambiar la contraseña
+// cambia el pwv y TODAS las sesiones anteriores dejan de valer.
+// Web Crypto funciona en el proxy (edge) y en las Server Actions (node).
 
 export const SESSION_COOKIE = 'colaboro_session'
 export const KID_COOKIE = 'colaboro_kid'
@@ -33,23 +35,35 @@ function safeEqual(a: string, b: string): boolean {
   return out === 0
 }
 
-export async function makeSessionToken(secret: string, accountId: number): Promise<string> {
-  const payload = `${accountId}.${Date.now() + TTL_MS}`
+// "Versión de contraseña": huella corta (sha256) del hash almacenado.
+export async function pwvOf(passwordHash: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(passwordHash))
+  return Array.from(new Uint8Array(digest).slice(0, 5))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+export async function makeSessionToken(secret: string, accountId: number, pwv: string): Promise<string> {
+  const payload = `${accountId}.${pwv}.${Date.now() + TTL_MS}`
   return `${payload}.${await sign(secret, payload)}`
 }
 
-// Devuelve el accountId si la cookie es válida y no ha caducado, si no null.
+export type SessionPayload = { accountId: number; pwv: string }
+
+// Devuelve {accountId, pwv} si la cookie es válida y no ha caducado, si no null.
+// OJO: el pwv se contrasta con la BD en getAccountId (aquí solo firma+caducidad).
 export async function readSession(
   secret: string,
   token: string | undefined,
-): Promise<number | null> {
+): Promise<SessionPayload | null> {
   if (!token) return null
   const parts = token.split('.')
-  if (parts.length !== 3) return null
-  const [accId, exp, sig] = parts
-  if (!/^\d+$/.test(accId) || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return null
-  if (!safeEqual(sig, await sign(secret, `${accId}.${exp}`))) return null
-  return Number(accId)
+  if (parts.length !== 4) return null
+  const [accId, pwv, exp, sig] = parts
+  if (!/^\d+$/.test(accId) || !/^[0-9a-f]{10}$/.test(pwv) || !/^\d+$/.test(exp)) return null
+  if (Number(exp) < Date.now()) return null
+  if (!safeEqual(sig, await sign(secret, `${accId}.${pwv}.${exp}`))) return null
+  return { accountId: Number(accId), pwv }
 }
 
 // ── Sesión de "modo niño" ────────────────────────────────────────────

@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { accounts } from '@/lib/db/schema'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { addKid, changePassword, logout } from '@/app/actions'
+import { addKid, changePassword, deleteAccount, logout } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 
-export default async function AjustesPage({ searchParams }: { searchParams: Promise<{ pw?: string }> }) {
+export default async function AjustesPage({ searchParams }: { searchParams: Promise<{ pw?: string; del?: string }> }) {
   const sp = await searchParams
   const accountId = await requireAccountPage()
   const [kids, accRows] = await Promise.all([
@@ -115,6 +115,32 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               Cerrar sesión
             </ConfirmButton>
           </form>
+
+          {/* Zona de peligro: borrar la cuenta entera (RGPD, supresión) */}
+          <div className="mt-4 rounded-2xl border-2 border-red-100 p-3">
+            <span className="font-display text-sm font-bold text-red-500">🗑️ Borrar la cuenta</span>
+            <p className="mt-0.5 text-[11px] font-semibold text-[var(--ink-3)]">
+              Elimina la cuenta y TODOS sus datos (hijos, tareas, historial, logros…). No se puede deshacer.
+            </p>
+            {sp.del === 'bad' && (
+              <p className="mt-1 text-[11px] font-bold text-red-600">La contraseña no es correcta.</p>
+            )}
+            <form action={deleteAccount} className="mt-2 flex items-end gap-2">
+              <input
+                name="password"
+                type="password"
+                placeholder="Tu contraseña"
+                className={`${inputCls} flex-1`}
+                required
+              />
+              <ConfirmButton
+                message="¿BORRAR la cuenta y todos sus datos? Esta acción es definitiva y no se puede deshacer."
+                className="shrink-0 rounded-xl border-2 border-red-300 px-3 py-1.5 text-sm font-bold text-red-500"
+              >
+                Borrar
+              </ConfirmButton>
+            </form>
+          </div>
         </div>
       </div>
     </ThemeShell>

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Colaboro — Tareas de casa',
     short_name: 'Colaboro',
-    description: 'Contador de tareas de casa de Leo y Eliot',
+    description: 'Tareas de casa en familia: apunta, ahorra y gana premios',
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

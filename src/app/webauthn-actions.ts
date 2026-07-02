@@ -16,7 +16,7 @@ import { db } from '@/lib/db'
 import { accounts, webauthnCredentials } from '@/lib/db/schema'
 import { requireAccount, getKidMode } from '@/lib/session'
 import { rpInfo, RP_NAME } from '@/lib/webauthn'
-import { SESSION_COOKIE, KID_COOKIE, makeSessionToken } from '@/lib/auth'
+import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, pwvOf } from '@/lib/auth'
 
 const CHALLENGE_COOKIE = 'colaboro_wa_ch'
 const prod = process.env.NODE_ENV === 'production'
@@ -140,7 +140,9 @@ export async function authVerify(response: AuthenticationResponseJSON): Promise<
   const c = await cookies()
   c.delete(CHALLENGE_COOKIE)
   c.delete(KID_COOKIE)
-  const token = await makeSessionToken(process.env.COLABORO_SECRET!, kid.accountId)
+  const [acc] = await db.select({ passwordHash: accounts.passwordHash }).from(accounts).where(eq(accounts.id, kid.accountId))
+  if (!acc) return { ok: false }
+  const token = await makeSessionToken(process.env.COLABORO_SECRET!, kid.accountId, await pwvOf(acc.passwordHash))
   c.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',

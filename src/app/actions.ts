@@ -1,7 +1,7 @@
 'use server'
 
 import { and, desc, eq, sql } from 'drizzle-orm'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
@@ -25,8 +25,15 @@ import { ICON_BY_KEY } from '@/lib/icons'
 import { REWARD_BY_KEY } from '@/lib/reward-icons'
 import { avatarDataUri } from '@/lib/avatars'
 import { hashPassword, verifyPassword } from '@/lib/password'
-import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken } from '@/lib/auth'
+import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken, pwvOf } from '@/lib/auth'
 import { getViewer, getKidMode, requireAccount } from '@/lib/session'
+import { rateLimit, rateClear } from '@/lib/ratelimit'
+
+// IP del cliente (tras Traefik) para el limitador de intentos.
+async function clientIp(): Promise<string> {
+  const h = await headers()
+  return (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'desconocida'
+}
 
 const isYmd = (s: unknown): s is string => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)
 
@@ -35,7 +42,9 @@ function refresh() {
 }
 
 async function setSessionCookie(accountId: number) {
-  const token = await makeSessionToken(process.env.COLABORO_SECRET!, accountId)
+  const [acc] = await db.select({ passwordHash: accounts.passwordHash }).from(accounts).where(eq(accounts.id, accountId))
+  if (!acc) throw new Error('No autorizado')
+  const token = await makeSessionToken(process.env.COLABORO_SECRET!, accountId, await pwvOf(acc.passwordHash))
   const c = await cookies()
   c.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -82,6 +91,9 @@ async function setKidCookie(accountId: number, kidId: number) {
 export async function register(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const password = String(formData.get('password') ?? '')
+  // Registro solo con invitación (INVITE_CODE en el entorno del servidor).
+  const invite = String(formData.get('invite') ?? '').trim()
+  if (process.env.INVITE_CODE && invite !== process.env.INVITE_CODE) redirect('/registro?e=inv')
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) redirect('/registro?e=email')
   if (password.length < 6) redirect('/registro?e=pass')
 
@@ -99,10 +111,17 @@ export async function register(formData: FormData) {
 export async function login(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const password = String(formData.get('password') ?? '')
+  // Máx. 10 intentos fallidos por IP y por email cada 15 minutos.
+  const ip = await clientIp()
+  if (!rateLimit(`login:ip:${ip}`, 10, 15 * 60_000) || !rateLimit(`login:email:${email}`, 10, 15 * 60_000)) {
+    redirect('/login?e=rl')
+  }
   const [acc] = await db.select().from(accounts).where(eq(accounts.email, email))
   if (!acc || !verifyPassword(password, acc.passwordHash)) {
     redirect('/login?e=1')
   }
+  rateClear(`login:ip:${ip}`)
+  rateClear(`login:email:${email}`)
   await setSessionCookie(acc.id)
   redirect('/')
 }
@@ -121,7 +140,30 @@ export async function changePassword(formData: FormData) {
   if (!acc || !verifyPassword(current, acc.passwordHash)) redirect('/tareas?pw=bad')
   if (next.length < 6) redirect('/tareas?pw=short')
   await db.update(accounts).set({ passwordHash: hashPassword(next) }).where(eq(accounts.id, accountId))
+  await setSessionCookie(accountId) // renueva ESTA sesión; las demás quedan invalidadas
   redirect('/tareas?pw=ok')
+}
+
+// Borra la cuenta ENTERA con todos sus datos (RGPD: derecho de supresión).
+// Pide la contraseña para confirmar. Irreversible.
+export async function deleteAccount(formData: FormData) {
+  const accountId = await requireAccount()
+  const password = String(formData.get('password') ?? '')
+  const [acc] = await db.select().from(accounts).where(eq(accounts.id, accountId))
+  if (!acc || !verifyPassword(password, acc.passwordHash)) redirect('/tareas?del=bad')
+
+  await db.transaction(async (tx) => {
+    // Las marcas primero (su FK a tasks es restrictiva); el resto cae en cascada
+    // al borrar la cuenta (hijos, tareas, recompensas, logros, avisos, huellas).
+    const kidRows = await tx.select({ id: kids.id }).from(kids).where(eq(kids.accountId, accountId))
+    for (const k of kidRows) await tx.delete(completions).where(eq(completions.kidId, k.id))
+    await tx.delete(accounts).where(eq(accounts.id, accountId))
+  })
+
+  const c = await cookies()
+  c.delete(SESSION_COOKIE)
+  c.delete(KID_COOKIE)
+  redirect('/login')
 }
 
 // ── Modo niño ────────────────────────────────────────────────────────
@@ -147,10 +189,13 @@ export async function enterKid(formData: FormData) {
 export async function exitKidMode(formData: FormData) {
   const kid = await getKidMode() // sabemos la cuenta del padre por el token de niño
   if (!kid) redirect('/login')
+  // Máx. 10 intentos fallidos cada 15 min (que un niño no pruebe sin freno).
+  if (!rateLimit(`salir:${kid.accountId}`, 10, 15 * 60_000)) redirect('/salir?e=rl')
   // Para volver al panel del padre se exige su contraseña (que un niño no sabe).
   const password = String(formData.get('password') ?? '')
   const [acc] = await db.select().from(accounts).where(eq(accounts.id, kid.accountId))
   if (!acc || !verifyPassword(password, acc.passwordHash)) redirect('/salir?e=bad')
+  rateClear(`salir:${kid.accountId}`)
   const c = await cookies()
   c.delete(KID_COOKIE)
   await setSessionCookie(kid.accountId) // reabre la sesión del padre, sin re-login completo
@@ -184,10 +229,11 @@ export async function removeSubscription(endpoint: string) {
 // ── Sugerencias y peticiones ─────────────────────────────────────────
 // Se guardan en BD y se avisa por push a la cuenta "dueña" (por defecto la 1).
 export async function sendSuggestion(formData: FormData) {
-  const accountId = await requireAccount()
+  await requireAccount() // hay que estar dentro, pero…
   const text = String(formData.get('text') ?? '').trim().slice(0, 2000)
   if (!text) redirect('/sugerencias')
-  await db.insert(suggestions).values({ accountId, text })
+  // …no se guarda QUIÉN la envía: la sugerencia es anónima de verdad.
+  await db.insert(suggestions).values({ text })
   const ownerId = Number(process.env.SUGGESTIONS_ACCOUNT_ID) || 1
   void sendToAccount(ownerId, { title: '💡 Nueva sugerencia', body: text.slice(0, 120), url: '/sugerencias' })
   redirect('/sugerencias?sent=1')
