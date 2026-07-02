@@ -76,15 +76,6 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           </form>
         </div>
 
-        {/* Editar logros */}
-        <Link
-          href="/logros/editar"
-          className="tap-bounce mx-3 mt-4 flex items-center justify-between rounded-3xl bg-[var(--card)] p-4 shadow-md"
-        >
-          <span className="font-display text-sm font-bold text-[var(--ink)]">🏅 Editar logros</span>
-          <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
-        </Link>
-
         {/* Sugerencias y peticiones */}
         <Link
           href="/sugerencias"

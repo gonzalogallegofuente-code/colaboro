@@ -125,6 +125,7 @@ export default async function KidSettingsPage({
               <SettingRow href={`/tareas/${k.id}?sec=meta`} label="🎯 Meta de ahorro" />
               <SettingRow href={`/tareas/editar?kid=${k.id}`} label="🧹 Editar tareas" />
               <SettingRow href={`/recompensas/editar?kid=${k.id}`} label="🎁 Editar recompensas" />
+              <SettingRow href={`/logros/editar?kid=${k.id}`} label="🏅 Editar logros" />
               <SettingRow href={`/tareas/${k.id}?sec=modo`} label="📱 Modo niño" />
             </div>
 

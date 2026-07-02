@@ -194,6 +194,12 @@ export async function sendSuggestion(formData: FormData) {
 }
 
 // ── Logros / medallas (editables por cuenta) ─────────────────────────
+// Vuelve a la pantalla de edición conservando el hijo desde el que se abrió.
+function badgesBack(formData: FormData): never {
+  const kid = Number(formData.get('kid'))
+  redirect(kid ? `/logros/editar?kid=${kid}` : '/logros/editar')
+}
+
 export async function addBadge(formData: FormData) {
   const accountId = await requireAccount()
   const metric = String(formData.get('metric') ?? 'tasks')
@@ -212,7 +218,7 @@ export async function addBadge(formData: FormData) {
     label,
     sortOrder: (max ?? 0) + 1,
   })
-  redirect('/logros/editar')
+  badgesBack(formData)
 }
 
 export async function updateBadge(formData: FormData) {
@@ -227,7 +233,7 @@ export async function updateBadge(formData: FormData) {
     .update(badges)
     .set({ metric: isMetric(metric) ? metric : 'tasks', threshold, icon, label })
     .where(and(eq(badges.id, id), eq(badges.accountId, accountId)))
-  redirect('/logros/editar')
+  badgesBack(formData)
 }
 
 export async function deleteBadge(formData: FormData) {
@@ -235,7 +241,7 @@ export async function deleteBadge(formData: FormData) {
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
   await db.delete(badges).where(and(eq(badges.id, id), eq(badges.accountId, accountId)))
-  redirect('/logros/editar')
+  badgesBack(formData)
 }
 
 // ── Tareas por defecto para un hijo nuevo ────────────────────────────

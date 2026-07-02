@@ -15,8 +15,14 @@ const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 tex
 const METRICS: BadgeMetric[] = ['tasks', 'streak', 'earned']
 const BADGE_ICONS = ['🏅', '🥇', '🌟', '🔥', '💪', '🚀', '👑', '💎', '🦸', '⚡', '🌱', '🤑', '🏆', '🎯']
 
-export default async function EditarLogrosPage() {
+export default async function EditarLogrosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ kid?: string }>
+}) {
+  const sp = await searchParams
   const accountId = await requireAccountPage()
+  const kid = sp.kid && /^\d+$/.test(sp.kid) ? Number(sp.kid) : null
   await seedBadgesIfEmpty(accountId)
   const list = await getBadgeDefs(accountId)
 
@@ -27,14 +33,17 @@ export default async function EditarLogrosPage() {
 
         <div className="flex items-center justify-between px-4 pt-2">
           <h1 className="font-display text-xl font-bold text-[var(--head)]">🏅 Editar logros</h1>
-          <Link href="/tareas" className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm">
-            ← Ajustes
+          <Link
+            href={kid ? `/tareas/${kid}` : '/tareas'}
+            className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-bold text-indigo-600 shadow-sm"
+          >
+            {kid ? '← Volver' : '← Ajustes'}
           </Link>
         </div>
         <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
           Los logros son medallas que los niños ganan al llegar a una meta. Puedes cambiar la meta (el valor), el icono
           y el nombre, o añadir y quitar logros. Cada uno se gana según un dato: <b>tareas hechas</b>,{' '}
-          <b>mejor racha (días)</b> o <b>dinero/puntos ganados</b>.
+          <b>mejor racha (días)</b> o <b>dinero/puntos ganados</b>. Son los mismos para todos los hijos.
         </p>
 
         <div className="mx-3 mt-3 space-y-2.5">
@@ -42,6 +51,7 @@ export default async function EditarLogrosPage() {
             <div key={b.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <form action={updateBadge}>
                 <input type="hidden" name="id" value={b.id} />
+                {kid && <input type="hidden" name="kid" value={kid} />}
                 <div className="flex items-center gap-2">
                   <EmojiInput name="icon" defaultValue={b.icon} suggestions={BADGE_ICONS} />
                   <input name="label" defaultValue={b.label} className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre del logro" />
@@ -66,6 +76,7 @@ export default async function EditarLogrosPage() {
               </form>
               <form action={deleteBadge} className="mt-1 text-right">
                 <input type="hidden" name="id" value={b.id} />
+                {kid && <input type="hidden" name="kid" value={kid} />}
                 <ConfirmSubmit
                   message={`¿Borrar el logro «${b.label}»?`}
                   className="text-xs font-semibold text-rose-400 underline underline-offset-2"
@@ -78,6 +89,7 @@ export default async function EditarLogrosPage() {
 
           {/* Añadir logro */}
           <form action={addBadge} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
+            {kid && <input type="hidden" name="kid" value={kid} />}
             <span className="font-display text-sm font-bold text-[var(--ink)]">➕ Añadir logro</span>
             <div className="mt-2 flex items-center gap-2">
               <EmojiInput name="icon" defaultValue="🏅" suggestions={BADGE_ICONS} />
