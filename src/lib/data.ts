@@ -1,6 +1,7 @@
 import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
 import { db } from './db'
 import {
+  accounts,
   kids,
   tasks,
   completions,
@@ -184,6 +185,45 @@ export async function getPendingCompletions(accountId: number): Promise<PendingC
     .innerJoin(kids, eq(kids.id, completions.kidId))
     .where(and(eq(kids.accountId, accountId), eq(completions.status, 'pending')))
     .orderBy(desc(completions.doneOn), desc(completions.id))
+}
+
+// ── Objetivo familiar (semanal, entre todos los hijos) ───────────────
+export type FamilyGoal = { target: number; reward: string; count: number; done: boolean }
+
+// Objetivo de la cuenta y progreso de ESTA semana (tareas aprobadas de todos).
+export async function getFamilyGoal(accountId: number): Promise<FamilyGoal | null> {
+  const [acc] = await db
+    .select({ target: accounts.familyGoalTarget, reward: accounts.familyGoalReward })
+    .from(accounts)
+    .where(eq(accounts.id, accountId))
+  if (!acc?.target || acc.target <= 0) return null
+  const range = weekRange(todayYmd())
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(completions)
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(
+      and(
+        eq(kids.accountId, accountId),
+        eq(completions.status, 'approved'),
+        gte(completions.doneOn, range.start),
+        lte(completions.doneOn, range.end),
+      ),
+    )
+  const count = row?.n ?? 0
+  return { target: acc.target, reward: acc.reward ?? '', count, done: count >= acc.target }
+}
+
+// Aviso push justo cuando la familia ALCANZA el objetivo (una vez: al igualar).
+export async function maybeCelebrateFamilyGoal(accountId: number): Promise<void> {
+  const goal = await getFamilyGoal(accountId)
+  if (goal && goal.count === goal.target) {
+    void sendToAccount(accountId, {
+      title: '🎉 ¡Objetivo familiar conseguido!',
+      body: `Habéis llegado a ${goal.target} tareas esta semana → ${goal.reward}`,
+      url: '/',
+    })
+  }
 }
 
 export type KidSummary = Kid & { weekCents: number; balanceCents: number }

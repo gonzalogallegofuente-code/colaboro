@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBoardData, getKidStats, getBadgeDefs, getPendingCompletions } from '@/lib/data'
+import { getBoardData, getKidStats, getBadgeDefs, getPendingCompletions, getFamilyGoal } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, friendlyDay } from '@/lib/week'
@@ -75,6 +75,8 @@ export default async function Page({
 
   const stats = await getKidStats(selKid.id)
   const pendientes = isKid ? [] : await getPendingCompletions(accountId)
+  const famGoal = await getFamilyGoal(accountId)
+  const famPct = famGoal ? Math.min(100, Math.round((famGoal.count / famGoal.target) * 100)) : 0
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -168,6 +170,32 @@ export default async function Page({
               </form>
             </div>
           ))}
+        </div>
+        </>
+      )}
+
+      {/* Objetivo familiar (entre todos los hermanos) */}
+      {famGoal && (
+        <>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
+        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <div className="flex items-center justify-between gap-2 text-sm font-bold text-[var(--ink)]">
+            <span className="truncate">
+              {famGoal.done ? '¡Conseguido! 🎉' : `${famGoal.count} de ${famGoal.target} tareas entre todos`}
+            </span>
+            <span className="shrink-0 text-[var(--ink-2)]">→ {famGoal.reward}</span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-sky-300 to-indigo-500"
+              style={{ width: `${famPct}%` }}
+            />
+          </div>
+          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+            {famGoal.done
+              ? `Habéis hecho ${famGoal.count} tareas esta semana. ¡A disfrutar el premio!`
+              : 'Esta semana, sumando las tareas de todos los hermanos.'}
+          </div>
         </div>
         </>
       )}

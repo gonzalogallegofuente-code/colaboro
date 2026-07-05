@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { accounts } from '@/lib/db/schema'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { addKid, changePassword, deleteAccount, logout } from '@/app/actions'
+import { addKid, changePassword, deleteAccount, logout, setFamilyGoal } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
@@ -21,9 +21,18 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
   const accountId = await requireAccountPage()
   const [kids, accRows] = await Promise.all([
     getActiveKids(accountId),
-    db.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, accountId)),
+    db
+      .select({
+        email: accounts.email,
+        famTarget: accounts.familyGoalTarget,
+        famReward: accounts.familyGoalReward,
+      })
+      .from(accounts)
+      .where(eq(accounts.id, accountId)),
   ])
   const accEmail = accRows[0]?.email ?? ''
+  const famTarget = accRows[0]?.famTarget ?? null
+  const famReward = accRows[0]?.famReward ?? ''
   const theme = 'infantil' // Ajustes siempre en tono claro (no hereda del hijo)
 
   return (
@@ -75,6 +84,35 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
             </SubmitButton>
           </form>
         </div>
+
+        {/* Objetivo familiar */}
+        <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
+        <form action={setFamilyGoal} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <p className="mb-2 text-[11px] font-semibold text-[var(--ink-3)]">
+            Un reto de equipo: si ENTRE TODOS llegáis a N tareas esta semana (lunes a domingo), hay premio compartido.
+            Sale en el tablero de todos. Deja el número vacío para quitarlo.
+          </p>
+          <div className="flex items-end gap-2">
+            <label className="w-28">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Tareas/semana</span>
+              <input
+                name="target"
+                type="number"
+                min={0}
+                defaultValue={famTarget ?? ''}
+                placeholder="20"
+                className={inputCls}
+              />
+            </label>
+            <label className="flex-1">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Premio</span>
+              <input name="reward" defaultValue={famReward} placeholder="p. ej. 🎬 Peli con palomitas" className={inputCls} />
+            </label>
+          </div>
+          <SubmitButton className="tap-bounce mt-2 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
+            Guardar objetivo
+          </SubmitButton>
+        </form>
 
         {/* Sugerencias y peticiones */}
         <Link

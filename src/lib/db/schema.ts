@@ -16,6 +16,9 @@ export const accounts = pgTable('accounts', {
   id: serial('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  // Objetivo familiar semanal: N tareas ENTRE TODOS → premio compartido.
+  familyGoalTarget: integer('family_goal_target'),
+  familyGoalReward: text('family_goal_reward'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

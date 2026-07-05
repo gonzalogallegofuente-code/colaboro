@@ -19,7 +19,7 @@ import {
 } from '@/lib/db/schema'
 import { isMetric } from '@/lib/badges'
 import { parseEurosToCents } from '@/lib/money'
-import { kidBalances, getActiveKids, awardEarnedBadges } from '@/lib/data'
+import { kidBalances, getActiveKids, awardEarnedBadges, maybeCelebrateFamilyGoal } from '@/lib/data'
 import { sendToAccount } from '@/lib/push'
 import { ICON_BY_KEY } from '@/lib/icons'
 import { REWARD_BY_KEY } from '@/lib/reward-icons'
@@ -368,7 +368,10 @@ export async function markTask(formData: FormData) {
   // ni logros) hasta que el padre la apruebe. Lo que marca el padre va directo.
   const pending = v.isKid && t.approval
   await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v, status: pending ? 'pending' : 'approved' })
-  if (!pending) await awardEarnedBadges(v.accountId, kidId) // ¿logro con premio?
+  if (!pending) {
+    await awardEarnedBadges(v.accountId, kidId) // ¿logro con premio?
+    await maybeCelebrateFamilyGoal(v.accountId) // ¿objetivo familiar alcanzado?
+  }
   refresh()
 
   // En modo niño, avisa al padre (sin bloquear).
@@ -384,6 +387,26 @@ export async function markTask(formData: FormData) {
   }
 }
 
+// ── Objetivo familiar (semanal, por cuenta) ──────────────────────────
+export async function setFamilyGoal(formData: FormData) {
+  const accountId = await requireAccount()
+  const target = Math.max(0, Math.round(Number(formData.get('target')) || 0))
+  const reward = String(formData.get('reward') ?? '').trim().slice(0, 60)
+  if (target > 0 && reward) {
+    await db
+      .update(accounts)
+      .set({ familyGoalTarget: target, familyGoalReward: reward })
+      .where(eq(accounts.id, accountId))
+  } else {
+    // Sin número o sin premio = quitar el objetivo.
+    await db
+      .update(accounts)
+      .set({ familyGoalTarget: null, familyGoalReward: null })
+      .where(eq(accounts.id, accountId))
+  }
+  refresh()
+}
+
 // ── Aprobación de tareas marcadas por los niños ──────────────────────
 export async function approveCompletion(formData: FormData) {
   const accountId = await requireAccount()
@@ -397,6 +420,7 @@ export async function approveCompletion(formData: FormData) {
   if (row) {
     await db.update(completions).set({ status: 'approved' }).where(eq(completions.id, row.id))
     await awardEarnedBadges(accountId, row.kidId) // ahora sí cuenta para logros
+    await maybeCelebrateFamilyGoal(accountId) // ¿objetivo familiar alcanzado?
   }
   refresh()
 }
