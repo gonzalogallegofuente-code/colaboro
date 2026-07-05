@@ -114,7 +114,7 @@ export async function kidBalances(accountId: number): Promise<Map<number, number
       .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
       .from(completions)
       .innerJoin(kids, eq(kids.id, completions.kidId))
-      .where(eq(kids.accountId, accountId))
+      .where(and(eq(kids.accountId, accountId), eq(completions.status, 'approved')))
       .groupBy(completions.kidId),
     db
       .select({ kidId: payouts.kidId, c: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int` })
@@ -141,6 +141,49 @@ export async function kidBalances(accountId: number): Promise<Map<number, number
   for (const r of redeemed) m.set(r.kidId, (m.get(r.kidId) ?? 0) - r.c)
   for (const r of awards) m.set(r.kidId, (m.get(r.kidId) ?? 0) + r.c)
   return m
+}
+
+export type PendingCompletion = {
+  id: number
+  doneOn: string
+  valueCents: number
+  taskName: string
+  taskIcon: string
+  taskIconKey: string | null
+  taskColor: string
+  kidId: number
+  kidName: string
+  kidEmoji: string
+  kidAvatarUrl: string | null
+  kidUnit: string
+  kidPointsName: string
+  kidPointsIcon: string
+}
+
+// Marcas hechas por los niños que esperan la aprobación del padre.
+export async function getPendingCompletions(accountId: number): Promise<PendingCompletion[]> {
+  return db
+    .select({
+      id: completions.id,
+      doneOn: completions.doneOn,
+      valueCents: completions.valueCents,
+      taskName: tasks.name,
+      taskIcon: tasks.icon,
+      taskIconKey: tasks.iconKey,
+      taskColor: tasks.color,
+      kidId: kids.id,
+      kidName: kids.name,
+      kidEmoji: kids.emoji,
+      kidAvatarUrl: kids.avatarUrl,
+      kidUnit: kids.unit,
+      kidPointsName: kids.pointsName,
+      kidPointsIcon: kids.pointsIcon,
+    })
+    .from(completions)
+    .innerJoin(tasks, eq(tasks.id, completions.taskId))
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(and(eq(kids.accountId, accountId), eq(completions.status, 'pending')))
+    .orderBy(desc(completions.doneOn), desc(completions.id))
 }
 
 export type KidSummary = Kid & { weekCents: number; balanceCents: number }
@@ -175,7 +218,12 @@ export async function getBoardData(
       .from(completions)
       .innerJoin(kids, eq(kids.id, completions.kidId))
       .where(
-        and(eq(kids.accountId, accountId), gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)),
+        and(
+          eq(kids.accountId, accountId),
+          eq(completions.status, 'approved'),
+          gte(completions.doneOn, range.start),
+          lte(completions.doneOn, range.end),
+        ),
       )
       .groupBy(completions.kidId),
   ])
@@ -264,7 +312,14 @@ export async function getWeekGrid(
     .select({ kidId: completions.kidId, cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
     .from(completions)
     .innerJoin(kids, eq(kids.id, completions.kidId))
-    .where(and(eq(kids.accountId, accountId), gte(completions.doneOn, range.start), lte(completions.doneOn, range.end)))
+    .where(
+      and(
+        eq(kids.accountId, accountId),
+        eq(completions.status, 'approved'),
+        gte(completions.doneOn, range.start),
+        lte(completions.doneOn, range.end),
+      ),
+    )
     .groupBy(completions.kidId)
   const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
 
@@ -290,6 +345,7 @@ export async function getWeekGrid(
     .where(
       and(
         eq(completions.kidId, selectedKidId),
+        eq(completions.status, 'approved'),
         gte(completions.doneOn, range.start),
         lte(completions.doneOn, range.end),
       ),
@@ -330,7 +386,7 @@ export async function getHistory(accountId: number, limitWeeks = 16): Promise<Hi
       .select({ kidId: completions.kidId, doneOn: completions.doneOn, valueCents: completions.valueCents })
       .from(completions)
       .innerJoin(kids, eq(kids.id, completions.kidId))
-      .where(eq(kids.accountId, accountId)),
+      .where(and(eq(kids.accountId, accountId), eq(completions.status, 'approved'))),
     db
       .select({
         id: payouts.id,
@@ -455,7 +511,7 @@ export async function getKidStats(kidId: number): Promise<{
     db
       .selectDistinct({ d: completions.doneOn })
       .from(completions)
-      .where(eq(completions.kidId, kidId))
+      .where(and(eq(completions.kidId, kidId), eq(completions.status, 'approved')))
       .orderBy(completions.doneOn),
     db
       .select({
@@ -463,7 +519,7 @@ export async function getKidStats(kidId: number): Promise<{
         e: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
       })
       .from(completions)
-      .where(eq(completions.kidId, kidId)),
+      .where(and(eq(completions.kidId, kidId), eq(completions.status, 'approved'))),
   ])
   const dates = dateRows.map((r) => r.d)
   const set = new Set(dates)

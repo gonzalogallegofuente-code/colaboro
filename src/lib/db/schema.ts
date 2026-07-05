@@ -63,6 +63,8 @@ export const tasks = pgTable('tasks', {
   iconKey: text('icon_key'),
   valueCents: integer('value_cents').notNull().default(100),
   weeklyTarget: integer('weekly_target').notNull().default(7),
+  // Si está activa, lo que marque el NIÑO queda pendiente hasta que el padre apruebe.
+  requiresApproval: boolean('requires_approval').notNull().default(false),
   color: text('color').notNull().default('#e9d5ff'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),
@@ -81,6 +83,8 @@ export const completions = pgTable(
       .references(() => tasks.id, { onDelete: 'cascade' }),
     doneOn: date('done_on').notNull(),
     valueCents: integer('value_cents').notNull(),
+    // 'approved' cuenta para saldo/estadísticas; 'pending' espera al padre.
+    status: text('status').notNull().default('approved'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('completions_kid_date_idx').on(t.kidId, t.doneOn)],

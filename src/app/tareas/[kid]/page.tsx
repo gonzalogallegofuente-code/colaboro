@@ -50,6 +50,13 @@ const SEC_TITLES: Record<string, string> = {
   modo: '📱 Modo niño',
 }
 
+// Cabecera de grupo dentro del menú de ajustes del hijo.
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="px-2 pt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ink-3)]">{children}</h2>
+  )
+}
+
 // Botón que abre una sub-pantalla de ajustes del hijo.
 function SettingRow({ href, label }: { href: string; label: string }) {
   return (
@@ -116,17 +123,22 @@ export default async function KidSettingsPage({
         {/* ── Menú de ajustes del hijo (lista de botones) ── */}
         {!sec && (
           <>
-            <div className="mx-3 mt-3 space-y-2">
+            <div className="mx-3 mt-1 space-y-2">
+              <GroupLabel>Perfil</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=avatar`} label="🎭 Nombre y avatar" />
               <SettingRow href={`/tareas/${k.id}?sec=color`} label="🎨 Color" />
+              <GroupLabel>Aspecto</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=diseno`} label="🌗 Diseño" />
-              <SettingRow href={`/tareas/${k.id}?sec=moneda`} label="🪙 Contar en (euros o puntos)" />
               <SettingRow href={`/tareas/${k.id}?sec=iconos`} label="✏️ Estilo de los iconos" />
+              <GroupLabel>Recompensas</GroupLabel>
+              <SettingRow href={`/tareas/${k.id}?sec=moneda`} label="🪙 Contar en (euros o puntos)" />
               <SettingRow href={`/tareas/${k.id}?sec=meta`} label="🎯 Meta de ahorro" />
-              <SettingRow href={`/tareas/editar?kid=${k.id}`} label="🧹 Editar tareas" />
               <SettingRow href={`/recompensas/editar?kid=${k.id}`} label="🎁 Editar recompensas" />
               <SettingRow href={`/logros/editar?kid=${k.id}`} label="🏅 Editar logros" />
-              <SettingRow href={`/tareas/${k.id}?sec=modo`} label="📱 Modo niño" />
+              <GroupLabel>Tareas</GroupLabel>
+              <SettingRow href={`/tareas/editar?kid=${k.id}`} label="🧹 Editar tareas" />
+              <GroupLabel>Modo niño</GroupLabel>
+              <SettingRow href={`/tareas/${k.id}?sec=modo`} label="📱 Modo niño y avisos" />
             </div>
 
             {/* Borrar hijo */}

@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { getBoardData, getKidStats, getBadgeDefs } from '@/lib/data'
+import { getBoardData, getKidStats, getBadgeDefs, getPendingCompletions } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
-import { todayYmd } from '@/lib/week'
+import { todayYmd, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask } from './actions'
+import { markTask, undoTask, approveCompletion, rejectCompletion } from './actions'
+import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
@@ -73,6 +74,7 @@ export default async function Page({
   const theme = themeOf(selKid)
 
   const stats = await getKidStats(selKid.id)
+  const pendientes = isKid ? [] : await getPendingCompletions(accountId)
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -124,6 +126,50 @@ export default async function Page({
           )
         })}
       </div>
+      )}
+
+      {/* Para aprobar (marcas de los niños en tareas con aprobación) */}
+      {pendientes.length > 0 && (
+        <>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">⏳ Para aprobar</h2>
+        <div className="mx-3 space-y-1.5">
+          {pendientes.map((p) => (
+            <div key={p.id} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl shadow-inner"
+                style={{ background: p.taskColor }}
+              >
+                {p.taskIcon}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-display text-sm font-bold text-[var(--ink)]">{p.taskName}</div>
+                <div className="text-[11px] font-semibold text-[var(--ink-3)]">
+                  {p.kidName} · {friendlyDay(p.doneOn)} ·{' '}
+                  {formatAmount(p.valueCents, moneyOf({ unit: p.kidUnit, pointsName: p.kidPointsName, pointsIcon: p.kidPointsIcon }))}
+                </div>
+              </div>
+              <form action={approveCompletion}>
+                <input type="hidden" name="id" value={p.id} />
+                <SubmitButton
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-base leading-none text-white shadow-sm"
+                  aria-label={`Aprobar ${p.taskName} de ${p.kidName}`}
+                >
+                  ✓
+                </SubmitButton>
+              </form>
+              <form action={rejectCompletion}>
+                <input type="hidden" name="id" value={p.id} />
+                <ConfirmSubmit
+                  message={`¿Rechazar «${p.taskName}» de ${p.kidName}? Se quitará como si no se hubiera marcado.`}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
+                >
+                  ✕
+                </ConfirmSubmit>
+              </form>
+            </div>
+          ))}
+        </div>
+        </>
       )}
 
       {/* Meta de ahorro */}
@@ -202,7 +248,7 @@ export default async function Page({
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-base font-bold text-[var(--ink)]">{t.name}</div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[var(--chip)] px-2 py-0.5 text-xs font-bold text-[var(--chip-ink)]">
-                  {unitIcon(money)} {formatAmount(t.valueCents, money)}
+                  {t.valueCents === 0 ? '🤝 Convivencia' : `${unitIcon(money)} ${formatAmount(t.valueCents, money)}`}
                 </span>
                 <ProgressCoins count={week} target={t.weeklyTarget} />
               </div>

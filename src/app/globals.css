@@ -12,8 +12,8 @@
   --app-bg: linear-gradient(160deg, #e0f2fe 0%, #ede9fe 45%, #fce7f3 100%);
   --card: rgba(255, 255, 255, 0.9);
   --ink: #1f2937;
-  --ink-2: #6b7280;
-  --ink-3: #9ca3af;
+  --ink-2: #5b6472;
+  --ink-3: #79828f; /* antes #9ca3af: más contraste en textos pequeños */
   --head: #3730a3;
   --nav: rgba(255, 255, 255, 0.4);
   --chip: #fef3c7;
@@ -29,8 +29,8 @@
     linear-gradient(160deg, #0b1020 0%, #0f172a 60%, #0b1020 100%);
   --card: rgba(30, 41, 59, 0.72);
   --ink: #e7ebf3;
-  --ink-2: #9aa6bd;
-  --ink-3: #6b7890;
+  --ink-2: #a7b2c8;
+  --ink-3: #8b96b0; /* antes #6b7890: más contraste sobre fondo oscuro */
   --head: #c4b5fd;
   --nav: rgba(2, 6, 23, 0.5);
   --chip: rgba(34, 211, 238, 0.16);

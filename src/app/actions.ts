@@ -359,24 +359,59 @@ export async function markTask(formData: FormData) {
   if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [t] = await db
-    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon })
+    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon, approval: tasks.requiresApproval })
     .from(tasks)
     .where(and(eq(tasks.id, taskId), eq(tasks.kidId, kidId), eq(tasks.accountId, v.accountId)))
   if (!t) throw new Error('Tarea no encontrada')
 
-  await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v })
-  await awardEarnedBadges(v.accountId, kidId) // ¿ha desbloqueado un logro con premio?
+  // Si la tarea exige aprobación y la marca el NIÑO, queda pendiente (sin dinero
+  // ni logros) hasta que el padre la apruebe. Lo que marca el padre va directo.
+  const pending = v.isKid && t.approval
+  await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v, status: pending ? 'pending' : 'approved' })
+  if (!pending) await awardEarnedBadges(v.accountId, kidId) // ¿logro con premio?
   refresh()
 
   // En modo niño, avisa al padre (sin bloquear).
   if (v.isKid) {
     const [k] = await db.select({ name: kids.name }).from(kids).where(eq(kids.id, kidId))
     void sendToAccount(v.accountId, {
-      title: `${t.icon} Tarea hecha`,
-      body: `${k?.name ?? 'Tu hijo'} ha hecho «${t.name}»`,
+      title: pending ? `${t.icon} Tarea por aprobar` : `${t.icon} Tarea hecha`,
+      body: pending
+        ? `${k?.name ?? 'Tu hijo'} ha marcado «${t.name}» — espera tu aprobación`
+        : `${k?.name ?? 'Tu hijo'} ha hecho «${t.name}»`,
       url: '/',
     })
   }
+}
+
+// ── Aprobación de tareas marcadas por los niños ──────────────────────
+export async function approveCompletion(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const [row] = await db
+    .select({ id: completions.id, kidId: completions.kidId })
+    .from(completions)
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(and(eq(completions.id, id), eq(kids.accountId, accountId), eq(completions.status, 'pending')))
+  if (row) {
+    await db.update(completions).set({ status: 'approved' }).where(eq(completions.id, row.id))
+    await awardEarnedBadges(accountId, row.kidId) // ahora sí cuenta para logros
+  }
+  refresh()
+}
+
+export async function rejectCompletion(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const [row] = await db
+    .select({ id: completions.id })
+    .from(completions)
+    .innerJoin(kids, eq(kids.id, completions.kidId))
+    .where(and(eq(completions.id, id), eq(kids.accountId, accountId), eq(completions.status, 'pending')))
+  if (row) await db.delete(completions).where(eq(completions.id, row.id))
+  refresh()
 }
 
 export async function undoTask(formData: FormData) {
@@ -428,6 +463,7 @@ export async function addTask(formData: FormData) {
   const icon = String(formData.get('icon') ?? '').trim() || '⭐'
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
+  const requiresApproval = formData.get('requiresApproval') === '1'
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -442,6 +478,7 @@ export async function addTask(formData: FormData) {
     iconKey,
     valueCents,
     weeklyTarget,
+    requiresApproval,
     color: '#e9d5ff',
     sortOrder: (max ?? 0) + 1,
   })
@@ -461,9 +498,10 @@ export async function updateTask(formData: FormData) {
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
+  const requiresApproval = formData.get('requiresApproval') === '1'
   const [row] = await db
     .update(tasks)
-    .set({ name, description, icon, iconKey, valueCents, weeklyTarget })
+    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
   redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)
