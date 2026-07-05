@@ -222,7 +222,7 @@ export default async function KidSettingsPage({
                                 : 'border-indigo-100 hover:border-indigo-400'
                             }`}
                           >
-                            <span className="flex h-[52px] w-[52px] items-center justify-center text-4xl">{em}</span>
+                            <span className="flex h-[52px] w-[52px] items-center justify-center text-4xl leading-none">{em}</span>
                           </button>
                         </form>
                       )
@@ -249,7 +249,7 @@ export default async function KidSettingsPage({
                         <input type="hidden" name="seed" value={o.seed} />
                         <button className={`tap-bounce flex w-full items-center justify-center rounded-2xl border-2 p-1 ${on ? 'border-indigo-500 bg-indigo-100 ring-2 ring-indigo-500' : 'border-indigo-100 hover:border-indigo-400'}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={o.uri} alt="" width={52} height={52} className="rounded-full" />
+                          <img src={o.uri} alt="" width={52} height={52} className="block h-[52px] w-[52px] rounded-full" />
                         </button>
                       </form>
                       )
