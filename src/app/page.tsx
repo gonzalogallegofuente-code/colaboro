@@ -77,6 +77,9 @@ export default async function Page({
   const pendientes = isKid ? [] : await getPendingCompletions(accountId)
   const famGoal = await getFamilyGoal(accountId)
   const famPct = famGoal ? Math.min(100, Math.round((famGoal.count / famGoal.target) * 100)) : 0
+  // Valor medio de sus tareas con pago, para "¡con N tareas más lo tienes!".
+  const paidTasks = data.tasks.filter((t) => t.valueCents > 0)
+  const avgTaskCents = paidTasks.length ? paidTasks.reduce((a, t) => a + t.valueCents, 0) / paidTasks.length : 0
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -97,6 +100,19 @@ export default async function Page({
         <div className="mx-3 mb-1 flex items-center justify-between rounded-2xl bg-[var(--card)] px-3 py-1.5 text-xs shadow-sm">
           <span className="font-bold text-[var(--ink-3)]">👦 Modo niño</span>
           <Link href="/salir" className="font-bold text-indigo-600">👤 Modo adulto</Link>
+        </div>
+      )}
+
+      {/* Saludo del niño (portada del modo niño) */}
+      {isKid && (
+        <div className="mx-3 mt-2 flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={52} />
+          <div className="min-w-0">
+            <div className="font-display text-xl font-bold text-[var(--head)]">¡Hola, {selKid.name}! 👋</div>
+            <div className="text-sm font-semibold text-[var(--ink-2)]">
+              Tienes <span className="font-bold text-[var(--ink)]">{formatAmount(selKid.balanceCents, money)}</span> en la hucha
+            </div>
+          </div>
         </div>
       )}
 
@@ -174,6 +190,35 @@ export default async function Page({
         </>
       )}
 
+      {/* Meta de ahorro */}
+      {hasGoal && (
+        <>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🎯 Meta de ahorro</h2>
+        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <div className="flex items-center justify-between text-sm font-bold text-[var(--ink)]">
+            <span className="truncate">
+              {selKid.goalIcon} {selKid.goalName}
+            </span>
+            <span className="shrink-0">
+              {formatAmount(goalBal, money)} / {formatAmount(goalCost, money)}
+            </span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500" style={{ width: `${goalPct}%` }} />
+          </div>
+          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+            {goalDone
+              ? '¡Meta conseguida! 🎉'
+              : `Te faltan ${formatAmount(goalCost - goalBal, money)}${
+                  isKid && avgTaskCents > 0
+                    ? ` · ¡con ${Math.max(1, Math.ceil((goalCost - goalBal) / avgTaskCents))} tareas más lo tienes! 💪`
+                    : ''
+                }`}
+          </div>
+        </div>
+        </>
+      )}
+
       {/* Objetivo familiar (entre todos los hermanos) */}
       {famGoal && (
         <>
@@ -195,29 +240,6 @@ export default async function Page({
             {famGoal.done
               ? `Habéis hecho ${famGoal.count} tareas esta semana. ¡A disfrutar el premio!`
               : 'Esta semana, sumando las tareas de todos los hermanos.'}
-          </div>
-        </div>
-        </>
-      )}
-
-      {/* Meta de ahorro */}
-      {hasGoal && (
-        <>
-        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🎯 Meta de ahorro</h2>
-        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <div className="flex items-center justify-between text-sm font-bold text-[var(--ink)]">
-            <span className="truncate">
-              {selKid.goalIcon} {selKid.goalName}
-            </span>
-            <span className="shrink-0">
-              {formatAmount(goalBal, money)} / {formatAmount(goalCost, money)}
-            </span>
-          </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500" style={{ width: `${goalPct}%` }} />
-          </div>
-          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
-            {goalDone ? '¡Meta conseguida! 🎉' : `Te faltan ${formatAmount(goalCost - goalBal, money)}`}
           </div>
         </div>
         </>

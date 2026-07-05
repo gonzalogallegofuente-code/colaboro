@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { getHistory, getWeekGrid } from '@/lib/data'
+import { Fragment } from 'react'
+import { getHistory, getWeekGrid, getHistoryStats } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
-import { formatRange, todayYmd, weekRange } from '@/lib/week'
+import { formatRange, todayYmd, weekRange, parseYmd } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
@@ -9,6 +10,11 @@ import { Avatar } from '@/components/Avatar'
 import { KidWeekGrid } from '@/components/KidWeekGrid'
 
 export const dynamic = 'force-dynamic'
+
+const MES_LARGO = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
 
 export default async function HistoricoPage({
   searchParams,
@@ -18,7 +24,7 @@ export default async function HistoricoPage({
   const sp = await searchParams
   const viewer = await requireViewerPage()
   const accountId = viewer.accountId
-  const { kids, weeks, payouts } = await getHistory(accountId)
+  const [{ kids, weeks, payouts }, resumen] = await Promise.all([getHistory(accountId), getHistoryStats(accountId)])
   const theme = kids.length ? themeOf(kids[0]) : 'infantil'
   const today = todayYmd()
   const currentStart = weekRange(today).start
@@ -41,17 +47,65 @@ export default async function HistoricoPage({
         {!viewer.isKid && ' Toca una casilla para corregir un día.'}
       </p>
 
+      {/* Resumen por hijo */}
+      {resumen.length > 0 && (
+        <div className="mx-3 mt-3 space-y-2">
+          {resumen.map((s) => {
+            const money = moneyOf(s)
+            return (
+              <div key={s.kidId} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
+                <div className="flex items-center gap-2">
+                  <Avatar emoji={s.emoji} avatarUrl={s.avatarUrl} name={s.name} size={22} />
+                  <span className="font-display text-sm font-bold" style={{ color: s.color }}>{s.name}</span>
+                  <span className="ml-auto text-xs font-bold text-[var(--ink-2)]">
+                    Esta semana: {s.weekCount} {s.weekCount === 1 ? 'tarea' : 'tareas'} · {formatAmount(s.weekCents, money)}
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
+                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">{formatAmount(s.totalCents, money)}</div>
+                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">ganado total</div>
+                  </div>
+                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
+                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">{formatAmount(s.redeemedCents, money)}</div>
+                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">canjeado</div>
+                  </div>
+                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
+                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">🔥 {s.bestStreak}</div>
+                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">mejor racha</div>
+                  </div>
+                </div>
+                {s.topTaskName && (
+                  <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
+                    ⭐ Su tarea estrella: <span className="text-[var(--ink-2)]">{s.topTaskName}</span> (×{s.topTaskCount})
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div className="mx-3 mt-3 space-y-2.5">
         {weeks.length === 0 && (
           <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             Aún no hay nada apuntado. ¡A por la primera tarea! 💪
           </div>
         )}
-        {weeks.map((w) => {
+        {weeks.map((w, i) => {
           const isCurrent = w.start === currentStart
           const isOpen = w.start === openStart
+          const d = parseYmd(w.start)
+          const prev = i > 0 ? parseYmd(weeks[i - 1].start) : null
+          const newMonth = !prev || prev.getMonth() !== d.getMonth() || prev.getFullYear() !== d.getFullYear()
           return (
-            <div key={w.start} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
+            <Fragment key={w.start}>
+            {newMonth && (
+              <h3 className="px-2 pt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ink-3)]">
+                {MES_LARGO[d.getMonth()]} {d.getFullYear()}
+              </h3>
+            )}
+            <div className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <Link
                 href={isOpen ? '/historico' : `/historico?open=${w.start}`}
                 replace
@@ -101,6 +155,7 @@ export default async function HistoricoPage({
                 </div>
               )}
             </div>
+            </Fragment>
           )
         })}
       </div>

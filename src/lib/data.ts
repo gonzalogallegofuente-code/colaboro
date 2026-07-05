@@ -187,6 +187,79 @@ export async function getPendingCompletions(accountId: number): Promise<PendingC
     .orderBy(desc(completions.doneOn), desc(completions.id))
 }
 
+// ── Resumen para el histórico (por hijo) ─────────────────────────────
+export type KidHistoryStats = {
+  kidId: number
+  name: string
+  emoji: string
+  avatarUrl: string | null
+  color: string
+  unit: string
+  pointsName: string
+  pointsIcon: string
+  weekCount: number
+  weekCents: number
+  totalCount: number
+  totalCents: number
+  redeemedCents: number
+  bestStreak: number
+  topTaskName: string | null
+  topTaskCount: number
+}
+
+export async function getHistoryStats(accountId: number): Promise<KidHistoryStats[]> {
+  const kidList = await getActiveKids(accountId)
+  const range = weekRange(todayYmd())
+  const out: KidHistoryStats[] = []
+  for (const k of kidList) {
+    const [stats, weekAgg, redAgg, top] = await Promise.all([
+      getKidStats(k.id),
+      db
+        .select({ n: sql<number>`count(*)::int`, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
+        .from(completions)
+        .where(
+          and(
+            eq(completions.kidId, k.id),
+            eq(completions.status, 'approved'),
+            gte(completions.doneOn, range.start),
+            lte(completions.doneOn, range.end),
+          ),
+        ),
+      db
+        .select({ c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::int` })
+        .from(redemptions)
+        .where(eq(redemptions.kidId, k.id)),
+      db
+        .select({ name: tasks.name, n: sql<number>`count(*)::int` })
+        .from(completions)
+        .innerJoin(tasks, eq(tasks.id, completions.taskId))
+        .where(and(eq(completions.kidId, k.id), eq(completions.status, 'approved')))
+        .groupBy(tasks.name)
+        .orderBy(sql`count(*) desc`)
+        .limit(1),
+    ])
+    out.push({
+      kidId: k.id,
+      name: k.name,
+      emoji: k.emoji,
+      avatarUrl: k.avatarUrl,
+      color: k.color,
+      unit: k.unit,
+      pointsName: k.pointsName,
+      pointsIcon: k.pointsIcon,
+      weekCount: weekAgg[0]?.n ?? 0,
+      weekCents: weekAgg[0]?.c ?? 0,
+      totalCount: stats.total,
+      totalCents: stats.earnedCents,
+      redeemedCents: redAgg[0]?.c ?? 0,
+      bestStreak: stats.bestStreak,
+      topTaskName: top[0]?.name ?? null,
+      topTaskCount: top[0]?.n ?? 0,
+    })
+  }
+  return out
+}
+
 // ── Objetivo familiar (semanal, entre todos los hijos) ───────────────
 export type FamilyGoal = { target: number; reward: string; count: number; done: boolean }
 

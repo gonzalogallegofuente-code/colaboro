@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getRewardsData } from '@/lib/data'
+import { getRewardsData, getActiveTasks } from '@/lib/data'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { requireViewerPage } from '@/lib/session'
 import { redeemReward, payKid } from '@/app/actions'
@@ -40,6 +40,11 @@ export default async function RecompensasPage({
   const selKid = kids.find((k) => k.id === selectedKidId)!
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
+
+  // Valor medio de sus tareas con pago: convierte "te faltan X" en "≈ N tareas".
+  const kidTasks = await getActiveTasks(viewer.accountId, selKid.id)
+  const paid = kidTasks.filter((t) => t.valueCents > 0)
+  const avgTaskCents = paid.length ? paid.reduce((a, t) => a + t.valueCents, 0) / paid.length : 0
 
   return (
     <ThemeShell theme={theme}>
@@ -118,6 +123,10 @@ export default async function RecompensasPage({
                 {!enough && (
                   <div className="mt-0.5 text-[11px] font-semibold text-rose-400">
                     Te faltan {formatAmount(r.costCents - selKid.balanceCents, money)}
+                    {avgTaskCents > 0 && (() => {
+                      const n = Math.max(1, Math.ceil((r.costCents - selKid.balanceCents) / avgTaskCents))
+                      return ` · ¡lo tienes con ${n} ${n === 1 ? 'tarea' : 'tareas'} más! 💪`
+                    })()}
                   </div>
                 )}
               </div>
