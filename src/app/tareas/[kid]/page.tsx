@@ -30,11 +30,15 @@ import { Avatar } from '@/components/Avatar'
 
 export const dynamic = 'force-dynamic'
 
+// 60 emojis en tandas de 20, para paginar con "Ver otras caras" como los personajes.
 const KID_EMOJIS = [
   '😀', '😎', '🤩', '🥳', '😺', '🦁', '🦊', '🐯', '🐻', '🐼', '🐨', '🐸',
   '🐵', '🦄', '🐶', '🐱', '🐰', '🐲', '🦖', '🐙', '🦋', '🦉', '🐳', '🦈',
-  '🤖', '👾', '👻', '🚀', '⚽', '🎮', '🍕', '🌟',
+  '🤖', '👾', '👻', '🚀', '⚽', '🎮', '🍕', '🌟', '😜', '🤠', '🥷', '🧙',
+  '🧚', '🦸', '🦹', '👽', '🐧', '🐢', '🦅', '🦜', '🐝', '🐞', '🦕', '🐬',
+  '🐴', '🏀', '🎧', '🎨', '🎸', '🚴', '🛹', '🏆', '🎲', '🧩', '🍩', '🌈',
 ]
+const EMOJIS_POR_TANDA = 20
 const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
 const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
@@ -97,6 +101,10 @@ export default async function KidSettingsPage({
           const seed = `${k.name}-${avSalt}-${i}`
           return { seed, uri: avatarDataUri(avsKey, seed)! }
         })
+  // Los emojis van en tandas de 20, paginadas con "Ver otras caras" (como los personajes).
+  const emojiTandas = Math.ceil(KID_EMOJIS.length / EMOJIS_POR_TANDA)
+  const emojiDesde = ((avSalt - 1) % emojiTandas) * EMOJIS_POR_TANDA
+  const emojiPage = KID_EMOJIS.slice(emojiDesde, emojiDesde + EMOJIS_POR_TANDA)
 
   const themePill = (on: boolean) =>
     `tap-bounce w-full rounded-xl border-2 px-3 py-2 font-display text-sm font-bold leading-tight ${
@@ -199,24 +207,36 @@ export default async function KidSettingsPage({
               </div>
 
               {avsKey === 'emoji' ? (
-                <div className="mt-2 grid grid-cols-5 gap-2">
-                  {KID_EMOJIS.map((em) => {
-                    const on = !k.avatarUrl && k.emoji === em
-                    return (
-                      <form key={em} action={setKidEmoji}>
-                        <input type="hidden" name="kidId" value={k.id} />
-                        <input type="hidden" name="emoji" value={em} />
-                        <button
-                          className={`tap-bounce flex aspect-square w-full items-center justify-center rounded-2xl text-4xl ${
-                            on ? 'bg-indigo-100 ring-2 ring-indigo-500' : 'bg-[var(--card)] hover:bg-indigo-50'
-                          }`}
-                        >
-                          {em}
-                        </button>
-                      </form>
-                    )
-                  })}
-                </div>
+                <>
+                  <div className="mt-2 grid grid-cols-5 gap-2">
+                    {emojiPage.map((em) => {
+                      const on = !k.avatarUrl && k.emoji === em
+                      return (
+                        <form key={em} action={setKidEmoji}>
+                          <input type="hidden" name="kidId" value={k.id} />
+                          <input type="hidden" name="emoji" value={em} />
+                          <button
+                            className={`tap-bounce flex w-full items-center justify-center rounded-2xl border-2 p-1 ${
+                              on
+                                ? 'border-indigo-500 bg-indigo-100 ring-2 ring-indigo-500'
+                                : 'border-indigo-100 hover:border-indigo-400'
+                            }`}
+                          >
+                            <span className="flex h-[52px] w-[52px] items-center justify-center text-4xl">{em}</span>
+                          </button>
+                        </form>
+                      )
+                    })}
+                  </div>
+                  <Link
+                    href={`/tareas/${k.id}?sec=avatar&avs=emoji&av=${avSalt + 1}`}
+                    replace
+                    scroll={false}
+                    className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
+                  >
+                    Ver otras caras
+                  </Link>
+                </>
               ) : (
                 <>
                   <div className="mt-2 grid grid-cols-5 gap-2">

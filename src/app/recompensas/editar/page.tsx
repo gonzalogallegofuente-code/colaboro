@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { getAllRewards, getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
@@ -44,8 +45,10 @@ export default async function EditarRecompensasPage({
     )
   }
 
+  // Cada pantalla de edición es SOLO del hijo desde cuyos ajustes se abrió.
   const kidParam = sp.kid ? Number(sp.kid) : undefined
-  const selKid = kids.find((k) => k.id === kidParam) ?? kids[0]
+  const selKid = kids.find((k) => k.id === kidParam)
+  if (!selKid) redirect('/tareas')
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
   const rewards = await getAllRewards(accountId, selKid.id)
@@ -62,23 +65,15 @@ export default async function EditarRecompensasPage({
         </Link>
       </div>
 
-      {/* Hijo — fijo al hacer scroll */}
-      <div className="sticky top-14 z-20 flex gap-2 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">
-        {kids.map((k) => {
-          const on = k.id === selKid.id
-          return (
-            <Link
-              key={k.id}
-              href={`/recompensas/editar?kid=${k.id}`}
-              replace
-              className={`flex flex-1 items-center justify-center gap-2 rounded-2xl px-2 py-2 shadow-sm ${on ? 'shadow-md ring-2 ring-white' : ''}`}
-              style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
-            >
-              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
-              <span className="font-display font-bold">{k.name}</span>
-            </Link>
-          )
-        })}
+      {/* Hijo elegido (solo se editan SUS recompensas) — fijo al hacer scroll */}
+      <div className="sticky top-14 z-20 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">
+        <div
+          className="flex items-center justify-center gap-2 rounded-2xl px-2 py-2 text-white shadow-md"
+          style={{ background: selKid.color }}
+        >
+          <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={28} />
+          <span className="font-display font-bold">Recompensas de {selKid.name}</span>
+        </div>
       </div>
 
       <RewardIconDefs />
