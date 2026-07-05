@@ -94,6 +94,8 @@ export async function register(formData: FormData) {
   // Registro solo con invitación (INVITE_CODE en el entorno del servidor).
   const invite = String(formData.get('invite') ?? '').trim()
   if (process.env.INVITE_CODE && invite !== process.env.INVITE_CODE) redirect('/registro?e=inv')
+  // Aceptación expresa de la política de privacidad (RGPD).
+  if (formData.get('acceptPrivacy') !== '1') redirect('/registro?e=priv')
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) redirect('/registro?e=email')
   if (password.length < 6) redirect('/registro?e=pass')
 

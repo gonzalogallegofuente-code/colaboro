@@ -12,6 +12,7 @@ const ERRORS: Record<string, string> = {
   pass: 'La contraseña debe tener al menos 6 caracteres',
   dup: 'Ya existe una cuenta con ese email',
   inv: 'El código de invitación no es válido',
+  priv: 'Debes aceptar la política de privacidad',
 }
 
 export default async function RegistroPage({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
@@ -36,17 +37,20 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
           Código de invitación
           <input name="invite" autoComplete="off" placeholder="Te lo da quien te invita" className={inputCls} required />
         </label>
+        <label className="mt-3 flex items-start gap-2 text-[12px] font-semibold text-[var(--ink-2)]">
+          <input type="checkbox" name="acceptPrivacy" value="1" required className="mt-0.5 h-4 w-4 accent-indigo-600" />
+          <span>
+            He leído y acepto la{' '}
+            <Link href="/privacidad" className="font-bold text-indigo-600 underline">
+              política de privacidad
+            </Link>
+            .
+          </span>
+        </label>
         {e && <p className="mt-2 text-center text-sm font-semibold text-red-600">{ERRORS[e] ?? 'Revisa los datos'}</p>}
         <SubmitButton className="tap-bounce mt-4 w-full rounded-2xl bg-emerald-600 py-3 font-display text-lg font-bold text-white">
           Crear cuenta ✨
         </SubmitButton>
-        <p className="mt-3 text-center text-[11px] font-semibold text-[var(--ink-3)]">
-          Al crear la cuenta aceptas la{' '}
-          <Link href="/privacidad" className="underline">
-            política de privacidad
-          </Link>
-          .
-        </p>
       </form>
       <p className="mt-4 text-sm font-semibold text-[var(--ink-2)]">
         ¿Ya tienes cuenta?{' '}

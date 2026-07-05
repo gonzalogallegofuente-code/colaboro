@@ -16,6 +16,15 @@ export default function PrivacidadPage() {
         Aquí te contamos, en claro, qué datos se guardan y para qué.
       </p>
 
+      <div className="mt-4 rounded-2xl bg-[var(--card,#fff)] p-4 text-sm leading-relaxed text-[var(--ink-2)] shadow-sm ring-1 ring-black/5">
+        <p className="font-bold text-[var(--head)]">En resumen</p>
+        · Guardamos <b>lo mínimo</b>: tu email y contraseña (cifrada), el nombre o apodo de tus hijos con un avatar
+        dibujado, y sus tareas apuntadas.
+        <br />· <b>No</b> hay fotos, ni publicidad, ni analítica, ni cesión a terceros. Solo lo ve tu familia.
+        <br />· Todo viaja cifrado (HTTPS) y las copias externas van cifradas.
+        <br />· Puedes <b>borrarlo todo</b> cuando quieras en Ajustes → Cuenta, con efecto inmediato.
+      </div>
+
       <h2 className={h2}>Responsable</h2>
       <p className={p}>
         El administrador de esta instancia familiar. Contacto para cualquier cuestión de datos:{' '}

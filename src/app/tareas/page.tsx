@@ -129,6 +129,11 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           <p className="text-sm text-[var(--ink-2)]">
             Conectado como <span className="font-bold text-[var(--ink)]">{accEmail}</span>
           </p>
+          <p className="mt-1">
+            <Link href="/privacidad" className="text-xs font-bold text-indigo-600 underline underline-offset-2">
+              🔒 Política de privacidad y tus datos
+            </Link>
+          </p>
           <form action={changePassword} className="mt-3 space-y-2">
             <input name="current" type="password" placeholder="Contraseña actual" className={inputCls} required />
             <input name="next" type="password" placeholder="Nueva contraseña (mín. 6)" className={inputCls} required />
