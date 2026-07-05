@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colaboro — Propuestas de diseño (archivo · 3 rondas · 18 propuestas)</title>
+<style>
+  :root{
+    --paper:#F6F5F1; --ink:#211F1C; --ink-2:#6D6862; --line:#E1DED6;
+    --note:#0F6B62; --note-soft:#E3EFEC;
+  }
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;}
+  .wrap{max-width:1120px;margin:0 auto;padding:48px 24px 80px;}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);font-weight:600;}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1.12;margin:10px 0 14px;text-wrap:balance;}
+  .lede{max-width:64ch;color:var(--ink-2);margin:0 0 8px;}
+  .lede b{color:var(--ink);}
+
+  .round-head{margin-top:80px;padding:14px 18px;background:var(--ink);color:#F6F5F1;border-radius:14px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .round-head h2{font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);margin:0;}
+  .round-head .tag{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.8;font-weight:600;}
+
+  section{margin-top:40px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .sec-head h3.age-t{font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);margin:0;}
+  .sec-head .age{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--note);font-weight:700;}
+  .sec-note{color:var(--ink-2);font-size:14.5px;max-width:74ch;margin:10px 0 26px;}
+
+  .row{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;}
+  .prop{flex:1 1 300px;max-width:352px;}
+  .prop h4{font-family:Georgia,serif;font-size:21px;margin:16px 0 4px;}
+  .prop h4 small{font-family:"Segoe UI",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);font-weight:600;margin-left:8px;}
+  .vibe{font-size:14.5px;color:var(--ink-2);margin:0 0 10px;}
+  .meta{font-size:13px;color:var(--ink-2);margin:8px 0 0;}
+  .meta b{color:var(--ink);font-weight:600;}
+  .pal{display:flex;gap:6px;margin:10px 0 2px;}
+  .pal i{width:26px;height:26px;border-radius:8px;border:1px solid rgba(0,0,0,.12);display:block;}
+  .ideal{margin-top:10px;padding:10px 12px;background:var(--note-soft);border-radius:10px;font-size:13.5px;color:#144E47;}
+  .ideal b{font-weight:700;}
+  .coste{display:inline-block;margin-top:10px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;border-radius:999px;padding:4px 12px;}
+  .coste.piel{background:#E7F0E4;color:#3D6B33;}
+  .coste.media{background:#FBEED2;color:#8A6210;}
+  .coste.grande{background:#F9E2DC;color:#9C3F26;}
+
+  .phone{width:100%;max-width:340px;border-radius:34px;padding:10px;background:#15141A;box-shadow:0 18px 40px rgba(20,18,14,.18);}
+  .screen{border-radius:26px;overflow:hidden;height:600px;display:flex;flex-direction:column;position:relative;}
+  .screen *{box-sizing:border-box;}
+
+  /* ════════ RONDA 1 · pieles ════════ */
+  /* ── P1 CUENTO ── */
+  .m-cuento{background:#FFF8E7;font-family:"Comic Sans MS","Segoe UI",sans-serif;color:#46342B;}
+  .m-cuento .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 6px;font-weight:700;}
+  .m-cuento .top .logo{font-size:19px;}
+  .m-cuento .top .ic{font-size:15px;letter-spacing:4px;}
+  .m-cuento .kids{display:flex;gap:10px;padding:8px 14px;}
+  .m-cuento .kid{flex:1;text-align:center;border:3px solid #46342B;border-radius:22px;padding:8px 4px 6px;background:#fff;box-shadow:4px 4px 0 #46342B22;}
+  .m-cuento .kid.on{background:#F9C846;box-shadow:4px 4px 0 #46342B;}
+  .m-cuento .kid .av{font-size:30px;line-height:1.1;}
+  .m-cuento .kid .nm{font-weight:700;font-size:14px;}
+  .m-cuento .kid .eu{font-size:12.5px;}
+  .m-cuento .sect{margin:10px 16px 4px;font-size:15px;font-weight:700;}
+  .m-cuento .task{display:flex;align-items:center;gap:10px;margin:8px 12px;background:#fff;border:3px solid #46342B;border-radius:20px;padding:9px 10px;box-shadow:4px 4px 0 #46342B18;}
+  .m-cuento .task .tic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2.5px solid #46342B;}
+  .m-cuento .t1 .tic{background:#7EB5D6;} .m-cuento .t2 .tic{background:#EF6461;} .m-cuento .t3 .tic{background:#4E937A;}
+  .m-cuento .task .tx{flex:1;min-width:0;}
+  .m-cuento .task .nm{font-weight:700;font-size:14.5px;line-height:1.25;}
+  .m-cuento .task .va{display:inline-block;background:#F9C846;border:2px solid #46342B;border-radius:999px;font-size:11.5px;font-weight:700;padding:1px 8px;margin-top:2px;}
+  .m-cuento .task .go{width:46px;height:46px;border-radius:50%;background:#EF6461;border:3px solid #46342B;color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #46342B;}
+  .m-cuento .foot{margin-top:auto;text-align:center;padding:10px;font-size:12.5px;color:#8A7A62;}
+  .m-cuento .medal{margin:6px 16px;background:#FDEBC8;border:2.5px dashed #46342B55;border-radius:16px;padding:7px 12px;font-size:13px;font-weight:700;}
+
+  /* ── P2 JUGUETE ── */
+  .m-juguete{background:#FFFFFF;font-family:"Segoe UI",sans-serif;color:#20242C;}
+  .m-juguete .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px;}
+  .m-juguete .top .logo{font-weight:900;font-size:18px;letter-spacing:-.02em;}
+  .m-juguete .top .ic{font-size:15px;letter-spacing:4px;}
+  .m-juguete .kids{display:flex;gap:10px;padding:6px 14px;}
+  .m-juguete .kid{flex:1;text-align:center;border-radius:20px;padding:10px 4px 8px;background:#F1F3F7;border-bottom:5px solid #D8DCE4;}
+  .m-juguete .kid.on{background:#2E7CF6;border-bottom:5px solid #1B56C4;color:#fff;}
+  .m-juguete .kid .av{font-size:30px;}
+  .m-juguete .kid .nm{font-weight:800;font-size:14px;}
+  .m-juguete .kid .eu{font-size:12.5px;font-weight:700;opacity:.85;}
+  .m-juguete .stars{display:flex;gap:5px;justify-content:center;padding:8px 0 2px;font-size:16px;}
+  .m-juguete .sect{margin:8px 16px 2px;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;}
+  .m-juguete .task{display:flex;align-items:center;gap:12px;margin:9px 12px;border-radius:22px;padding:12px;color:#fff;border-bottom:6px solid rgba(0,0,0,.25);}
+  .m-juguete .t1{background:#2FBF71;} .m-juguete .t2{background:#FF8A00;} .m-juguete .t3{background:#F45B9F;}
+  .m-juguete .task .tic{width:46px;height:46px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;}
+  .m-juguete .task .tx{flex:1;min-width:0;}
+  .m-juguete .task .nm{font-weight:800;font-size:15px;line-height:1.2;}
+  .m-juguete .task .va{font-size:12.5px;font-weight:700;opacity:.95;}
+  .m-juguete .task .go{width:48px;height:48px;border-radius:16px;background:#FFDC33;border-bottom:5px solid #D9A800;color:#20242C;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+  .m-juguete .foot{margin-top:auto;text-align:center;font-weight:800;font-size:13px;color:#8B93A3;padding:10px;}
+
+  /* ── P3 CALMA ── */
+  .m-calma{background:#EDF0EC;font-family:"Segoe UI",sans-serif;color:#4A4741;}
+  .m-calma .top{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 8px;}
+  .m-calma .top .logo{font-weight:600;font-size:16px;letter-spacing:.06em;}
+  .m-calma .top .ic{font-size:13px;letter-spacing:5px;opacity:.7;}
+  .m-calma .kids{display:flex;gap:10px;padding:10px 18px;}
+  .m-calma .kid{flex:1;text-align:center;border-radius:18px;padding:12px 4px 9px;background:transparent;}
+  .m-calma .kid.on{background:#FFFFFF;box-shadow:0 2px 10px rgba(90,85,75,.08);}
+  .m-calma .kid .av{font-size:26px;}
+  .m-calma .kid .nm{font-weight:600;font-size:13.5px;margin-top:2px;}
+  .m-calma .kid .eu{font-size:12px;color:#8A867E;}
+  .m-calma .saldo{text-align:center;padding:8px 0 2px;}
+  .m-calma .saldo .n{font-size:30px;font-weight:300;letter-spacing:.02em;}
+  .m-calma .saldo .l{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#8A867E;}
+  .m-calma .sect{margin:16px 22px 4px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#8A867E;font-weight:600;}
+  .m-calma .task{display:flex;align-items:center;gap:12px;margin:8px 16px;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 1px 4px rgba(90,85,75,.06);}
+  .m-calma .task .tic{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;}
+  .m-calma .t1 .tic{background:#DCE5DA;} .m-calma .t2 .tic{background:#E9DBD9;} .m-calma .t3 .tic{background:#E4D9C8;}
+  .m-calma .task .tx{flex:1;}
+  .m-calma .task .nm{font-weight:600;font-size:14px;}
+  .m-calma .task .va{font-size:12px;color:#8A867E;}
+  .m-calma .task .go{width:38px;height:38px;border-radius:50%;border:1.5px solid #96A98F;color:#5F7159;font-size:20px;display:flex;align-items:center;justify-content:center;background:#fff;}
+  .m-calma .foot{margin-top:auto;text-align:center;padding:12px;font-size:12px;color:#8A867E;}
+
+  /* ── M1 ARCADE ── */
+  .m-arcade{background:linear-gradient(180deg,#0B1220 0%,#0E1830 100%);font-family:"Segoe UI",sans-serif;color:#E8EEF9;}
+  .m-arcade .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 6px;}
+  .m-arcade .top .logo{font-family:Consolas,monospace;font-weight:700;font-size:15px;letter-spacing:.14em;color:#B6FF2E;}
+  .m-arcade .top .ic{font-size:14px;letter-spacing:4px;opacity:.8;}
+  .m-arcade .hud{margin:8px 14px;border:1px solid #22314F;background:#101B33;border-radius:12px;padding:10px 12px;}
+  .m-arcade .hud .r1{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+  .m-arcade .hud .r1 .nv{font-family:Consolas,monospace;color:#33E1FF;font-weight:700;}
+  .m-arcade .hud .r1 .nm{font-weight:700;}
+  .m-arcade .hud .r1 .eu{font-family:Consolas,monospace;color:#B6FF2E;font-weight:700;}
+  .m-arcade .bar{height:8px;border-radius:4px;background:#1B2740;margin-top:8px;overflow:hidden;}
+  .m-arcade .bar i{display:block;height:100%;width:64%;background:linear-gradient(90deg,#33E1FF,#B6FF2E);}
+  .m-arcade .bar-l{display:flex;justify-content:space-between;font-family:Consolas,monospace;font-size:10.5px;color:#7C8DB0;margin-top:4px;}
+  .m-arcade .kids{display:flex;gap:8px;padding:6px 14px;}
+  .m-arcade .kid{flex:1;display:flex;align-items:center;gap:8px;border:1px solid #22314F;border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600;color:#9FB0D0;}
+  .m-arcade .kid.on{border-color:#B6FF2E;color:#E8EEF9;background:#141F3A;box-shadow:0 0 12px #B6FF2E33;}
+  .m-arcade .sect{margin:10px 18px 2px;font-family:Consolas,monospace;font-size:11px;letter-spacing:.22em;color:#7C8DB0;}
+  .m-arcade .task{display:flex;align-items:center;gap:11px;margin:8px 14px;background:#101B33;border:1px solid #22314F;border-left:3px solid #33E1FF;border-radius:10px;padding:10px 12px;}
+  .m-arcade .t2{border-left-color:#B6FF2E;} .m-arcade .t3{border-left-color:#8A6CFF;}
+  .m-arcade .task .tic{width:40px;height:40px;border-radius:9px;background:#182647;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .m-arcade .task .tx{flex:1;min-width:0;}
+  .m-arcade .task .nm{font-weight:700;font-size:14px;}
+  .m-arcade .task .va{font-family:Consolas,monospace;font-size:11.5px;color:#B6FF2E;}
+  .m-arcade .task .go{width:42px;height:42px;border-radius:10px;background:transparent;border:1.5px solid #B6FF2E;color:#B6FF2E;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .m-arcade .foot{margin-top:auto;display:flex;justify-content:center;gap:14px;padding:10px;font-family:Consolas,monospace;font-size:11px;color:#7C8DB0;}
+
+  /* ── M2 SPORT ── */
+  .m-sport{background:#FAFAFA;font-family:Bahnschrift,"Arial Narrow","Segoe UI",sans-serif;color:#111;}
+  .m-sport .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;}
+  .m-sport .top .logo{font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;}
+  .m-sport .top .ic{font-size:14px;letter-spacing:4px;}
+  .m-sport .hero{padding:6px 16px 2px;}
+  .m-sport .hero .l{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#777;}
+  .m-sport .hero .n{font-size:46px;font-weight:700;line-height:1.02;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .m-sport .hero .r{display:inline-block;background:#111;color:#D7FF3F;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;margin-top:6px;transform:skewX(-8deg);}
+  .m-sport .kids{display:flex;gap:0;margin:12px 16px 0;border:2px solid #111;}
+  .m-sport .kid{flex:1;text-align:center;padding:8px 4px;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.06em;}
+  .m-sport .kid.on{background:#111;color:#fff;}
+  .m-sport .sect{margin:14px 18px 2px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#777;}
+  .m-sport .task{display:flex;align-items:center;gap:12px;margin:9px 16px;background:#fff;border:1px solid #E4E4E4;border-left:5px solid #111;padding:11px 12px;}
+  .m-sport .task .tic{font-size:22px;width:38px;text-align:center;}
+  .m-sport .task .tx{flex:1;min-width:0;}
+  .m-sport .task .nm{font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:.03em;}
+  .m-sport .task .va{font-size:12px;color:#777;font-variant-numeric:tabular-nums;}
+  .m-sport .task .go{width:42px;height:42px;background:#D7FF3F;border:2px solid #111;color:#111;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .m-sport .foot{margin-top:auto;display:flex;justify-content:space-between;padding:10px 16px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#777;}
+
+  /* ── M3 CLEAN ── */
+  .m-clean{background:#F4F5F7;font-family:"Segoe UI",sans-serif;color:#1B1F27;}
+  .m-clean .top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px;}
+  .m-clean .top .logo{font-weight:700;font-size:16.5px;letter-spacing:-.01em;}
+  .m-clean .top .ic{font-size:14px;letter-spacing:4px;color:#8A90A0;}
+  .m-clean .card{background:#fff;border-radius:16px;margin:8px 14px;padding:14px;box-shadow:0 1px 3px rgba(25,30,45,.06);}
+  .m-clean .who{display:flex;align-items:center;gap:10px;}
+  .m-clean .who .av{width:40px;height:40px;border-radius:50%;background:#E8ECFF;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .m-clean .who .nm{font-weight:700;font-size:15px;}
+  .m-clean .who .sub{font-size:12px;color:#8A90A0;}
+  .m-clean .who .eu{margin-left:auto;font-weight:700;font-size:18px;color:#4F6BFF;font-variant-numeric:tabular-nums;}
+  .m-clean .prog{margin-top:12px;}
+  .m-clean .prog .pl{display:flex;justify-content:space-between;font-size:12px;color:#8A90A0;margin-bottom:5px;}
+  .m-clean .prog .pb{height:7px;border-radius:4px;background:#EDEFF4;overflow:hidden;}
+  .m-clean .prog .pb i{display:block;height:100%;width:58%;background:#4F6BFF;border-radius:4px;}
+  .m-clean .sect{margin:12px 20px 0;font-size:12.5px;font-weight:700;color:#8A90A0;}
+  .m-clean .task{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;margin:8px 14px;padding:11px 12px;box-shadow:0 1px 3px rgba(25,30,45,.05);}
+  .m-clean .task .tic{width:38px;height:38px;border-radius:10px;background:#F0F2F7;display:flex;align-items:center;justify-content:center;font-size:19px;}
+  .m-clean .task .tx{flex:1;min-width:0;}
+  .m-clean .task .nm{font-weight:600;font-size:14px;}
+  .m-clean .task .va{font-size:12px;color:#8A90A0;font-variant-numeric:tabular-nums;}
+  .m-clean .task .go{width:34px;height:34px;border-radius:50%;background:#4F6BFF;color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center;}
+  .m-clean .foot{margin-top:auto;text-align:center;padding:12px;font-size:12px;color:#8A90A0;}
+
+  /* ════════ RONDA 2 · otra estructura ════════ */
+  /* ── P4 AVENTURA ── */
+  .m-avent{background:linear-gradient(180deg,#8ED0F5 0%,#C2E6F8 34%,#D8EFC8 62%,#A9D98B 100%);font-family:"Segoe UI",sans-serif;color:#2E4A2A;}
+  .m-avent .top{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 4px;font-weight:700;color:#1F3D57;}
+  .m-avent .coin{background:#FFFFFFCC;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;}
+  .m-avent .title{margin:4px auto 0;background:#FFFFFFE8;border-radius:999px;padding:5px 16px;font-size:13.5px;font-weight:800;width:max-content;color:#1F3D57;box-shadow:0 2px 6px rgba(30,60,40,.15);}
+  .m-avent .map{position:relative;flex:1;}
+  .m-avent .map svg{position:absolute;inset:0;width:100%;height:100%;}
+  .m-avent .node{position:absolute;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 0 rgba(30,60,40,.25);}
+  .m-avent .done{background:#7BC96C;border:4px solid #fff;color:#fff;}
+  .m-avent .now{background:#fff;border:4px solid #FF9430;width:74px;height:74px;font-size:34px;box-shadow:0 0 0 8px #FF943033,0 5px 0 rgba(30,60,40,.25);}
+  .m-avent .lock{background:#E9EFE4;border:4px solid #fff;opacity:.75;font-size:22px;}
+  .m-avent .lbl{position:absolute;font-size:11.5px;font-weight:800;background:#FFFFFFD9;border-radius:8px;padding:2px 8px;color:#2E4A2A;white-space:nowrap;}
+  .m-avent .hero-task{position:absolute;left:50%;transform:translateX(-50%);bottom:88px;background:#fff;border-radius:18px;padding:10px 14px;text-align:center;box-shadow:0 6px 18px rgba(30,60,40,.2);width:200px;}
+  .m-avent .hero-task .nm{font-weight:800;font-size:14.5px;color:#1F3D57;}
+  .m-avent .hero-task .va{font-size:12px;color:#6B8A66;font-weight:700;}
+  .m-avent .hero-task .btn{margin-top:7px;background:#FF9430;color:#fff;font-weight:800;border-radius:12px;padding:7px 0;font-size:14px;box-shadow:0 3px 0 #C96E1D;}
+  .m-avent .foot{padding:10px;text-align:center;font-size:12.5px;font-weight:700;color:#3E5C39;background:#FFFFFF66;}
+
+  /* ── P5 MASCOTA ── */
+  .m-pet{background:linear-gradient(180deg,#EFE7FB 0%,#E4D9F6 70%,#CBBCE8 70%,#C2B2E2 100%);font-family:"Segoe UI",sans-serif;color:#4A3E63;}
+  .m-pet .top{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 4px;font-weight:700;color:#4A3E63;}
+  .m-pet .coin{background:#FFFFFFCC;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;}
+  .m-pet .bubble{margin:8px auto 0;background:#fff;border-radius:16px;padding:7px 14px;font-size:13px;font-weight:700;width:max-content;max-width:82%;box-shadow:0 3px 10px rgba(70,50,110,.12);position:relative;}
+  .m-pet .bubble:after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border:9px solid transparent;border-top-color:#fff;border-bottom:0;}
+  .m-pet .pet{text-align:center;margin-top:6px;}
+  .m-pet .pet .body{font-size:96px;line-height:1.05;filter:drop-shadow(0 10px 8px rgba(70,50,110,.25));}
+  .m-pet .pet .shadow{width:110px;height:14px;background:rgba(70,50,110,.18);border-radius:50%;margin:2px auto 0;}
+  .m-pet .mood{text-align:center;font-size:15px;margin-top:6px;}
+  .m-pet .mood .l{display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7A6B9C;font-weight:700;margin-bottom:2px;}
+  .m-pet .feed{margin:10px 12px 0;display:flex;flex-direction:column;gap:8px;}
+  .m-pet .fitem{display:flex;align-items:center;gap:10px;background:#FFFFFFE6;border-radius:16px;padding:9px 12px;box-shadow:0 2px 8px rgba(70,50,110,.10);}
+  .m-pet .fitem .tic{font-size:21px;}
+  .m-pet .fitem .tx{flex:1;min-width:0;}
+  .m-pet .fitem .nm{font-weight:800;font-size:13.5px;}
+  .m-pet .fitem .va{font-size:11.5px;color:#7A6B9C;font-weight:700;}
+  .m-pet .fitem .go{background:#8C6FF0;color:#fff;border-radius:12px;font-size:12px;font-weight:800;padding:7px 11px;box-shadow:0 3px 0 #6A50C4;}
+  .m-pet .foot{margin-top:auto;text-align:center;padding:10px;font-size:12px;font-weight:700;color:#FFFFFF;}
+
+  /* ── P6 NEVERA ── */
+  .m-fridge{background:linear-gradient(105deg,#F4F6F8 0%,#E7EBEF 55%,#DDE2E7 100%);font-family:"Segoe UI",sans-serif;color:#33393F;}
+  .m-fridge:before{content:"";position:absolute;top:90px;right:10px;width:9px;height:150px;border-radius:6px;background:linear-gradient(90deg,#C7CDD4,#AEB6BE);box-shadow:inset 0 2px 3px #fff;}
+  .m-fridge .top{display:flex;justify-content:space-between;align-items:center;padding:13px 16px 6px;font-weight:700;}
+  .m-fridge .top .ic{letter-spacing:4px;font-size:14px;}
+  .m-fridge .magnets{display:flex;gap:8px;padding:2px 16px 6px;}
+  .m-fridge .magnets i{width:14px;height:14px;border-radius:50%;display:block;box-shadow:inset 0 -2px 2px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.2);}
+  .m-fridge .pola{width:170px;background:#fff;padding:10px 10px 8px;box-shadow:0 6px 14px rgba(40,45,55,.22);transform:rotate(-3deg);margin:6px auto 2px;text-align:center;}
+  .m-fridge .pola .ph{background:linear-gradient(135deg,#FFE9B8,#FFD1A1);border-radius:4px;padding:10px 4px;font-size:26px;}
+  .m-fridge .pola .cap{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:12.5px;margin-top:6px;color:#4A4438;}
+  .m-fridge .chit{position:relative;background:#FFFDF5;margin:12px 22px 0;padding:10px 12px 9px 14px;box-shadow:0 4px 10px rgba(40,45,55,.16);display:flex;align-items:center;gap:10px;}
+  .m-fridge .chit .mag{position:absolute;top:-7px;left:14px;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 -2px 2px rgba(0,0,0,.25),0 2px 3px rgba(0,0,0,.25);}
+  .m-fridge .r1{transform:rotate(1.2deg);} .m-fridge .r2{transform:rotate(-1.4deg);} .m-fridge .r3{transform:rotate(.8deg);}
+  .m-fridge .chit .tic{font-size:22px;}
+  .m-fridge .chit .tx{flex:1;min-width:0;}
+  .m-fridge .chit .nm{font-weight:700;font-size:14px;}
+  .m-fridge .chit .va{font-size:12px;color:#8A8F96;}
+  .m-fridge .chit .star{font-size:22px;}
+  .m-fridge .chit .go{width:38px;height:38px;border-radius:50%;background:#E85D4A;color:#fff;font-size:21px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 3px rgba(0,0,0,.22),0 2px 4px rgba(0,0,0,.25);}
+  .m-fridge .note{font-family:"Segoe Print","Comic Sans MS",cursive;background:#FFF3A6;margin:14px 40px 0;padding:9px 12px;font-size:12.5px;transform:rotate(-1.5deg);box-shadow:0 4px 10px rgba(40,45,55,.18);color:#5A5230;}
+  .m-fridge .foot{margin-top:auto;text-align:center;padding:10px;font-size:12px;color:#8A8F96;font-weight:600;}
+
+  /* ── M4 CARTERA ── */
+  .m-bank{background:#0C1512;font-family:"Segoe UI",sans-serif;color:#E9F2EE;}
+  .m-bank .top{display:flex;justify-content:space-between;align-items:center;padding:15px 18px 8px;font-weight:700;}
+  .m-bank .top .ic{letter-spacing:4px;font-size:14px;opacity:.8;}
+  .m-bank .card{margin:6px 14px;border-radius:18px;padding:16px 16px 13px;background:linear-gradient(135deg,#3DDC97 0%,#0FA37F 100%);color:#062D22;position:relative;overflow:hidden;}
+  .m-bank .card:before{content:"";position:absolute;right:-38px;top:-38px;width:130px;height:130px;border-radius:50%;background:#FFFFFF2E;}
+  .m-bank .card .l{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.75;}
+  .m-bank .card .n{font-size:37px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .m-bank .card .who{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}
+  .m-bank .card .chip{width:30px;height:22px;border-radius:5px;background:linear-gradient(135deg,#F5D67B,#D9A93F);}
+  .m-bank .week{display:flex;align-items:flex-end;gap:5px;margin:12px 20px 2px;height:44px;}
+  .m-bank .week i{flex:1;background:#1C2B25;border-radius:4px 4px 0 0;display:block;}
+  .m-bank .week i.hi{background:#3DDC97;}
+  .m-bank .week-l{display:flex;justify-content:space-between;margin:4px 20px 0;font-size:10.5px;color:#7FA294;}
+  .m-bank .sect{margin:12px 20px 2px;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:#7FA294;font-weight:700;}
+  .m-bank .mov{display:flex;align-items:center;gap:11px;padding:9px 18px;}
+  .m-bank .mov+.mov{border-top:1px solid #16241E;}
+  .m-bank .mov .tic{width:36px;height:36px;border-radius:50%;background:#16241E;display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .m-bank .mov .tx{flex:1;min-width:0;}
+  .m-bank .mov .nm{font-weight:700;font-size:13.5px;}
+  .m-bank .mov .tm{font-size:11px;color:#7FA294;}
+  .m-bank .mov .am{font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;color:#3DDC97;}
+  .m-bank .mov .am.neg{color:#FF8E7A;}
+  .m-bank .cta{margin:10px 14px 0;background:#3DDC97;color:#062D22;border-radius:14px;text-align:center;font-weight:800;padding:11px 0;font-size:14.5px;}
+  .m-bank .foot{margin-top:auto;display:flex;justify-content:space-around;padding:10px;font-size:11.5px;color:#7FA294;font-weight:700;}
+
+  /* ── M5 PÍXEL ── */
+  .m-pixel{background:#9BBC0F;font-family:Consolas,"Courier New",monospace;color:#0F380F;}
+  .m-pixel .top{background:#0F380F;color:#9BBC0F;display:flex;justify-content:space-between;padding:10px 14px;font-weight:700;font-size:13px;letter-spacing:.08em;}
+  .m-pixel .stats{display:flex;justify-content:space-between;padding:9px 14px;font-weight:700;font-size:13px;border-bottom:4px solid #0F380F;}
+  .m-pixel .win{margin:16px 14px 0;border:4px solid #0F380F;background:#8BAC0F;box-shadow:6px 6px 0 #30623055;position:relative;padding:16px 12px 12px;}
+  .m-pixel .win .tab{position:absolute;top:-13px;left:10px;background:#0F380F;color:#9BBC0F;font-size:11.5px;font-weight:700;padding:2px 10px;letter-spacing:.1em;}
+  .m-pixel .q{display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:13.5px;font-weight:700;}
+  .m-pixel .q+.q{border-top:2px dashed #0F380F55;}
+  .m-pixel .q .cur{width:14px;}
+  .m-pixel .q .nm{flex:1;letter-spacing:.02em;}
+  .m-pixel .q .va{font-size:12px;}
+  .m-pixel .q.sel{background:#0F380F;color:#9BBC0F;margin:0 -8px;padding:7px 12px;}
+  .m-pixel .abtn{margin:14px 14px 0;border:4px solid #0F380F;background:#306230;color:#9BBC0F;text-align:center;font-weight:700;padding:10px 0;font-size:14px;letter-spacing:.14em;box-shadow:5px 5px 0 #0F380F;}
+  .m-pixel .bar{margin:16px 14px 0;}
+  .m-pixel .bar .l{font-size:11px;font-weight:700;letter-spacing:.1em;margin-bottom:4px;}
+  .m-pixel .bar .track{border:3px solid #0F380F;height:16px;background:#8BAC0F;padding:2px;}
+  .m-pixel .bar .track i{display:block;height:100%;width:64%;background:repeating-linear-gradient(90deg,#0F380F 0 6px,#306230 6px 12px);}
+  .m-pixel .foot{margin-top:auto;background:#0F380F;color:#9BBC0F;text-align:center;font-size:11px;padding:9px;letter-spacing:.12em;font-weight:700;}
+
+  /* ── M6 MURO ── */
+  .m-feed{background:#FFFFFF;font-family:"Segoe UI",sans-serif;color:#14171C;}
+  .m-feed .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px;}
+  .m-feed .top .logo{font-weight:800;font-size:18px;letter-spacing:-.02em;}
+  .m-feed .top .ic{font-size:15px;letter-spacing:4px;color:#5A6270;}
+  .m-feed .stories{display:flex;gap:14px;padding:6px 16px 10px;border-bottom:1px solid #EEF0F3;}
+  .m-feed .st{text-align:center;font-size:11px;font-weight:600;color:#5A6270;}
+  .m-feed .st .ring{width:56px;height:56px;border-radius:50%;padding:3px;background:linear-gradient(135deg,#FF7A00,#FF2E88);display:flex;}
+  .m-feed .st .ring.off{background:#E3E6EA;}
+  .m-feed .st .in{flex:1;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:25px;}
+  .m-feed .score{margin:10px 16px 0;background:#F3F5F8;border-radius:12px;text-align:center;font-size:13px;font-weight:700;padding:8px;color:#3B4250;}
+  .m-feed .post{padding:12px 16px 8px;border-bottom:1px solid #EEF0F3;}
+  .m-feed .post .head{display:flex;align-items:center;gap:9px;}
+  .m-feed .post .av{width:34px;height:34px;border-radius:50%;background:#FFE8CF;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .m-feed .post .who{font-size:13.5px;}
+  .m-feed .post .who b{font-weight:800;}
+  .m-feed .post .tm{font-size:11.5px;color:#8A93A0;}
+  .m-feed .post .body{margin:8px 0 0;background:linear-gradient(135deg,#F6F8FB,#EEF3F9);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;}
+  .m-feed .post .big{font-size:30px;}
+  .m-feed .post .desc{font-size:13.5px;font-weight:600;}
+  .m-feed .post .desc .eu{color:#0FA37F;font-weight:800;}
+  .m-feed .reacts{display:flex;gap:8px;margin-top:8px;}
+  .m-feed .reacts span{background:#F3F5F8;border-radius:999px;font-size:12px;font-weight:700;padding:4px 10px;color:#3B4250;}
+  .m-feed .compose{margin-top:auto;display:flex;gap:8px;padding:10px 14px;border-top:1px solid #EEF0F3;}
+  .m-feed .compose .in{flex:1;background:#F3F5F8;border-radius:999px;padding:9px 14px;font-size:13px;color:#8A93A0;}
+  .m-feed .compose .go{width:38px;height:38px;border-radius:50%;background:#14171C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;}
+
+  /* ════════ RONDA 3 · más mundos ════════ */
+  /* ── P7 COHETE ── */
+  .m-space{background:
+    radial-gradient(1.4px 1.4px at 12% 18%,#fff 99%,transparent),
+    radial-gradient(1.6px 1.6px at 68% 9%,#fff 99%,transparent),
+    radial-gradient(1.2px 1.2px at 84% 30%,#FFFFFFB0 99%,transparent),
+    radial-gradient(1.4px 1.4px at 30% 40%,#FFFFFF90 99%,transparent),
+    radial-gradient(1.8px 1.8px at 55% 24%,#fff 99%,transparent),
+    linear-gradient(180deg,#0A1633 0%,#14264D 70%,#1C3159 100%);
+    font-family:"Segoe UI",sans-serif;color:#EAF1FF;}
+  .m-space .top{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 4px;font-weight:700;}
+  .m-space .coin{background:#FFFFFF22;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;}
+  .m-space .planets{display:flex;justify-content:space-between;padding:6px 22px 0;font-size:17px;opacity:.95;}
+  .m-space .planets .today{filter:drop-shadow(0 0 6px #6EE7F0);font-size:20px;}
+  .m-space .planets-l{display:flex;justify-content:space-between;padding:0 22px;font-size:9.5px;color:#8FA5CE;letter-spacing:.06em;}
+  .m-space .launch{display:flex;align-items:flex-end;justify-content:center;gap:18px;margin-top:8px;height:158px;}
+  .m-space .rocket{font-size:74px;line-height:1;filter:drop-shadow(0 6px 12px rgba(110,231,240,.35));}
+  .m-space .pad{width:120px;height:8px;background:#3A4E7C;border-radius:4px;margin:4px auto 0;}
+  .m-space .gauge{width:26px;height:130px;border-radius:13px;background:#101F42;border:2px solid #3A4E7C;padding:3px;display:flex;flex-direction:column;justify-content:flex-end;}
+  .m-space .gauge i{display:block;height:66%;border-radius:9px;background:linear-gradient(180deg,#6EE7F0,#FFB13D);}
+  .m-space .gauge-l{font-size:9.5px;letter-spacing:.14em;color:#8FA5CE;text-align:center;margin-top:4px;}
+  .m-space .msg{text-align:center;font-weight:800;font-size:14.5px;margin-top:2px;color:#FFD98A;}
+  .m-space .fuel{margin:10px 12px 0;display:flex;flex-direction:column;gap:7px;}
+  .m-space .fi{display:flex;align-items:center;gap:10px;background:#FFFFFF14;border:1px solid #FFFFFF1F;border-radius:14px;padding:8px 11px;}
+  .m-space .fi .tic{font-size:20px;}
+  .m-space .fi .tx{flex:1;min-width:0;}
+  .m-space .fi .nm{font-weight:700;font-size:13.5px;}
+  .m-space .fi .va{font-size:11.5px;color:#9FB4DC;}
+  .m-space .fi .go{background:#FFB13D;color:#3A2400;border-radius:11px;font-size:12px;font-weight:800;padding:7px 10px;box-shadow:0 3px 0 #B87A1E;}
+  .m-space .fi.ok{opacity:.65;}
+  .m-space .fi.ok .go{background:#2E9E6B;color:#fff;box-shadow:none;}
+  .m-space .foot{margin-top:auto;text-align:center;padding:9px;font-size:12px;color:#8FA5CE;font-weight:600;}
+
+  /* ── P8 JARDÍN ── */
+  .m-garden{background:linear-gradient(180deg,#DFF1FA 0%,#EAF6E9 52%,#E7DFC8 78%,#CBB088 100%);font-family:"Segoe UI",sans-serif;color:#3F4A35;}
+  .m-garden .top{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 4px;font-weight:700;color:#3F4A35;}
+  .m-garden .coin{background:#FFFFFFCC;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;}
+  .m-garden .say{margin:6px auto 0;width:max-content;max-width:85%;background:#FFFFFFE6;border-radius:14px;padding:6px 14px;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(80,90,50,.12);}
+  .m-garden .sun{position:absolute;top:46px;right:22px;font-size:34px;filter:drop-shadow(0 0 12px #FFD34D88);}
+  .m-garden .garden{margin-top:auto;padding:0 10px;}
+  .m-garden .plants{display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px;}
+  .m-garden .plant{width:38px;text-align:center;}
+  .m-garden .plant .p{line-height:1;}
+  .m-garden .d1 .p{font-size:30px;} .m-garden .d2 .p{font-size:30px;}
+  .m-garden .today-p .p{font-size:34px;filter:drop-shadow(0 0 8px #8BD46F);}
+  .m-garden .empty .p{font-size:16px;opacity:.55;}
+  .m-garden .plant .d{font-size:9.5px;font-weight:800;color:#6C6046;letter-spacing:.06em;margin-top:3px;}
+  .m-garden .soil{height:34px;background:linear-gradient(180deg,#8A6A44,#755736);border-radius:14px 14px 0 0;margin-top:-4px;position:relative;z-index:-1;}
+  .m-garden .tasks{background:#FFFDF6;border-radius:20px 20px 0 0;padding:12px 12px 10px;box-shadow:0 -6px 18px rgba(80,90,50,.14);}
+  .m-garden .tl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8A8163;font-weight:700;margin:0 4px 8px;}
+  .m-garden .ti{display:flex;align-items:center;gap:10px;padding:7px 6px;}
+  .m-garden .ti+.ti{border-top:1px dashed #E4DCC4;}
+  .m-garden .ti .tic{font-size:20px;}
+  .m-garden .ti .tx{flex:1;min-width:0;}
+  .m-garden .ti .nm{font-weight:700;font-size:13.5px;color:#4A4535;}
+  .m-garden .ti .va{font-size:11.5px;color:#8A8163;}
+  .m-garden .ti .go{background:#6FA84F;color:#fff;border-radius:11px;font-size:12px;font-weight:800;padding:7px 11px;box-shadow:0 3px 0 #4C7A33;}
+  .m-garden .ti.ok .go{background:#D8D2BC;color:#7A745C;box-shadow:none;}
+
+  /* ── P9 SUPERHÉROE ── */
+  .m-hero{background:#FFD93B;background-image:radial-gradient(circle,#00000014 1.5px,transparent 1.6px);background-size:9px 9px;font-family:"Segoe UI",sans-serif;color:#1A1A2E;}
+  .m-hero .top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 4px;font-weight:900;}
+  .m-hero .top .logo{font-family:Impact,"Arial Black",sans-serif;font-size:19px;letter-spacing:.03em;-webkit-text-stroke:1px #1A1A2E;color:#fff;text-shadow:2px 2px 0 #1A1A2E;}
+  .m-hero .banner{margin:6px 12px 0;background:#E4322B;color:#fff;border:3px solid #1A1A2E;box-shadow:4px 4px 0 #1A1A2E;padding:7px 10px;text-align:center;font-family:Impact,"Arial Black",sans-serif;font-size:15px;letter-spacing:.05em;transform:rotate(-1.2deg);}
+  .m-hero .panel{margin:12px 12px 0;background:#fff;border:3px solid #1A1A2E;box-shadow:5px 5px 0 #1A1A2E;padding:10px 12px;position:relative;}
+  .m-hero .panel .cap{position:absolute;top:-12px;left:8px;background:#2D7DD2;color:#fff;border:2.5px solid #1A1A2E;font-size:10.5px;font-weight:900;letter-spacing:.1em;padding:1px 8px;text-transform:uppercase;}
+  .m-hero .who{display:flex;align-items:center;gap:10px;}
+  .m-hero .who .av{font-size:38px;}
+  .m-hero .who .nm{font-family:Impact,"Arial Black",sans-serif;font-size:17px;letter-spacing:.03em;}
+  .m-hero .who .sub{font-size:11.5px;font-weight:700;color:#5A5A6E;}
+  .m-hero .power{margin-top:8px;}
+  .m-hero .power .l{font-size:10px;font-weight:900;letter-spacing:.16em;}
+  .m-hero .power .track{border:2.5px solid #1A1A2E;height:14px;background:#fff;margin-top:3px;}
+  .m-hero .power .track i{display:block;height:100%;width:66%;background:repeating-linear-gradient(45deg,#E4322B 0 8px,#FF7B4D 8px 16px);}
+  .m-hero .mission{display:flex;align-items:center;gap:10px;padding:8px 2px;}
+  .m-hero .mission+.mission{border-top:2.5px dashed #1A1A2E33;}
+  .m-hero .mission .tic{font-size:23px;}
+  .m-hero .mission .tx{flex:1;min-width:0;}
+  .m-hero .mission .nm{font-weight:900;font-size:13.5px;}
+  .m-hero .mission .va{font-size:11.5px;font-weight:700;color:#5A5A6E;}
+  .m-hero .mission .go{background:#2D7DD2;color:#fff;border:2.5px solid #1A1A2E;font-family:Impact,sans-serif;font-size:12.5px;letter-spacing:.06em;padding:6px 9px;box-shadow:3px 3px 0 #1A1A2E;}
+  .m-hero .pow{position:absolute;right:14px;bottom:88px;background:#fff;border:3px solid #1A1A2E;border-radius:50% 45% 55% 48%;padding:14px 10px;font-family:Impact,sans-serif;font-size:16px;transform:rotate(8deg);box-shadow:4px 4px 0 #1A1A2E;color:#E4322B;}
+  .m-hero .foot{margin-top:auto;text-align:center;font-weight:900;font-size:12px;padding:9px;letter-spacing:.08em;}
+
+  /* ── M7 CIUDAD ── */
+  .m-city{background:linear-gradient(180deg,#2B2150 0%,#4A3A78 45%,#8A5A8F 78%,#C9707F 100%);font-family:"Segoe UI",sans-serif;color:#F2ECFF;}
+  .m-city .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;font-weight:700;}
+  .m-city .coin{background:#FFFFFF22;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;}
+  .m-city .hint{text-align:center;font-size:12.5px;color:#D9CBF2;font-weight:600;padding:2px 20px 0;}
+  .m-city .moon{position:absolute;top:52px;left:24px;font-size:26px;opacity:.9;}
+  .m-city .sky-goal{margin:10px 14px 0;background:#FFFFFF1A;border:1px solid #FFFFFF2B;border-radius:12px;padding:8px 12px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+  .m-city .sky-goal b{color:#FFD98A;}
+  .m-city .blocks{margin-top:auto;display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:0 14px;}
+  .m-city .b{width:52px;border-radius:4px 4px 0 0;background:#1D1837;background-image:
+      linear-gradient(#FFD98A66 2.5px,transparent 2.5px),
+      linear-gradient(90deg,#FFD98A66 2.5px,transparent 2.5px);
+    background-size:10px 13px;border:1.5px solid #14102A;border-bottom:0;position:relative;}
+  .m-city .b .tag{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:16px;}
+  .m-city .b .lv{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9.5px;font-weight:800;color:#CDBFEA;}
+  .m-city .b.build:after{content:"🏗️";position:absolute;top:-40px;right:-12px;font-size:20px;}
+  .m-city .ground{height:12px;background:#14102A;}
+  .m-city .panel{background:#171230;padding:10px 14px 8px;}
+  .m-city .panel .l{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8F82B8;font-weight:700;margin-bottom:6px;}
+  .m-city .ci{display:flex;align-items:center;gap:10px;padding:6px 0;}
+  .m-city .ci+.ci{border-top:1px solid #241D45;}
+  .m-city .ci .tic{font-size:19px;}
+  .m-city .ci .tx{flex:1;min-width:0;}
+  .m-city .ci .nm{font-weight:700;font-size:13px;}
+  .m-city .ci .va{font-size:11px;color:#8F82B8;}
+  .m-city .ci .go{background:#FFD98A;color:#3A2A00;border-radius:10px;font-size:12px;font-weight:800;padding:6px 11px;}
+
+  /* ── M8 NÓMINA ── */
+  .m-job{background:#F4F3EE;font-family:"Segoe UI",sans-serif;color:#22303C;}
+  .m-job .lanyard{height:16px;background:repeating-linear-gradient(90deg,#1E3A5F 0 12px,#27496F 12px 24px);}
+  .m-job .clip{width:26px;height:12px;background:#B9C2CB;border-radius:0 0 6px 6px;margin:0 auto;}
+  .m-job .badge{margin:8px 24px 0;background:#fff;border-radius:12px;box-shadow:0 8px 20px rgba(30,50,70,.16);padding:14px;text-align:center;position:relative;}
+  .m-job .badge .co{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#8493A0;font-weight:700;}
+  .m-job .badge .av{font-size:44px;margin-top:4px;}
+  .m-job .badge .nm{font-weight:800;font-size:17px;margin-top:2px;}
+  .m-job .badge .role{font-size:12px;color:#5A6B7A;font-weight:600;}
+  .m-job .badge .dept{display:inline-block;margin-top:6px;background:#EDF2F6;border-radius:999px;font-size:11px;font-weight:700;color:#3D5468;padding:3px 12px;}
+  .m-job .badge .stamp{position:absolute;right:8px;top:10px;border:2.5px solid #C43D2E;color:#C43D2E;font-size:9.5px;font-weight:900;letter-spacing:.1em;padding:3px 6px;transform:rotate(9deg);border-radius:4px;opacity:.85;}
+  .m-job .sect{margin:14px 20px 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8493A0;font-weight:700;}
+  .m-job .pay{background:#fff;margin:0 14px;border-radius:12px;box-shadow:0 2px 8px rgba(30,50,70,.08);padding:4px 14px;}
+  .m-job .pr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13.5px;}
+  .m-job .pr+.pr{border-top:1px dashed #DCE3E9;}
+  .m-job .pr .c{font-weight:600;}
+  .m-job .pr .c small{display:block;font-size:11px;color:#8493A0;font-weight:600;}
+  .m-job .pr .a{font-weight:800;font-variant-numeric:tabular-nums;font-family:Consolas,monospace;color:#2E7D57;}
+  .m-job .pr.total{border-top:2.5px solid #22303C;}
+  .m-job .pr.total .c{font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.1em;}
+  .m-job .pr.total .a{font-size:16px;}
+  .m-job .promo{margin:10px 14px 0;background:#FFF6E3;border:1px solid #EAD9AC;border-radius:12px;padding:9px 12px;font-size:12.5px;font-weight:700;color:#7A5C1A;}
+  .m-job .fichar{margin:10px 14px 0;background:#1E3A5F;color:#fff;border-radius:12px;text-align:center;font-weight:800;padding:11px 0;font-size:14.5px;}
+  .m-job .foot{margin-top:auto;text-align:center;padding:9px;font-size:11.5px;color:#8493A0;font-weight:600;}
+
+  /* ── M9 MANGA ── */
+  .m-manga{background:#FFFFFF;font-family:"Segoe UI",sans-serif;color:#111;}
+  .m-manga .top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 4px;}
+  .m-manga .top .logo{font-weight:900;font-size:16px;letter-spacing:.02em;}
+  .m-manga .top .ch{font-size:11px;font-weight:800;letter-spacing:.14em;color:#666;}
+  .m-manga .title{margin:4px 14px 0;border:3px solid #111;padding:7px 10px;font-family:Impact,"Arial Black",sans-serif;font-size:16px;letter-spacing:.04em;background:#fff;box-shadow:4px 4px 0 #11111120;display:flex;justify-content:space-between;align-items:center;}
+  .m-manga .title .sun{width:20px;height:20px;border-radius:50%;background:#D62828;}
+  .m-manga .panels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 14px 0;}
+  .m-manga .pn{border:3px solid #111;background:#fff;padding:8px;position:relative;min-height:86px;}
+  .m-manga .pn.done{background-image:radial-gradient(circle,#00000022 1px,transparent 1.2px);background-size:6px 6px;}
+  .m-manga .pn .big{font-size:30px;line-height:1;}
+  .m-manga .pn .nm{font-weight:900;font-size:12px;margin-top:4px;line-height:1.25;}
+  .m-manga .pn .va{font-size:10.5px;font-weight:700;color:#666;}
+  .m-manga .pn .zas{position:absolute;top:4px;right:6px;font-family:Impact,sans-serif;font-size:13px;color:#D62828;transform:rotate(8deg);}
+  .m-manga .pn.wide{grid-column:1 / -1;display:flex;align-items:center;gap:12px;background:
+    repeating-linear-gradient(100deg,#11111110 0 2px,transparent 2px 9px),#fff;}
+  .m-manga .pn.wide .tx{flex:1;}
+  .m-manga .pn.wide .nm{font-size:14px;}
+  .m-manga .pn.wide .go{background:#111;color:#fff;font-family:Impact,sans-serif;letter-spacing:.08em;font-size:13px;padding:8px 12px;box-shadow:3px 3px 0 #D62828;}
+  .m-manga .strip{display:flex;justify-content:space-between;align-items:center;margin:10px 14px 0;border:3px solid #111;padding:7px 10px;font-size:12px;font-weight:800;}
+  .m-manga .strip .n{font-family:Consolas,monospace;font-size:14px;}
+  .m-manga .foot{margin-top:auto;text-align:center;padding:9px;font-size:11px;font-weight:800;letter-spacing:.16em;color:#666;text-transform:uppercase;}
+
+  .reco{margin-top:70px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 30px;}
+  .reco h2{font-family:Georgia,serif;margin:0 0 10px;font-size:24px;}
+  .reco p{max-width:76ch;color:var(--ink-2);margin:8px 0;}
+  .reco b{color:var(--ink);}
+  .reco ul{margin:8px 0;padding-left:20px;color:var(--ink-2);}
+  .reco li{margin:5px 0;}
+  .foot-note{margin-top:36px;font-size:13px;color:var(--ink-2);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Colaboro · archivo de propuestas de diseño · julio 2026 · nada aplicado</p>
+  <h1>18 propuestas, 3 rondas — para elegir cuando toque</h1>
+  <p class="lede">Documento guardado para retomar el rediseño en otro momento. La app elige el diseño <b>por hijo</b>, así que se puede combinar cualquier propuesta "P" (4–9 años) con cualquier "M" (10–15), o dar a cada hermano la suya. Cada propuesta lleva su etiqueta de esfuerzo: <b>piel</b> (~1 sesión), <b>media</b> (~2) o <b>rediseño</b> (3–4).</p>
+
+  <!-- ════════════════ RONDA 1 ════════════════ -->
+  <div class="round-head"><h2>Ronda 1 — pieles nuevas</h2><span class="tag">misma estructura · otra pintura</span></div>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los pequeños</h3><span class="age">4 – 9 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-cuento">
+          <div class="top"><span class="logo">🏠 Colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="kids">
+            <div class="kid on"><div class="av">🦊</div><div class="nm">Álex</div><div class="eu">3,50 €</div></div>
+            <div class="kid"><div class="av">🐸</div><div class="nm">Vera</div><div class="eu">2,00 €</div></div>
+          </div>
+          <div class="medal">🔥 ¡3 días seguidos ayudando!</div>
+          <div class="sect">📋 Mis tareas de hoy</div>
+          <div class="task t1"><div class="tic">🛏️</div><div class="tx"><div class="nm">Hacer la cama</div><span class="va">1,00 €</span></div><div class="go">+</div></div>
+          <div class="task t2"><div class="tic">🍽️</div><div class="tx"><div class="nm">Poner la mesa</div><span class="va">0,50 €</span></div><div class="go">+</div></div>
+          <div class="task t3"><div class="tic">📖</div><div class="tx"><div class="nm">Leer un rato</div><span class="va">1,00 €</span></div><div class="go">+</div></div>
+          <div class="foot">Toca el botón rojo cuando lo hagas ✨</div>
+        </div></div>
+        <h4>«Cuento» <small>P1</small></h4>
+        <p class="vibe">Un libro ilustrado: papel crema, contornos gruesos como rotulador, tarjetas que parecen pegatinas. Cálido y de andar por casa.</p>
+        <div class="pal"><i style="background:#FFF8E7"></i><i style="background:#EF6461"></i><i style="background:#F9C846"></i><i style="background:#7EB5D6"></i><i style="background:#4E937A"></i><i style="background:#46342B"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Baloo 2 + Nunito.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> quieres algo tierno y atemporal, que no parezca un videojuego.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-juguete">
+          <div class="top"><span class="logo">🏠 Colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="kids">
+            <div class="kid on"><div class="av">🦊</div><div class="nm">Álex</div><div class="eu">3,50 €</div></div>
+            <div class="kid"><div class="av">🐸</div><div class="nm">Vera</div><div class="eu">2,00 €</div></div>
+          </div>
+          <div class="stars">⭐ ⭐ ⭐ ☆ ☆</div>
+          <div class="sect">Tus misiones</div>
+          <div class="task t1"><div class="tic">🛏️</div><div class="tx"><div class="nm">Hacer la cama</div><div class="va">+1,00 €</div></div><div class="go">+</div></div>
+          <div class="task t2"><div class="tic">🍽️</div><div class="tx"><div class="nm">Poner la mesa</div><div class="va">+0,50 €</div></div><div class="go">+</div></div>
+          <div class="task t3"><div class="tic">📖</div><div class="tx"><div class="nm">Leer un rato</div><div class="va">+1,00 €</div></div><div class="go">+</div></div>
+          <div class="foot">¡2 más y completas el día! 🎉</div>
+        </div></div>
+        <h4>«Juguete» <small>P2</small></h4>
+        <p class="vibe">Bloques de color pleno sobre blanco y botones "gorditos" que se hunden al pulsar, tipo Duolingo o Toca Boca. Máxima energía.</p>
+        <div class="pal"><i style="background:#FFFFFF"></i><i style="background:#2E7CF6"></i><i style="background:#2FBF71"></i><i style="background:#FF8A00"></i><i style="background:#F45B9F"></i><i style="background:#FFDC33"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Fredoka + Nunito negrita.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> quieres que a los peques les parezca un juego y pidan ellos apuntar.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-calma">
+          <div class="top"><span class="logo">colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="kids">
+            <div class="kid on"><div class="av">🦊</div><div class="nm">Álex</div><div class="eu">3,50 €</div></div>
+            <div class="kid"><div class="av">🐸</div><div class="nm">Vera</div><div class="eu">2,00 €</div></div>
+          </div>
+          <div class="saldo"><div class="n">3,50 €</div><div class="l">esta semana</div></div>
+          <div class="sect">hoy</div>
+          <div class="task t1"><div class="tic">🛏️</div><div class="tx"><div class="nm">Hacer la cama</div><div class="va">1,00 €</div></div><div class="go">+</div></div>
+          <div class="task t2"><div class="tic">🍽️</div><div class="tx"><div class="nm">Poner la mesa</div><div class="va">0,50 €</div></div><div class="go">+</div></div>
+          <div class="task t3"><div class="tic">📖</div><div class="tx"><div class="nm">Leer un rato</div><div class="va">1,00 €</div></div><div class="go">+</div></div>
+          <div class="foot">poco a poco, cada día 🌱</div>
+        </div></div>
+        <h4>«Calma» <small>P3</small></h4>
+        <p class="vibe">Estilo Montessori: tonos tierra apagados, mucho aire, formas sencillas. Bonito para los padres, tranquilo para los niños.</p>
+        <div class="pal"><i style="background:#EDF0EC"></i><i style="background:#96A98F"></i><i style="background:#C9A9A6"></i><i style="background:#B98A5F"></i><i style="background:#6E6A64"></i><i style="background:#FFFFFF"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Quicksand + Nunito Sans.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> lo que te sobra del diseño actual es el "ruido" de colores.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los mayores</h3><span class="age">10 – 15 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-arcade">
+          <div class="top"><span class="logo">COLABORO_</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="hud">
+            <div class="r1"><span class="nv">NIVEL 7</span><span class="nm">Leo</span><span class="eu">12,50 €</span></div>
+            <div class="bar"><i></i></div>
+            <div class="bar-l"><span>XP 640/1000</span><span>racha ×5 🔥</span></div>
+          </div>
+          <div class="kids">
+            <div class="kid on"><span>🦁</span><span>Leo</span></div>
+            <div class="kid"><span>🐉</span><span>Eliot</span></div>
+          </div>
+          <div class="sect">// MISIONES DE HOY</div>
+          <div class="task t1"><div class="tic">🗑️</div><div class="tx"><div class="nm">Sacar la basura</div><div class="va">+1,00 € · +40 XP</div></div><div class="go">+</div></div>
+          <div class="task t2"><div class="tic">🍽️</div><div class="tx"><div class="nm">Lavaplatos</div><div class="va">+0,50 € · +20 XP</div></div><div class="go">+</div></div>
+          <div class="task t3"><div class="tic">📚</div><div class="tx"><div class="nm">Estudiar 30 min</div><div class="va">+1,00 € · +40 XP</div></div><div class="go">+</div></div>
+          <div class="foot"><span>[LOGROS 6/11]</span><span>[SEMANA 4,50 €]</span></div>
+        </div></div>
+        <h4>«Arcade» <small>M1</small></h4>
+        <p class="vibe">Un HUD de videojuego de verdad: nivel y barra de XP arriba, misiones con recompensa, azul noche con neón lima y cian.</p>
+        <div class="pal"><i style="background:#0B1220"></i><i style="background:#101B33"></i><i style="background:#B6FF2E"></i><i style="background:#33E1FF"></i><i style="background:#8A6CFF"></i><i style="background:#E8EEF9"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Chakra Petch + mono para números.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> el niño es gamer: convierte las tareas en misiones con XP.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-sport">
+          <div class="top"><span class="logo">Colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="hero">
+            <div class="l">Tu hucha</div>
+            <div class="n">12,50 €</div>
+            <span class="r">Racha · 5 días</span>
+          </div>
+          <div class="kids">
+            <div class="kid on">Leo</div>
+            <div class="kid">Eliot</div>
+          </div>
+          <div class="sect">Hoy · 3 pendientes</div>
+          <div class="task"><div class="tic">🗑️</div><div class="tx"><div class="nm">Sacar la basura</div><div class="va">1,00 € · 4/7 esta semana</div></div><div class="go">+</div></div>
+          <div class="task"><div class="tic">🍽️</div><div class="tx"><div class="nm">Lavaplatos</div><div class="va">0,50 € · 2/7 esta semana</div></div><div class="go">+</div></div>
+          <div class="task"><div class="tic">📚</div><div class="tx"><div class="nm">Estudiar 30 min</div><div class="va">1,00 € · 5/7 esta semana</div></div><div class="go">+</div></div>
+          <div class="foot"><span>Semana 4,50 €</span><span>Mejor racha 9</span></div>
+        </div></div>
+        <h4>«Sport» <small>M2</small></h4>
+        <p class="vibe">Como una app de entrenamiento: blanco, negro condensado en mayúsculas, números enormes y un único acento "volt".</p>
+        <div class="pal"><i style="background:#FAFAFA"></i><i style="background:#111111"></i><i style="background:#D7FF3F"></i><i style="background:#E4E4E4"></i><i style="background:#777777"></i><i style="background:#FFFFFF"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Barlow Condensed / Anton + tabulares.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> quieres algo con carácter que no sea "gamer" ni oscuro.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-clean">
+          <div class="top"><span class="logo">Colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="card">
+            <div class="who"><div class="av">🦁</div><div><div class="nm">Leo</div><div class="sub">Racha de 5 días 🔥</div></div><div class="eu">12,50 €</div></div>
+            <div class="prog"><div class="pl"><span>Semana</span><span>58 %</span></div><div class="pb"><i></i></div></div>
+          </div>
+          <div class="sect">Hoy</div>
+          <div class="task"><div class="tic">🗑️</div><div class="tx"><div class="nm">Sacar la basura</div><div class="va">1,00 € · 4 de 7</div></div><div class="go">+</div></div>
+          <div class="task"><div class="tic">🍽️</div><div class="tx"><div class="nm">Lavaplatos</div><div class="va">0,50 € · 2 de 7</div></div><div class="go">+</div></div>
+          <div class="task"><div class="tic">📚</div><div class="tx"><div class="nm">Estudiar 30 min</div><div class="va">1,00 € · 5 de 7</div></div><div class="go">+</div></div>
+          <div class="foot">Eliot también lleva 2 tareas hoy</div>
+        </div></div>
+        <h4>«Clean» <small>M3</small></h4>
+        <p class="vibe">La app "de mayores": neutro claro, tarjetas blancas, un solo acento (el color de cada hijo) y el foco en datos y progreso.</p>
+        <div class="pal"><i style="background:#F4F5F7"></i><i style="background:#FFFFFF"></i><i style="background:#4F6BFF"></i><i style="background:#1B1F27"></i><i style="background:#8A90A0"></i><i style="background:#E8ECFF"></i></div>
+        <p class="meta"><b>Tipografía real:</b> la del sistema (como iOS/Android).</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> a esa edad lo que quieren es que NO parezca una app infantil.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ RONDA 2 ════════════════ -->
+  <div class="round-head"><h2>Ronda 2 — cambia el tablero</h2><span class="tag">otra estructura u otra metáfora</span></div>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los pequeños</h3><span class="age">4 – 9 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-avent">
+          <div class="top"><span>🏠 Colaboro</span><span class="coin">🪙 3,50 €</span></div>
+          <div class="title">El camino de hoy · Álex 🦊</div>
+          <div class="map">
+            <svg viewBox="0 0 320 360" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M70 330 C 200 300, 260 260, 235 205 C 215 160, 90 175, 105 115 C 115 72, 200 60, 245 42"
+                fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity=".75"/>
+              <path d="M70 330 C 200 300, 260 260, 235 205 C 215 160, 90 175, 105 115 C 115 72, 200 60, 245 42"
+                fill="none" stroke="#F0A24B" stroke-width="5" stroke-dasharray="1 14" stroke-linecap="round"/>
+            </svg>
+            <div class="node done" style="left:44px;bottom:8px;">⭐</div>
+            <div class="lbl" style="left:104px;bottom:22px;">Cama ✓</div>
+            <div class="node done" style="right:44px;bottom:120px;">⭐</div>
+            <div class="lbl" style="right:20px;bottom:96px;">Mesa ✓</div>
+            <div class="node now" style="left:66px;top:126px;">📖</div>
+            <div class="lbl" style="left:36px;top:104px;">¡Estás aquí! 🦊</div>
+            <div class="node lock" style="right:52px;top:16px;">🔒</div>
+            <div class="lbl" style="right:26px;top:76px;">Mañana</div>
+            <div class="hero-task">
+              <div class="nm">Leer un rato</div>
+              <div class="va">te da 1,00 €</div>
+              <div class="btn">¡Hecho! ✔</div>
+            </div>
+          </div>
+          <div class="foot">2 de 3 hoy · ¡solo te falta una! 🏁</div>
+        </div></div>
+        <h4>«Aventura» <small>P4</small></h4>
+        <p class="vibe">El día es un <b>camino</b> (como los mapas de niveles): cada tarea es una parada y el niño avanza su personaje hasta la meta. No hay lista: hay viaje.</p>
+        <div class="pal"><i style="background:#8ED0F5"></i><i style="background:#A9D98B"></i><i style="background:#FF9430"></i><i style="background:#7BC96C"></i><i style="background:#FFFFFF"></i><i style="background:#2E4A2A"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Baloo 2. <b>Motivo:</b> paisaje que cambia (estaciones, día/noche).</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres el máximo enganche: terminar el camino del día se convierte en EL juego.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-pet">
+          <div class="top"><span>🏠 Colaboro</span><span class="coin">🪙 3,50 €</span></div>
+          <div class="bubble">¡Ñam! ¿Me das una tarea? 🍪</div>
+          <div class="pet">
+            <div class="body">🐲</div>
+            <div class="shadow"></div>
+          </div>
+          <div class="mood"><span class="l">Felicidad de Chispa</span>❤️❤️❤️🤍🤍</div>
+          <div class="feed">
+            <div class="fitem"><span class="tic">🛏️</span><div class="tx"><div class="nm">Hacer la cama</div><div class="va">+1,00 € · le da energía</div></div><span class="go">Dar 🍖</span></div>
+            <div class="fitem"><span class="tic">🍽️</span><div class="tx"><div class="nm">Poner la mesa</div><div class="va">+0,50 € · le da alegría</div></div><span class="go">Dar 🍖</span></div>
+            <div class="fitem"><span class="tic">📖</span><div class="tx"><div class="nm">Leer un rato</div><div class="va">+1,00 € · ¡crece!</div></div><span class="go">Dar 🍖</span></div>
+          </div>
+          <div class="foot">Chispa sube de nivel con cada tarea · Nivel 3</div>
+        </div></div>
+        <h4>«Mascota» <small>P5</small></h4>
+        <p class="vibe">Un tamagotchi familiar: cada hijo tiene su bichito y <b>las tareas lo alimentan</b>. Si ayuda, la mascota está feliz y crece.</p>
+        <div class="pal"><i style="background:#EFE7FB"></i><i style="background:#C2B2E2"></i><i style="background:#8C6FF0"></i><i style="background:#FFFFFF"></i><i style="background:#FFB454"></i><i style="background:#4A3E63"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Quicksand redonda. <b>Motivo:</b> la mascota evoluciona (huevo → cría → adulta).</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> tu peque es de cuidar peluches: la responsabilidad se aprende cuidando a Chispa.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-fridge">
+          <div class="top"><span>Colaboro</span><span class="ic">🎁 📅 ⚙️</span></div>
+          <div class="magnets"><i style="background:#E85D4A"></i><i style="background:#3E8ED0"></i><i style="background:#F2B705"></i><i style="background:#5CA85C"></i></div>
+          <div class="pola"><div class="ph">🦊</div><div class="cap">Álex · esta semana 3,50 €</div></div>
+          <div class="chit r1"><span class="mag" style="background:#3E8ED0"></span><span class="tic">🛏️</span><div class="tx"><div class="nm">Hacer la cama</div><div class="va">1,00 €</div></div><span class="star">⭐</span></div>
+          <div class="chit r2"><span class="mag" style="background:#F2B705"></span><span class="tic">🍽️</span><div class="tx"><div class="nm">Poner la mesa</div><div class="va">0,50 €</div></div><span class="star">⭐</span></div>
+          <div class="chit r3"><span class="mag" style="background:#5CA85C"></span><span class="tic">📖</span><div class="tx"><div class="nm">Leer un rato</div><div class="va">1,00 €</div></div><span class="go">+</span></div>
+          <div class="note">¡Hoy toca regar la planta! — mamá 🌱</div>
+          <div class="foot">Toca el botón rojo y gana tu pegatina ⭐</div>
+        </div></div>
+        <h4>«Nevera» <small>P6</small></h4>
+        <p class="vibe">La pantalla ES la puerta de la nevera de casa: tareas como <b>imanes y papelitos</b>, polaroid con la hucha, pegatinas y notas manuscritas de los padres.</p>
+        <div class="pal"><i style="background:#EDF0F3"></i><i style="background:#FFFDF5"></i><i style="background:#E85D4A"></i><i style="background:#F2B705"></i><i style="background:#3E8ED0"></i><i style="background:#FFF3A6"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Patrick Hand (manuscrita) + Nunito.</p>
+        <span class="coste media">Media · 2 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres algo único y hogareño que ninguna otra app tiene.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los mayores</h3><span class="age">10 – 15 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-bank">
+          <div class="top"><span>Colaboro</span><span class="ic">📅 ⚙️</span></div>
+          <div class="card">
+            <div class="l">Tu saldo</div>
+            <div class="n">12,50 €</div>
+            <div class="who"><span>LEO</span><span class="chip"></span></div>
+          </div>
+          <div class="week">
+            <i style="height:30%"></i><i style="height:55%"></i><i style="height:20%"></i><i style="height:70%"></i><i class="hi" style="height:100%"></i><i style="height:12%"></i><i style="height:12%"></i>
+          </div>
+          <div class="week-l"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div class="sect">Movimientos</div>
+          <div class="mov"><span class="tic">🗑️</span><div class="tx"><div class="nm">Sacar la basura</div><div class="tm">hoy · 18:32</div></div><span class="am">+1,00</span></div>
+          <div class="mov"><span class="tic">🍽️</span><div class="tx"><div class="nm">Lavaplatos</div><div class="tm">hoy · 15:04</div></div><span class="am">+0,50</span></div>
+          <div class="mov"><span class="tic">🎬</span><div class="tx"><div class="nm">Canje: peli en familia</div><div class="tm">ayer</div></div><span class="am neg">−6,00</span></div>
+          <div class="cta">＋ Apuntar tarea</div>
+          <div class="foot"><span>Inicio</span><span>Movimientos</span><span>Premios</span></div>
+        </div></div>
+        <h4>«Cartera» <small>M4</small></h4>
+        <p class="vibe">Colaboro tratado como lo que ya es por dentro: <b>su primera app de dinero</b>. Tarjeta con su nombre, gráfica semanal y las tareas como "ingresos".</p>
+        <div class="pal"><i style="background:#0C1512"></i><i style="background:#16241E"></i><i style="background:#3DDC97"></i><i style="background:#0FA37F"></i><i style="background:#E9F2EE"></i><i style="background:#FF8E7A"></i></div>
+        <p class="meta"><b>Tipografía real:</b> sistema + números tabulares. <b>Motivo:</b> la meta de ahorro encaja perfecta.</p>
+        <span class="coste media">Media · 2 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres que aprendan a manejar dinero: la metáfora más útil educativamente.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-pixel">
+          <div class="top"><span>COLABORO v2.0</span><span>⚙</span></div>
+          <div class="stats"><span>LEO&nbsp;LV.7</span><span>♥♥♥</span><span>🪙 12.50</span></div>
+          <div class="win">
+            <span class="tab">QUEST LOG</span>
+            <div class="q sel"><span class="cur">▶</span><span class="nm">SACAR BASURA</span><span class="va">+1.00</span></div>
+            <div class="q"><span class="cur"></span><span class="nm">LAVAPLATOS</span><span class="va">+0.50</span></div>
+            <div class="q"><span class="cur"></span><span class="nm">ESTUDIAR 30 MIN</span><span class="va">+1.00</span></div>
+          </div>
+          <div class="abtn">[A] COMPLETAR MISION</div>
+          <div class="bar">
+            <div class="l">EXP SEMANAL — 64%</div>
+            <div class="track"><i></i></div>
+          </div>
+          <div class="bar">
+            <div class="l">RACHA: 5 DIAS ★★★★★</div>
+            <div class="track"><i style="width:71%"></i></div>
+          </div>
+          <div class="foot">SELECT = CAMBIAR HEROE&nbsp;&nbsp;·&nbsp;&nbsp;START = PREMIOS</div>
+        </div></div>
+        <h4>«Píxel» <small>M5</small></h4>
+        <p class="vibe">Una consola de bolsillo de los 90: <b>4 tonos de verde</b>, letra de máquina, ventanas con marco duro y las tareas como QUEST LOG.</p>
+        <div class="pal"><i style="background:#9BBC0F"></i><i style="background:#8BAC0F"></i><i style="background:#306230"></i><i style="background:#0F380F"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Press Start 2P / VT323. <b>Motivo:</b> sonidos chip y "level up" al completar.</p>
+        <span class="coste piel">Piel · 1 sesión</span>
+        <div class="ideal"><b>Ideal si…</b> quieres personalidad instantánea con poco esfuerzo — la más distinta con el menor coste.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-feed">
+          <div class="top"><span class="logo">Colaboro</span><span class="ic">📅 ⚙️</span></div>
+          <div class="stories">
+            <div class="st"><div class="ring"><div class="in">🦁</div></div>Leo 🔥5</div>
+            <div class="st"><div class="ring"><div class="in">🐉</div></div>Eliot 🔥2</div>
+            <div class="st"><div class="ring off"><div class="in">👨</div></div>Papá</div>
+            <div class="st"><div class="ring off"><div class="in">👩</div></div>Mamá</div>
+          </div>
+          <div class="score">Hoy: Leo 2 — 1 Eliot 🏆</div>
+          <div class="post">
+            <div class="head"><div class="av">🦁</div><div><div class="who"><b>Leo</b> completó una tarea</div><div class="tm">hace 20 min</div></div></div>
+            <div class="body"><span class="big">🗑️</span><span class="desc">Sacar la basura · <span class="eu">+1,00 €</span></span></div>
+            <div class="reacts"><span>👏 2</span><span>🔥 1</span><span>+ reaccionar</span></div>
+          </div>
+          <div class="post">
+            <div class="head"><div class="av">🐉</div><div><div class="who"><b>Eliot</b> canjeó un premio</div><div class="tm">ayer</div></div></div>
+            <div class="body"><span class="big">🎬</span><span class="desc">Peli en familia · <span class="eu">−6,00 €</span></span></div>
+            <div class="reacts"><span>🎉 3</span><span>+ reaccionar</span></div>
+          </div>
+          <div class="compose"><div class="in">✅ Apunta lo que has hecho…</div><div class="go">+</div></div>
+        </div></div>
+        <h4>«Muro» <small>M6</small></h4>
+        <p class="vibe">Un feed familiar: lo que cada uno hace <b>se publica</b> y los demás reaccionan (👏🔥🎉). Rachas en los círculos y pique sano del marcador del día.</p>
+        <div class="pal"><i style="background:#FFFFFF"></i><i style="background:#F3F5F8"></i><i style="background:#FF7A00"></i><i style="background:#FF2E88"></i><i style="background:#0FA37F"></i><i style="background:#14171C"></i></div>
+        <p class="meta"><b>Tipografía real:</b> sistema, negritas fuertes. <b>Motivo:</b> las reacciones de los padres son el premio invisible.</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> tus hijos se pican entre ellos (en el buen sentido) y os gusta celebrar en familia.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ RONDA 3 ════════════════ -->
+  <div class="round-head"><h2>Ronda 3 — más mundos</h2><span class="tag">despegar · cultivar · salvar el día · construir · fichar · manga</span></div>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los pequeños</h3><span class="age">4 – 9 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-space">
+          <div class="top"><span>🏠 Colaboro</span><span class="coin">🪙 3,50 €</span></div>
+          <div class="planets"><span>🌍</span><span>🌕</span><span class="today">🪐</span><span>☄️</span><span>⭐</span></div>
+          <div class="planets-l"><span>lun</span><span>mar</span><span>HOY</span><span>jue</span><span>vie</span></div>
+          <div class="launch">
+            <div>
+              <div class="rocket">🚀</div>
+              <div class="pad"></div>
+            </div>
+            <div>
+              <div class="gauge"><i></i></div>
+              <div class="gauge-l">FUEL</div>
+            </div>
+          </div>
+          <div class="msg">¡Falta 1 tarea para despegar! 🔥</div>
+          <div class="fuel">
+            <div class="fi ok"><span class="tic">🛏️</span><div class="tx"><div class="nm">Hacer la cama</div><div class="va">combustible cargado</div></div><span class="go">✓</span></div>
+            <div class="fi ok"><span class="tic">🍽️</span><div class="tx"><div class="nm">Poner la mesa</div><div class="va">combustible cargado</div></div><span class="go">✓</span></div>
+            <div class="fi"><span class="tic">📖</span><div class="tx"><div class="nm">Leer un rato</div><div class="va">+1,00 € de combustible</div></div><span class="go">Cargar ⛽</span></div>
+          </div>
+          <div class="foot">Cada día, un planeta nuevo · Álex, comandante 🦊</div>
+        </div></div>
+        <h4>«Cohete» <small>P7</small></h4>
+        <p class="vibe">Cada día es un <b>lanzamiento</b>: las tareas cargan el depósito y al completarlas todas, el cohete despega rumbo al planeta de mañana.</p>
+        <div class="pal"><i style="background:#0A1633"></i><i style="background:#14264D"></i><i style="background:#FFB13D"></i><i style="background:#6EE7F0"></i><i style="background:#FFD98A"></i><i style="background:#FFFFFF"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Baloo 2. <b>Momento estrella:</b> la animación de despegue al acabar el día.</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres una meta diaria clarísima: "cargar el cohete" hace que quieran terminar TODAS las tareas.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-garden">
+          <div class="top"><span>🏠 Colaboro</span><span class="coin">🪙 3,50 €</span></div>
+          <div class="say">Tu jardín de la semana, Álex 🦊</div>
+          <div class="sun">☀️</div>
+          <div class="garden">
+            <div class="plants">
+              <div class="plant d1"><div class="p">🌷</div><div class="d">LUN</div></div>
+              <div class="plant d2"><div class="p">🌻</div><div class="d">MAR</div></div>
+              <div class="plant today-p"><div class="p">🌱</div><div class="d">HOY</div></div>
+              <div class="plant empty"><div class="p">🟤</div><div class="d">JUE</div></div>
+              <div class="plant empty"><div class="p">🟤</div><div class="d">VIE</div></div>
+              <div class="plant empty"><div class="p">🟤</div><div class="d">SÁB</div></div>
+              <div class="plant empty"><div class="p">🟤</div><div class="d">DOM</div></div>
+            </div>
+            <div class="soil"></div>
+            <div class="tasks">
+              <div class="tl">Riega tu planta de hoy</div>
+              <div class="ti ok"><span class="tic">🛏️</span><div class="tx"><div class="nm">Hacer la cama</div><div class="va">regada ✓</div></div><span class="go">✓</span></div>
+              <div class="ti"><span class="tic">🍽️</span><div class="tx"><div class="nm">Poner la mesa</div><div class="va">+0,50 €</div></div><span class="go">Regar 💧</span></div>
+              <div class="ti"><span class="tic">📖</span><div class="tx"><div class="nm">Leer un rato</div><div class="va">+1,00 €</div></div><span class="go">Regar 💧</span></div>
+            </div>
+          </div>
+        </div></div>
+        <h4>«Jardín» <small>P8</small></h4>
+        <p class="vibe">Cada tarea <b>riega la planta del día</b>: si ayudas, tu flor crece; la semana termina siendo un jardín florecido y el mes, un prado.</p>
+        <div class="pal"><i style="background:#DFF1FA"></i><i style="background:#EAF6E9"></i><i style="background:#6FA84F"></i><i style="background:#CBB088"></i><i style="background:#FFFDF6"></i><i style="background:#FFD34D"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Quicksand. <b>Momento estrella:</b> la flor abriéndose al completar el día.</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> prefieres motivar con calma y belleza — el histórico se vuelve un jardín.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-hero">
+          <div class="top"><span class="logo">COLABORO</span><span>🎁 ⚙️</span></div>
+          <div class="banner">¡LA CASA TE NECESITA!</div>
+          <div class="panel">
+            <span class="cap">Héroe de hoy</span>
+            <div class="who"><span class="av">🦸</span><div><div class="nm">SÚPER ÁLEX</div><div class="sub">2 rescates hechos · 3,50 € en el escondite</div></div></div>
+            <div class="power"><div class="l">PODER DEL DÍA</div><div class="track"><i></i></div></div>
+          </div>
+          <div class="panel">
+            <span class="cap">Misiones de rescate</span>
+            <div class="mission"><span class="tic">🛏️</span><div class="tx"><div class="nm">La cama del caos</div><div class="va">recompensa 1,00 €</div></div><span class="go">¡VOY!</span></div>
+            <div class="mission"><span class="tic">🍽️</span><div class="tx"><div class="nm">La mesa en apuros</div><div class="va">recompensa 0,50 €</div></div><span class="go">¡VOY!</span></div>
+            <div class="mission"><span class="tic">📖</span><div class="tx"><div class="nm">El libro perdido</div><div class="va">recompensa 1,00 €</div></div><span class="go">¡VOY!</span></div>
+          </div>
+          <div class="pow">¡ZAS!</div>
+          <div class="foot">CADA TAREA ES UN RESCATE ⚡</div>
+        </div></div>
+        <h4>«Superhéroe» <small>P9</small></h4>
+        <p class="vibe">Un tebeo: fondo de <b>puntitos de imprenta</b>, viñetas con borde grueso, onomatopeyas (¡ZAS!) y el niño como héroe con misiones de rescate.</p>
+        <div class="pal"><i style="background:#FFD93B"></i><i style="background:#E4322B"></i><i style="background:#2D7DD2"></i><i style="background:#FFFFFF"></i><i style="background:#1A1A2E"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Bangers + Nunito. <b>Momento estrella:</b> el ¡KA-POW! al marcar.</p>
+        <span class="coste media">Media · 2 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres mucho carácter sin rehacer pantallas: la lista de siempre disfrazada de tebeo.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3 class="age-t">Para los mayores</h3><span class="age">10 – 15 años</span></div>
+    <div class="row">
+      <div class="prop">
+        <div class="phone"><div class="screen m-city">
+          <div class="top"><span>Colaboro</span><span class="coin">💰 12,50 €</span></div>
+          <div class="hint">Tu ciudad crece con cada tarea, Leo</div>
+          <div class="moon">🌙</div>
+          <div class="sky-goal">🚲 Torre "Bici nueva" <b>58 % construida</b></div>
+          <div class="blocks">
+            <div class="b" style="height:120px;"><span class="tag">🗑️</span><span class="lv">NIV 4</span></div>
+            <div class="b build" style="height:170px;"><span class="tag">🍽️</span><span class="lv">NIV 6</span></div>
+            <div class="b" style="height:88px;"><span class="tag">📚</span><span class="lv">NIV 3</span></div>
+            <div class="b" style="height:140px;"><span class="tag">🧹</span><span class="lv">NIV 5</span></div>
+          </div>
+          <div class="ground"></div>
+          <div class="panel">
+            <div class="l">Obras de hoy</div>
+            <div class="ci"><span class="tic">🗑️</span><div class="tx"><div class="nm">Sacar la basura</div><div class="va">+1 planta al edificio · +1,00 €</div></div><span class="go">Construir</span></div>
+            <div class="ci"><span class="tic">📚</span><div class="tx"><div class="nm">Estudiar 30 min</div><div class="va">+1 planta al edificio · +1,00 €</div></div><span class="go">Construir</span></div>
+          </div>
+        </div></div>
+        <h4>«Ciudad» <small>M7</small></h4>
+        <p class="vibe">Cada tarea repetida hace crecer <b>su edificio</b>, y la <b>meta de ahorro es un rascacielos en obras</b>. El skyline es su progreso de meses.</p>
+        <div class="pal"><i style="background:#2B2150"></i><i style="background:#C9707F"></i><i style="background:#171230"></i><i style="background:#FFD98A"></i><i style="background:#F2ECFF"></i></div>
+        <p class="meta"><b>Tipografía real:</b> sistema + tabulares. <b>Momento estrella:</b> ver TU ciudad tras un mes ayudando.</p>
+        <span class="coste grande">Rediseño · 3-4 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> le va Minecraft/SimCity: el progreso construido es lo que más retiene a esa edad.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-job">
+          <div class="lanyard"></div>
+          <div class="clip"></div>
+          <div class="badge">
+            <span class="stamp">PAGADO</span>
+            <div class="co">Colaboro S.L. · Familia Gallego</div>
+            <div class="av">🦁</div>
+            <div class="nm">Leo</div>
+            <div class="role">Ayudante Senior · nivel 7</div>
+            <span class="dept">Dpto. de Cocina y Basuras</span>
+          </div>
+          <div class="sect">Nómina de la semana</div>
+          <div class="pay">
+            <div class="pr"><span class="c">Sacar la basura <small>×4 esta semana</small></span><span class="a">+4,00</span></div>
+            <div class="pr"><span class="c">Lavaplatos <small>×2 esta semana</small></span><span class="a">+1,00</span></div>
+            <div class="pr"><span class="c">Plus de racha <small>5 días seguidos 🔥</small></span><span class="a">+0,50</span></div>
+            <div class="pr total"><span class="c">Total devengado</span><span class="a">5,50 €</span></div>
+          </div>
+          <div class="promo">📈 Próximo ascenso: "Encargado" — te faltan 12 tareas</div>
+          <div class="fichar">✓ Fichar tarea hecha</div>
+          <div class="foot">Pagas los viernes · Hucha total: 12,50 €</div>
+        </div></div>
+        <h4>«Nómina» <small>M8</small></h4>
+        <p class="vibe">El juego de rol de "mi primer curro", con guiño: <b>tarjeta de empleado</b>, nómina semanal con conceptos, sello de PAGADO, pluses y ascensos.</p>
+        <div class="pal"><i style="background:#F4F3EE"></i><i style="background:#FFFFFF"></i><i style="background:#1E3A5F"></i><i style="background:#C43D2E"></i><i style="background:#2E7D57"></i></div>
+        <p class="meta"><b>Tipografía real:</b> sistema + Consolas en importes. <b>Momento estrella:</b> el sello PAGADO al cobrar el viernes.</p>
+        <span class="coste media">Media · 2 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> quieres humor + educación financiera: aprenden qué es una nómina jugando a tenerla.</div>
+      </div>
+
+      <div class="prop">
+        <div class="phone"><div class="screen m-manga">
+          <div class="top"><span class="logo">Colaboro</span><span class="ch">CAP. 27</span></div>
+          <div class="title"><span>LA SEMANA DE LEO</span><span class="sun"></span></div>
+          <div class="panels">
+            <div class="pn done"><span class="zas">¡ZAS!</span><div class="big">🗑️</div><div class="nm">Sacó la basura</div><div class="va">+1,00 € · 18:32</div></div>
+            <div class="pn done"><span class="zas">¡PAM!</span><div class="big">🍽️</div><div class="nm">Lavaplatos</div><div class="va">+0,50 € · 15:04</div></div>
+            <div class="pn wide">
+              <div class="big">📚</div>
+              <div class="tx"><div class="nm">MISIÓN DE HOY: estudiar 30 min</div><div class="va">recompensa +1,00 €</div></div>
+              <span class="go">HECHO</span>
+            </div>
+            <div class="pn"><div class="big">🔥</div><div class="nm">Racha ×5</div><div class="va">récord: 9</div></div>
+            <div class="pn"><div class="big">💰</div><div class="nm">12,50 €</div><div class="va">para la bici: 58 %</div></div>
+          </div>
+          <div class="strip"><span>PRÓXIMO CAPÍTULO: EL SÁBADO</span><span class="n">2/3</span></div>
+          <div class="foot">Tu semana, viñeta a viñeta</div>
+        </div></div>
+        <h4>«Manga» <small>M9</small></h4>
+        <p class="vibe">La semana contada como <b>página de manga</b>: blanco y negro con tramas, viñetas que se rellenan al completar tareas, un único rojo.</p>
+        <div class="pal"><i style="background:#FFFFFF"></i><i style="background:#111111"></i><i style="background:#D62828"></i><i style="background:#E8E8E8"></i></div>
+        <p class="meta"><b>Tipografía real:</b> Mochiy Pop One / Bangers + sistema. <b>Momento estrella:</b> el histórico como tomo de capítulos.</p>
+        <span class="coste media">Media · 2 sesiones</span>
+        <div class="ideal"><b>Ideal si…</b> hay fan del anime en casa: es la estética que eligen ellos, no la que les ponemos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ resumen ════════════════ -->
+  <div class="reco">
+    <h2>Resumen y recomendaciones (para cuando se retome)</h2>
+    <ul>
+      <li><b>Ronda 1 (pieles, 1 sesión cada una):</b> recomendada «Juguete» (P2) + «Sport» (M2). Son las de menor esfuerzo.</li>
+      <li><b>Ronda 2 (estructura nueva):</b> mejor gancho/esfuerzo «Nevera» (P6) + «Cartera» (M4); comodín barato «Píxel» (M5).</li>
+      <li><b>Ronda 3 (más mundos):</b> pareja coherente «Superhéroe» (P9) + «Manga» (M9) — un mismo universo cómic en dos edades. Apuestas grandes: «Cohete» (P7) y «Ciudad» (M7).</li>
+    </ul>
+    <p><b>Cómo retomarlo:</b> decir la pareja elegida (una P + una M) — o pedir variantes/mezclas ("el Cuento con los colores del Juguete", "el Sport en oscuro"). El tema es por hijo, así que también vale una por hermano. Otra opción sobre la mesa: que cada niño <b>elija su propio mundo</b> desde Ajustes, como quien elige skin (implica mantener varios temas a la vez — más trabajo de mantenimiento).</p>
+    <p class="foot-note">Maquetas ilustrativas del tablero · tipografías aproximadas del sistema (las reales, de Google Fonts, se incrustan al aplicar) · guardado en el repo: docs/propuestas-diseno.html</p>
+  </div>
+</div>
+</body>
+</html>
