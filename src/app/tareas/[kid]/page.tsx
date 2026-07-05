@@ -234,7 +234,7 @@ export default async function KidSettingsPage({
                     scroll={false}
                     className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
                   >
-                    Ver otras caras
+                    Ver más caras
                   </Link>
                 </>
               ) : (
@@ -261,7 +261,7 @@ export default async function KidSettingsPage({
                     scroll={false}
                     className="tap-bounce mt-2 inline-block rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
                   >
-                    Ver otras caras
+                    Ver más caras
                   </Link>
                 </>
               )}
