@@ -1,5 +1,13 @@
 import Link from 'next/link'
-import { getBoardData, getKidStats, getBadgeDefs, getPendingCompletions, getFamilyGoal } from '@/lib/data'
+import {
+  getBoardData,
+  getKidStats,
+  getBadgeDefs,
+  getPendingCompletions,
+  getFamilyGoal,
+  type PendingCompletion,
+  type FamilyGoal,
+} from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, friendlyDay } from '@/lib/week'
@@ -39,6 +47,82 @@ function ProgressCoins({ count, target }: { count: number; target: number }) {
   )
 }
 
+// Marcas de los niños pendientes del visto bueno del padre (✓ aprueba, ✕ rechaza).
+function PendientesSection({ pendientes }: { pendientes: PendingCompletion[] }) {
+  if (pendientes.length === 0) return null
+  return (
+    <>
+      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">⏳ Para aprobar</h2>
+      <div className="mx-3 space-y-1.5">
+        {pendientes.map((p) => (
+          <div key={p.id} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl shadow-inner"
+              style={{ background: p.taskColor }}
+            >
+              {p.taskIcon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-display text-sm font-bold text-[var(--ink)]">{p.taskName}</div>
+              <div className="text-[11px] font-semibold text-[var(--ink-3)]">
+                {p.kidName} · {friendlyDay(p.doneOn)} ·{' '}
+                {formatAmount(p.valueCents, moneyOf({ unit: p.kidUnit, pointsName: p.kidPointsName, pointsIcon: p.kidPointsIcon }))}
+              </div>
+            </div>
+            <form action={approveCompletion}>
+              <input type="hidden" name="id" value={p.id} />
+              <SubmitButton
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-base leading-none text-white shadow-sm"
+                aria-label={`Aprobar ${p.taskName} de ${p.kidName}`}
+              >
+                ✓
+              </SubmitButton>
+            </form>
+            <form action={rejectCompletion}>
+              <input type="hidden" name="id" value={p.id} />
+              <ConfirmSubmit
+                message={`¿Rechazar «${p.taskName}» de ${p.kidName}? Se quitará como si no se hubiera marcado.`}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
+              >
+                ✕
+              </ConfirmSubmit>
+            </form>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// Objetivo familiar semanal (entre todos los hermanos), con barra de progreso.
+function FamGoalSection({ goal }: { goal: FamilyGoal }) {
+  const pct = Math.min(100, Math.round((goal.count / goal.target) * 100))
+  return (
+    <>
+      <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
+      <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+        <div className="flex items-center justify-between gap-2 text-sm font-bold text-[var(--ink)]">
+          <span className="truncate">
+            {goal.done ? '¡Conseguido! 🎉' : `${goal.count} de ${goal.target} tareas entre todos`}
+          </span>
+          <span className="shrink-0 text-[var(--ink-2)]">→ {goal.reward}</span>
+        </div>
+        <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sky-300 to-indigo-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+          {goal.done
+            ? `Habéis hecho ${goal.count} tareas esta semana. ¡A disfrutar el premio!`
+            : 'Esta semana, sumando las tareas de todos los hermanos.'}
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default async function Page({
   searchParams,
 }: {
@@ -69,14 +153,52 @@ export default async function Page({
     )
   }
 
+  // Con más de un hijo, la portada del padre es ELEGIR hijo; lo familiar
+  // (pendientes de aprobar, objetivo) vive ahí. Con uno solo, directo a él.
+  const multi = !isKid && data.kids.length > 1
+  const chooserMode = multi && !kidParam
+  const pendientes = isKid ? [] : await getPendingCompletions(accountId)
+  const famGoal = await getFamilyGoal(accountId)
+
+  if (chooserMode) {
+    return (
+      <ThemeShell theme="infantil">
+        <div className="mx-auto max-w-md pb-12">
+          <Nav active="inicio" />
+          <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📋 ¿A quién le apuntamos?</h1>
+          <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">Toca un hijo para ver y apuntar sus cosas.</p>
+          <div className="mt-3 grid grid-cols-2 gap-3 px-3">
+            {data.kids.map((k) => {
+              const m = moneyOf(k)
+              return (
+                <Link
+                  key={k.id}
+                  href={`/?kid=${k.id}`}
+                  className="tap-bounce rounded-3xl p-4 text-center text-white shadow-md"
+                  style={{ background: k.color }}
+                >
+                  <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={64} className="mx-auto" />
+                  <div className="mt-1.5 font-display text-lg font-bold">{k.name}</div>
+                  <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-sm font-extrabold">
+                    {unitIcon(m)} {formatAmount(k.weekCents, m)}
+                  </div>
+                  <div className="mt-1 text-[11px] font-bold text-white/85">Hucha: {formatAmount(k.balanceCents, m)}</div>
+                </Link>
+              )
+            })}
+          </div>
+          <PendientesSection pendientes={pendientes} />
+          {famGoal && <FamGoalSection goal={famGoal} />}
+        </div>
+      </ThemeShell>
+    )
+  }
+
   const selKid = data.kids.find((k) => k.id === data.selectedKidId)!
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
 
   const stats = await getKidStats(selKid.id)
-  const pendientes = isKid ? [] : await getPendingCompletions(accountId)
-  const famGoal = await getFamilyGoal(accountId)
-  const famPct = famGoal ? Math.min(100, Math.round((famGoal.count / famGoal.target) * 100)) : 0
   // Valor medio de sus tareas con pago, para "¡con N tareas más lo tienes!".
   const paidTasks = data.tasks.filter((t) => t.valueCents > 0)
   const avgTaskCents = paidTasks.length ? paidTasks.reduce((a, t) => a + t.valueCents, 0) / paidTasks.length : 0
@@ -116,79 +238,35 @@ export default async function Page({
         </div>
       )}
 
-      {/* Selector de hijo (oculto en modo niño) */}
+      {/* Cabecera del hijo elegido (vista de padre) */}
       {!isKid && (
-      <div className="grid grid-cols-2 gap-3 px-3">
-        {data.kids.map((k) => {
-          const on = k.id === selKid.id
-          return (
+        <div className="flex items-center gap-2 px-3">
+          {multi && (
             <Link
-              key={k.id}
-              href={`/?kid=${k.id}`}
-              replace
-              className={`tap-bounce relative overflow-hidden rounded-3xl p-3 text-center shadow-md transition ${
-                on ? 'scale-[1.03] shadow-xl ring-4 ring-white' : 'opacity-90'
-              }`}
-              style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
+              href="/"
+              className="tap-bounce flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--card)] font-display text-xl font-bold text-[var(--head)] shadow-sm"
+              aria-label="Elegir otro hijo"
             >
-              <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={56} className="mx-auto" />
-              <div className="mt-1 font-display text-lg font-bold">{k.name}</div>
-              <div
-                className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-lg font-extrabold ${
-                  on ? 'bg-white/25 text-white' : 'bg-[var(--chip)] text-[var(--chip-ink)]'
-                }`}
-              >
-                {unitIcon(moneyOf(k))} {formatAmount(k.weekCents, moneyOf(k))}
-              </div>
+              ←
             </Link>
-          )
-        })}
-      </div>
+          )}
+          <div
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-3xl p-2.5 pl-3 text-white shadow-md"
+            style={{ background: selKid.color }}
+          >
+            <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={40} />
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-display text-lg font-bold leading-tight">{selKid.name}</div>
+              <div className="text-xs font-bold text-white/85">
+                Semana {formatAmount(selKid.weekCents, money)} · Hucha {formatAmount(selKid.balanceCents, money)}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Para aprobar (marcas de los niños en tareas con aprobación) */}
-      {pendientes.length > 0 && (
-        <>
-        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">⏳ Para aprobar</h2>
-        <div className="mx-3 space-y-1.5">
-          {pendientes.map((p) => (
-            <div key={p.id} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl shadow-inner"
-                style={{ background: p.taskColor }}
-              >
-                {p.taskIcon}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-display text-sm font-bold text-[var(--ink)]">{p.taskName}</div>
-                <div className="text-[11px] font-semibold text-[var(--ink-3)]">
-                  {p.kidName} · {friendlyDay(p.doneOn)} ·{' '}
-                  {formatAmount(p.valueCents, moneyOf({ unit: p.kidUnit, pointsName: p.kidPointsName, pointsIcon: p.kidPointsIcon }))}
-                </div>
-              </div>
-              <form action={approveCompletion}>
-                <input type="hidden" name="id" value={p.id} />
-                <SubmitButton
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-base leading-none text-white shadow-sm"
-                  aria-label={`Aprobar ${p.taskName} de ${p.kidName}`}
-                >
-                  ✓
-                </SubmitButton>
-              </form>
-              <form action={rejectCompletion}>
-                <input type="hidden" name="id" value={p.id} />
-                <ConfirmSubmit
-                  message={`¿Rechazar «${p.taskName}» de ${p.kidName}? Se quitará como si no se hubiera marcado.`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
-                >
-                  ✕
-                </ConfirmSubmit>
-              </form>
-            </div>
-          ))}
-        </div>
-        </>
-      )}
+      {/* Para aprobar: con varios hijos vive en la portada de selección */}
+      {!multi && <PendientesSection pendientes={pendientes} />}
 
       {/* Meta de ahorro */}
       {hasGoal && (
@@ -219,31 +297,8 @@ export default async function Page({
         </>
       )}
 
-      {/* Objetivo familiar (entre todos los hermanos) */}
-      {famGoal && (
-        <>
-        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
-        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-          <div className="flex items-center justify-between gap-2 text-sm font-bold text-[var(--ink)]">
-            <span className="truncate">
-              {famGoal.done ? '¡Conseguido! 🎉' : `${famGoal.count} de ${famGoal.target} tareas entre todos`}
-            </span>
-            <span className="shrink-0 text-[var(--ink-2)]">→ {famGoal.reward}</span>
-          </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-300 to-indigo-500"
-              style={{ width: `${famPct}%` }}
-            />
-          </div>
-          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
-            {famGoal.done
-              ? `Habéis hecho ${famGoal.count} tareas esta semana. ¡A disfrutar el premio!`
-              : 'Esta semana, sumando las tareas de todos los hermanos.'}
-          </div>
-        </div>
-        </>
-      )}
+      {/* Objetivo familiar: el padre con varios hijos lo ve en la portada */}
+      {(isKid || !multi) && famGoal && <FamGoalSection goal={famGoal} />}
 
       {/* Logros */}
       <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🏅 Logros</h2>
