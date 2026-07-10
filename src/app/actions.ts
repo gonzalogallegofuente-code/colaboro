@@ -649,6 +649,16 @@ export async function setKidColor(formData: FormData) {
   refresh()
 }
 
+// Cómo cuenta la semana ese hijo: 'tareas' (libre) u 'objetivo' (plan acordado).
+export async function setWeekMode(formData: FormData) {
+  const accountId = await requireAccount()
+  const kidId = Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  const mode = formData.get('mode') === 'objetivo' ? 'objetivo' : 'tareas'
+  await db.update(kids).set({ weekMode: mode }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
+  refresh()
+}
+
 export async function setIconStyle(formData: FormData) {
   const accountId = await requireAccount()
   const kidId = Number(formData.get('kidId'))

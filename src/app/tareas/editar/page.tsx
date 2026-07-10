@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getActiveKids, getAllTasks } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf, formatAmount } from '@/lib/money'
-import { addTask, setTaskActive, updateTask } from '@/app/actions'
+import { addTask, setTaskActive, setWeekMode, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
@@ -56,10 +56,15 @@ export default async function EditarTareasPage({
   const iconStyle = selKid.iconStyle as IconStyle
   const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
-  // El "plan de la semana" que se está fijando: solo las tareas marcadas 🗓️.
+  // El "objetivo semanal" que se está fijando: solo las tareas marcadas 🗓️.
+  const modoObjetivo = selKid.weekMode === 'objetivo'
   const enPlan = tasks.filter((t) => t.active && t.inPlan)
   const planVeces = enPlan.reduce((a, t) => a + t.weeklyTarget, 0)
   const planCents = enPlan.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
+  const modePill = (on: boolean) =>
+    `tap-bounce w-full rounded-xl border-2 px-3 py-2 font-display text-sm font-bold leading-tight ${
+      on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
+    }`
 
   return (
     <ThemeShell theme={theme}>
@@ -91,23 +96,47 @@ export default async function EditarTareasPage({
           </div>
         </div>
 
-        {/* Resumen del plan que se está fijando */}
-        <p className="mx-4 mt-1 text-center text-[11.5px] font-semibold text-[var(--ink-3)]">
-          {planVeces > 0 ? (
-            <>
-              🗓️ El plan de la semana de {selKid.name} suma{' '}
-              <span className="text-[var(--ink-2)]">{planVeces} tareas</span>
-              {planCents > 0 && (
-                <>
-                  {' '}y hasta <span className="text-[var(--ink-2)]">{formatAmount(planCents, money)}</span>
-                </>
-              )}
-              . Empieza realista: mejor un plan que se pueda completar 😉
-            </>
-          ) : (
-            <>🗓️ Aún no hay plan de la semana: marca "cuenta para el plan" en las tareas que acordéis.</>
-          )}
-        </p>
+        {/* Cómo cuenta la semana: libre u objetivo acordado */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">Cómo cuenta la semana</span>
+          <div className="mt-2 flex gap-2">
+            <form action={setWeekMode} className="flex-1">
+              <input type="hidden" name="kidId" value={selKid.id} />
+              <input type="hidden" name="mode" value="tareas" />
+              <button className={modePill(!modoObjetivo)}>🧹 Por tareas (libre)</button>
+            </form>
+            <form action={setWeekMode} className="flex-1">
+              <input type="hidden" name="kidId" value={selKid.id} />
+              <input type="hidden" name="mode" value="objetivo" />
+              <button className={modePill(modoObjetivo)}>🗓️ Objetivo semanal</button>
+            </form>
+          </div>
+          <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
+            {modoObjetivo
+              ? 'Con objetivo: el tablero muestra las tareas acordadas (🗓️) con su barra de progreso, y el resto como extras. ¡Más motivador!'
+              : 'Libre: todas las tareas a la vista, se marca sin límite y sin objetivo.'}
+          </p>
+        </div>
+
+        {/* Resumen del objetivo que se está fijando */}
+        {modoObjetivo && (
+          <p className="mx-4 mt-1 text-center text-[11.5px] font-semibold text-[var(--ink-3)]">
+            {planVeces > 0 ? (
+              <>
+                🗓️ El objetivo semanal de {selKid.name} suma{' '}
+                <span className="text-[var(--ink-2)]">{planVeces} tareas</span>
+                {planCents > 0 && (
+                  <>
+                    {' '}y hasta <span className="text-[var(--ink-2)]">{formatAmount(planCents, money)}</span>
+                  </>
+                )}
+                . Empieza realista: mejor un objetivo que se pueda completar 😉
+              </>
+            ) : (
+              <>🗓️ Aún no hay objetivo: marca "cuenta para el objetivo semanal" en las tareas que acordéis.</>
+            )}
+          </p>
+        )}
 
         <IconDefs style={iconStyle} />
 
@@ -155,7 +184,7 @@ export default async function EditarTareasPage({
                     defaultChecked={t.inPlan}
                     className="h-4 w-4 accent-emerald-600"
                   />
-                  🗓️ Cuenta para el plan de la semana
+                  🗓️ Cuenta para el objetivo semanal
                 </label>
                 <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                   Guardar
@@ -189,7 +218,7 @@ export default async function EditarTareasPage({
             </label>
             <label className="mt-1.5 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
               <input type="checkbox" name="inPlan" value="1" className="h-4 w-4 accent-emerald-600" />
-              🗓️ Cuenta para el plan de la semana
+              🗓️ Cuenta para el objetivo semanal
             </label>
             <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
               Añadir tarea

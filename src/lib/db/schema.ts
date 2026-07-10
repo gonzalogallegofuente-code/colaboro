@@ -42,6 +42,9 @@ export const kids = pgTable('kids', {
   pointsIcon: text('points_icon').notNull().default('💎'),
   // Estilo de iconos de las tareas: 'emoji' | 'line' | 'fill'.
   iconStyle: text('icon_style').notNull().default('emoji'),
+  // Cómo cuenta la semana: 'tareas' (libre, sin objetivo) | 'objetivo' (plan
+  // acordado: el tablero muestra solo las tareas del objetivo + extras).
+  weekMode: text('week_mode').notNull().default('tareas'),
   // Meta de ahorro (opcional): un objetivo al que ahorrar.
   goalName: text('goal_name'),
   goalIcon: text('goal_icon'),

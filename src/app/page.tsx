@@ -127,7 +127,7 @@ function FamGoalSection({ goal }: { goal: FamilyGoal }) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ kid?: string }>
+  searchParams: Promise<{ kid?: string; extras?: string }>
 }) {
   const sp = await searchParams
   const today = todayYmd()
@@ -203,10 +203,11 @@ export default async function Page({
   // Valor medio de sus tareas con pago, para "¡con N tareas más lo tienes!".
   const paidTasks = data.tasks.filter((t) => t.valueCents > 0)
   const avgTaskCents = paidTasks.length ? paidTasks.reduce((a, t) => a + t.valueCents, 0) / paidTasks.length : 0
-  // Plan de la semana: SOLO las tareas elegidas (🗓️ in_plan), con las
-  // "veces/semana" acordadas. Cada tarea aporta como máximo su objetivo.
+  // Objetivo semanal (solo si el hijo está en modo 'objetivo'): las tareas
+  // elegidas (🗓️) con sus veces/semana. Cada tarea aporta como máximo su objetivo.
+  const modoObjetivo = selKid.weekMode === 'objetivo'
   const planTasks = data.tasks.filter((t) => t.inPlan)
-  const planTotal = planTasks.reduce((a, t) => a + t.weeklyTarget, 0)
+  const planTotal = modoObjetivo ? planTasks.reduce((a, t) => a + t.weeklyTarget, 0) : 0
   const planDone = planTasks.reduce((a, t) => a + Math.min(data.weekCountByTask[t.id] ?? 0, t.weeklyTarget), 0)
   const planPct = planTotal > 0 ? Math.min(100, Math.round((planDone / planTotal) * 100)) : 0
   const planFullCents = planTasks.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
@@ -216,6 +217,58 @@ export default async function Page({
       : { weeks: [], record: 0, lastWeek: 0 }
   const planRecordNuevo = planDone > planHist.record && planHist.record > 0
   const planMejorQuePasada = planHist.lastWeek > 0 && planDone > planHist.lastWeek
+  // Con objetivo activo, abajo solo salen las tareas acordadas; el resto son extras.
+  const conObjetivo = modoObjetivo && planTotal > 0
+  const listaTareas = conObjetivo ? planTasks : data.tasks
+  const extrasTasks = conObjetivo ? data.tasks.filter((t) => !t.inPlan) : []
+  const showExtras = sp.extras === '1'
+
+  // Tarjeta de una tarea (lista principal y extras).
+  const tarjetaDeTarea = (t: (typeof data.tasks)[number]) => {
+    const week = data.weekCountByTask[t.id] ?? 0
+    const day = data.dayCountByTask[t.id] ?? 0
+    return (
+      <div key={t.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md animate-pop">
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-inner"
+          style={{ background: t.color }}
+        >
+          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={34} color={iconColor(t.color)} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-display text-base font-bold text-[var(--ink)]">{t.name}</div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--chip)] px-2 py-0.5 text-xs font-bold text-[var(--chip-ink)]">
+            {t.valueCents === 0 ? '🤝 Convivencia' : `${unitIcon(money)} ${formatAmount(t.valueCents, money)}`}
+          </span>
+          <ProgressCoins count={week} target={t.weeklyTarget} />
+        </div>
+
+        <div className="flex shrink-0 flex-col items-center gap-1.5">
+          <form action={markTask}>
+            <input type="hidden" name="kidId" value={selKid.id} />
+            <input type="hidden" name="taskId" value={t.id} />
+            <input type="hidden" name="doneOn" value={today} />
+            <CoinButton color={selKid.color} label={`Marcar ${t.name} para ${selKid.name}`} />
+          </form>
+          {day > 0 && (
+            <form action={undoTask} className="flex items-center gap-1">
+              <input type="hidden" name="kidId" value={selKid.id} />
+              <input type="hidden" name="taskId" value={t.id} />
+              <input type="hidden" name="doneOn" value={today} />
+              <SubmitButton
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-lg leading-none text-[var(--ink-2)]"
+                aria-label="Quitar una"
+              >
+                −
+              </SubmitButton>
+              <span className="font-display text-xs font-bold text-[var(--ink-3)]">×{day}</span>
+            </form>
+          )}
+        </div>
+      </div>
+    )
+  }
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -341,14 +394,14 @@ export default async function Page({
         </span>
       </Link>
 
-      {/* Plan de la semana: las tareas ACORDADAS y su progreso, con historial */}
+      {/* Objetivo semanal (solo en modo objetivo): progreso + historial */}
       {planTotal > 0 ? (
         <>
-        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Plan de la semana</h2>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Objetivo semanal</h2>
         <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <div className="flex items-center justify-between gap-2 text-sm font-bold text-[var(--ink)]">
             <span>
-              {planDone} de {planTotal} tareas del plan
+              {planDone} de {planTotal} tareas del objetivo
             </span>
             <span className="shrink-0 text-[var(--ink-2)]">{planPct}%</span>
           </div>
@@ -382,7 +435,7 @@ export default async function Page({
 
           <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
             {planPct >= 100
-              ? `¡Plan completado! 🎉${planRecordNuevo ? ' ¡Y es tu récord! 🏆' : ''}`
+              ? `¡Objetivo completado! 🎉${planRecordNuevo ? ' ¡Y es tu récord! 🏆' : ''}`
               : planRecordNuevo
                 ? '¡Nuevo récord personal! 🏆 ¿Hasta dónde llegas?'
                 : planMejorQuePasada
@@ -397,21 +450,22 @@ export default async function Page({
                 {' '}Semana pasada: {planHist.lastWeek} · Récord: {planHist.record}.
               </>
             )}
-            {planFullCents > 0 && planPct < 100 && <> Plan completo: {formatAmount(planFullCents, money)}.</>}
+            {planFullCents > 0 && planPct < 100 && <> Objetivo completo: {formatAmount(planFullCents, money)}.</>}
           </div>
         </div>
         </>
       ) : (
+        modoObjetivo &&
         !isKid && (
           <>
-          <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Plan de la semana</h2>
+          <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Objetivo semanal</h2>
           <Link
             href={`/tareas/editar?kid=${selKid.id}`}
             className="tap-bounce mx-3 flex items-center gap-3 rounded-3xl border-2 border-dashed border-emerald-300 bg-[var(--card)] p-3 shadow-sm"
           >
             <span className="text-2xl">🗓️</span>
             <span className="flex-1 text-[12.5px] font-semibold text-[var(--ink-2)]">
-              Montad juntos el plan de {selKid.name}: elige qué tareas cuentan y cuántas veces por semana.
+              Montad juntos el objetivo de {selKid.name}: elige qué tareas cuentan (🗓️) y cuántas veces por semana.
               Empieza realista — ¡la barra tiene que poder llenarse! 😉
             </span>
             <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
@@ -431,52 +485,38 @@ export default async function Page({
             </Link>
           </div>
         )}
-        {data.tasks.map((t) => {
-          const week = data.weekCountByTask[t.id] ?? 0
-          const day = data.dayCountByTask[t.id] ?? 0
-          return (
-            <div key={t.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md animate-pop">
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-inner"
-                style={{ background: t.color }}
-              >
-                <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={34} color={iconColor(t.color)} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-display text-base font-bold text-[var(--ink)]">{t.name}</div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--chip)] px-2 py-0.5 text-xs font-bold text-[var(--chip-ink)]">
-                  {t.valueCents === 0 ? '🤝 Convivencia' : `${unitIcon(money)} ${formatAmount(t.valueCents, money)}`}
-                </span>
-                <ProgressCoins count={week} target={t.weeklyTarget} />
-              </div>
-
-              <div className="flex shrink-0 flex-col items-center gap-1.5">
-                <form action={markTask}>
-                  <input type="hidden" name="kidId" value={selKid.id} />
-                  <input type="hidden" name="taskId" value={t.id} />
-                  <input type="hidden" name="doneOn" value={today} />
-                  <CoinButton color={selKid.color} label={`Marcar ${t.name} para ${selKid.name}`} />
-                </form>
-                {day > 0 && (
-                  <form action={undoTask} className="flex items-center gap-1">
-                    <input type="hidden" name="kidId" value={selKid.id} />
-                    <input type="hidden" name="taskId" value={t.id} />
-                    <input type="hidden" name="doneOn" value={today} />
-                    <SubmitButton
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-lg leading-none text-[var(--ink-2)]"
-                      aria-label="Quitar una"
-                    >
-                      −
-                    </SubmitButton>
-                    <span className="font-display text-xs font-bold text-[var(--ink-3)]">×{day}</span>
-                  </form>
-                )}
-              </div>
-            </div>
-          )
-        })}
+        {listaTareas.map(tarjetaDeTarea)}
       </div>
+
+      {/* Extras: tareas fuera del objetivo (solo en modo objetivo) */}
+      {extrasTasks.length > 0 &&
+        (showExtras ? (
+          <>
+            <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">➕ Extras</h2>
+            <p className="px-4 pb-1 text-[11px] font-semibold text-[var(--ink-3)]">
+              No cuentan para el objetivo, pero sí dan {money.unit === 'pts' ? money.pointsName : 'dinero'}, rachas y
+              logros.
+            </p>
+            <div className="mx-3 space-y-2.5">{extrasTasks.map(tarjetaDeTarea)}</div>
+            <Link
+              href={isKid ? '/' : `/?kid=${selKid.id}`}
+              scroll={false}
+              replace
+              className="tap-bounce mx-auto mt-3 block w-max rounded-full bg-[var(--card)] px-4 py-2 text-sm font-bold text-[var(--ink-3)] shadow-sm"
+            >
+              Ocultar extras ▲
+            </Link>
+          </>
+        ) : (
+          <Link
+            href={isKid ? '/?extras=1' : `/?kid=${selKid.id}&extras=1`}
+            scroll={false}
+            replace
+            className="tap-bounce mx-auto mt-3 block w-max rounded-full bg-[var(--card)] px-4 py-2 text-sm font-bold text-indigo-600 shadow-sm"
+          >
+            ➕ Extras ({extrasTasks.length}) ▼
+          </Link>
+        ))}
     </div>
     </ThemeShell>
   )
