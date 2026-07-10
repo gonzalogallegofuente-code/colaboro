@@ -10,12 +10,17 @@ export async function sendMail(opts: { to: string; subject: string; text: string
   const from = process.env.MAIL_FROM || user
   if (!host || !user || !pass) throw new Error('SMTP sin configurar (MAIL_* en el entorno)')
 
+  // En hosting compartido (Acens) el certificado del SMTP va a nombre del
+  // proveedor, no del dominio propio: MAIL_TLS_NAME permite validar el
+  // certificado (cadena completa) contra ese nombre en vez de desactivarlo.
+  const tlsName = process.env.MAIL_TLS_NAME
   const transporter = nodemailer.createTransport({
     host,
     port,
     secure: port === 465, // 587 → STARTTLS
     requireTLS: true,
     auth: { user, pass },
+    tls: tlsName ? { servername: tlsName } : undefined,
   })
   await transporter.sendMail({ from: `Colaboro <${from}>`, ...opts })
 }
