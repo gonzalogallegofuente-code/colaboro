@@ -1,0 +1,1 @@
+ALTER TABLE "tasks" ADD COLUMN IF NOT EXISTS "in_plan" boolean DEFAULT false NOT NULL;

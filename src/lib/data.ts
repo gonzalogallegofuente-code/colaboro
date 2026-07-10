@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
+import { and, eq, gte, lte, sql, desc, inArray } from 'drizzle-orm'
 import { db } from './db'
 import {
   accounts,
@@ -14,7 +14,7 @@ import {
   type Task,
   type Reward,
 } from './db/schema'
-import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd } from './week'
+import { weekRange, weekStartOf, parseYmd, ymd, addDays, weekDays, todayYmd, shiftWeek } from './week'
 import { DEFAULT_BADGES, isMetric, metricValue, type BadgeDef } from './badges'
 import { moneyOf, formatAmount } from './money'
 import { sendToAccount } from './push'
@@ -258,6 +258,53 @@ export async function getHistoryStats(accountId: number): Promise<KidHistoryStat
     })
   }
   return out
+}
+
+// ── Plan de la semana (historial para ver la progresión) ─────────────
+export type PlanHistory = {
+  // Últimas 4 semanas PASADAS (con ceros si no hubo nada), en orden cronológico.
+  weeks: { start: string; done: number }[]
+  record: number // mejor semana pasada (con el plan actual como vara de medir)
+  lastWeek: number
+}
+
+// "Hecho" de cada semana = Σ min(marcas, objetivo) por tarea DEL PLAN, así
+// repetir una tarea de más no infla el plan. Se mide con el plan ACTUAL.
+export async function getPlanHistory(kidId: number, targets: Map<number, number>): Promise<PlanHistory> {
+  const ids = [...targets.keys()]
+  if (ids.length === 0) return { weeks: [], record: 0, lastWeek: 0 }
+  const rows = await db
+    .select({ taskId: completions.taskId, doneOn: completions.doneOn })
+    .from(completions)
+    .where(and(eq(completions.kidId, kidId), eq(completions.status, 'approved'), inArray(completions.taskId, ids)))
+
+  const byWeek = new Map<string, Map<number, number>>()
+  for (const r of rows) {
+    const ws = ymd(weekStartOf(parseYmd(r.doneOn)))
+    let m = byWeek.get(ws)
+    if (!m) {
+      m = new Map()
+      byWeek.set(ws, m)
+    }
+    m.set(r.taskId, (m.get(r.taskId) ?? 0) + 1)
+  }
+  const doneOf = (ws: string) => {
+    const m = byWeek.get(ws)
+    if (!m) return 0
+    let s = 0
+    for (const [tid, n] of m) s += Math.min(n, targets.get(tid) ?? 0)
+    return s
+  }
+
+  const cur = weekRange(todayYmd()).start
+  const weeks: { start: string; done: number }[] = []
+  for (let i = 4; i >= 1; i--) {
+    const ws = shiftWeek(cur, -i)
+    weeks.push({ start: ws, done: doneOf(ws) })
+  }
+  let record = 0
+  for (const ws of byWeek.keys()) if (ws < cur) record = Math.max(record, doneOf(ws))
+  return { weeks, record, lastWeek: doneOf(shiftWeek(cur, -1)) }
 }
 
 // ── Objetivo familiar (semanal, entre todos los hijos) ───────────────

@@ -71,6 +71,8 @@ export const tasks = pgTable('tasks', {
   weeklyTarget: integer('weekly_target').notNull().default(7),
   // Si está activa, lo que marque el NIÑO queda pendiente hasta que el padre apruebe.
   requiresApproval: boolean('requires_approval').notNull().default(false),
+  // ¿Cuenta para el "plan de la semana"? Se elige tarea a tarea (nada por defecto).
+  inPlan: boolean('in_plan').notNull().default(false),
   color: text('color').notNull().default('#e9d5ff'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),

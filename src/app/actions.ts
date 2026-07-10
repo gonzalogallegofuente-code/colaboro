@@ -547,6 +547,7 @@ export async function addTask(formData: FormData) {
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
   const requiresApproval = formData.get('requiresApproval') === '1'
+  const inPlan = formData.get('inPlan') === '1'
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -562,6 +563,7 @@ export async function addTask(formData: FormData) {
     valueCents,
     weeklyTarget,
     requiresApproval,
+    inPlan,
     color: '#e9d5ff',
     sortOrder: (max ?? 0) + 1,
   })
@@ -582,9 +584,10 @@ export async function updateTask(formData: FormData) {
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
   const requiresApproval = formData.get('requiresApproval') === '1'
+  const inPlan = formData.get('inPlan') === '1'
   const [row] = await db
     .update(tasks)
-    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval })
+    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval, inPlan })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
   redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)

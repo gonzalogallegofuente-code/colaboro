@@ -56,10 +56,10 @@ export default async function EditarTareasPage({
   const iconStyle = selKid.iconStyle as IconStyle
   const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
-  // El "plan de la semana" que se está fijando: Σ (valor × veces/semana) de las activas.
-  const activas = tasks.filter((t) => t.active)
-  const planVeces = activas.reduce((a, t) => a + t.weeklyTarget, 0)
-  const planCents = activas.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
+  // El "plan de la semana" que se está fijando: solo las tareas marcadas 🗓️.
+  const enPlan = tasks.filter((t) => t.active && t.inPlan)
+  const planVeces = enPlan.reduce((a, t) => a + t.weeklyTarget, 0)
+  const planCents = enPlan.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
 
   return (
     <ThemeShell theme={theme}>
@@ -92,17 +92,22 @@ export default async function EditarTareasPage({
         </div>
 
         {/* Resumen del plan que se está fijando */}
-        {planVeces > 0 && (
-          <p className="mx-4 mt-1 text-center text-[11.5px] font-semibold text-[var(--ink-3)]">
-            🗓️ El plan de la semana de {selKid.name} suma <span className="text-[var(--ink-2)]">{planVeces} tareas</span>
-            {planCents > 0 && (
-              <>
-                {' '}y hasta <span className="text-[var(--ink-2)]">{formatAmount(planCents, money)}</span>
-              </>
-            )}
-            .
-          </p>
-        )}
+        <p className="mx-4 mt-1 text-center text-[11.5px] font-semibold text-[var(--ink-3)]">
+          {planVeces > 0 ? (
+            <>
+              🗓️ El plan de la semana de {selKid.name} suma{' '}
+              <span className="text-[var(--ink-2)]">{planVeces} tareas</span>
+              {planCents > 0 && (
+                <>
+                  {' '}y hasta <span className="text-[var(--ink-2)]">{formatAmount(planCents, money)}</span>
+                </>
+              )}
+              . Empieza realista: mejor un plan que se pueda completar 😉
+            </>
+          ) : (
+            <>🗓️ Aún no hay plan de la semana: marca "cuenta para el plan" en las tareas que acordéis.</>
+          )}
+        </p>
 
         <IconDefs style={iconStyle} />
 
@@ -142,6 +147,16 @@ export default async function EditarTareasPage({
                   />
                   Requiere tu aprobación cuando la marque el niño
                 </label>
+                <label className="mt-1.5 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
+                  <input
+                    type="checkbox"
+                    name="inPlan"
+                    value="1"
+                    defaultChecked={t.inPlan}
+                    className="h-4 w-4 accent-emerald-600"
+                  />
+                  🗓️ Cuenta para el plan de la semana
+                </label>
                 <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                   Guardar
                 </SubmitButton>
@@ -171,6 +186,10 @@ export default async function EditarTareasPage({
             <label className="mt-2 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
               <input type="checkbox" name="requiresApproval" value="1" className="h-4 w-4 accent-indigo-600" />
               Requiere tu aprobación cuando la marque el niño
+            </label>
+            <label className="mt-1.5 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
+              <input type="checkbox" name="inPlan" value="1" className="h-4 w-4 accent-emerald-600" />
+              🗓️ Cuenta para el plan de la semana
             </label>
             <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
               Añadir tarea

@@ -5,6 +5,7 @@ import {
   getBadgeDefs,
   getPendingCompletions,
   getFamilyGoal,
+  getPlanHistory,
   type PendingCompletion,
   type FamilyGoal,
 } from '@/lib/data'
@@ -202,12 +203,19 @@ export default async function Page({
   // Valor medio de sus tareas con pago, para "¡con N tareas más lo tienes!".
   const paidTasks = data.tasks.filter((t) => t.valueCents > 0)
   const avgTaskCents = paidTasks.length ? paidTasks.reduce((a, t) => a + t.valueCents, 0) / paidTasks.length : 0
-  // Plan de la semana: lo fijado en "veces/semana" de cada tarea, agregado.
-  // Cada tarea aporta como máximo su objetivo (repetir de más no rellena otras).
-  const planTotal = data.tasks.reduce((a, t) => a + t.weeklyTarget, 0)
-  const planDone = data.tasks.reduce((a, t) => a + Math.min(data.weekCountByTask[t.id] ?? 0, t.weeklyTarget), 0)
+  // Plan de la semana: SOLO las tareas elegidas (🗓️ in_plan), con las
+  // "veces/semana" acordadas. Cada tarea aporta como máximo su objetivo.
+  const planTasks = data.tasks.filter((t) => t.inPlan)
+  const planTotal = planTasks.reduce((a, t) => a + t.weeklyTarget, 0)
+  const planDone = planTasks.reduce((a, t) => a + Math.min(data.weekCountByTask[t.id] ?? 0, t.weeklyTarget), 0)
   const planPct = planTotal > 0 ? Math.min(100, Math.round((planDone / planTotal) * 100)) : 0
-  const planFullCents = data.tasks.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
+  const planFullCents = planTasks.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
+  const planHist =
+    planTotal > 0
+      ? await getPlanHistory(selKid.id, new Map(planTasks.map((t) => [t.id, t.weeklyTarget])))
+      : { weeks: [], record: 0, lastWeek: 0 }
+  const planRecordNuevo = planDone > planHist.record && planHist.record > 0
+  const planMejorQuePasada = planHist.lastWeek > 0 && planDone > planHist.lastWeek
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -333,8 +341,8 @@ export default async function Page({
         </span>
       </Link>
 
-      {/* Plan de la semana: el objetivo fijado (veces/semana) y su progreso */}
-      {planTotal > 0 && (
+      {/* Plan de la semana: las tareas ACORDADAS y su progreso, con historial */}
+      {planTotal > 0 ? (
         <>
         <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Plan de la semana</h2>
         <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
@@ -350,20 +358,66 @@ export default async function Page({
               style={{ width: `${planPct}%` }}
             />
           </div>
-          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+
+          {/* Mini-gráfica: 4 semanas pasadas (grises) + esta (verde) */}
+          <div className="mt-2.5 flex h-12 items-end gap-1.5">
+            {planHist.weeks.map((w) => (
+              <div
+                key={w.start}
+                className="flex-1 rounded-t-md bg-gray-300"
+                style={{ height: `${Math.max(5, Math.min(100, Math.round((w.done / planTotal) * 100)))}%` }}
+                title={`${w.done} tareas`}
+              />
+            ))}
+            <div
+              className="flex-1 rounded-t-md bg-emerald-500"
+              style={{ height: `${Math.max(5, planPct)}%` }}
+              title={`${planDone} tareas (esta semana)`}
+            />
+          </div>
+          <div className="flex justify-between text-[9.5px] font-bold uppercase tracking-wide text-[var(--ink-3)]">
+            <span>hace 4 semanas</span>
+            <span className="text-emerald-600">esta</span>
+          </div>
+
+          <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
             {planPct >= 100
-              ? '¡Plan de la semana completado! 🎉'
-              : planPct >= 50
-                ? '¡Ya llevas más de la mitad! 💪'
-                : isKid
-                  ? 'Cada tarea que marques rellena la barra 🙂'
-                  : 'El plan sale de las "veces/semana" de cada tarea (Editar tareas).'}
-            {planFullCents > 0 && planPct < 100 && (
-              <> Plan completo: {formatAmount(planFullCents, money)}.</>
+              ? `¡Plan completado! 🎉${planRecordNuevo ? ' ¡Y es tu récord! 🏆' : ''}`
+              : planRecordNuevo
+                ? '¡Nuevo récord personal! 🏆 ¿Hasta dónde llegas?'
+                : planMejorQuePasada
+                  ? '¡Vas mejor que la semana pasada! 📈'
+                  : planPct >= 50
+                    ? '¡Ya llevas más de la mitad! 💪'
+                    : isKid
+                      ? 'Cada tarea que marques rellena la barra 🙂'
+                      : 'Se ajusta en Editar tareas (🗓️ y veces/semana).'}
+            {planHist.record > 0 && (
+              <>
+                {' '}Semana pasada: {planHist.lastWeek} · Récord: {planHist.record}.
+              </>
             )}
+            {planFullCents > 0 && planPct < 100 && <> Plan completo: {formatAmount(planFullCents, money)}.</>}
           </div>
         </div>
         </>
+      ) : (
+        !isKid && (
+          <>
+          <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Plan de la semana</h2>
+          <Link
+            href={`/tareas/editar?kid=${selKid.id}`}
+            className="tap-bounce mx-3 flex items-center gap-3 rounded-3xl border-2 border-dashed border-emerald-300 bg-[var(--card)] p-3 shadow-sm"
+          >
+            <span className="text-2xl">🗓️</span>
+            <span className="flex-1 text-[12.5px] font-semibold text-[var(--ink-2)]">
+              Montad juntos el plan de {selKid.name}: elige qué tareas cuentan y cuántas veces por semana.
+              Empieza realista — ¡la barra tiene que poder llenarse! 😉
+            </span>
+            <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
+          </Link>
+          </>
+        )
       )}
 
       {/* Tareas */}
