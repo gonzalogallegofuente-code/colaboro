@@ -49,10 +49,12 @@ export function unitWord(cfg: MoneyConfig): string {
 }
 
 // "1,5" / "1" -> 150 (céntimos). Acepta coma o punto.
+// Tope 10.000 € (1.000.000 céntimos): un valor desorbitado ("Respirar" a
+// 1.000.000 € marcado 22 veces) desbordó las sumas enteras y tumbó una cuenta.
 export function parseEurosToCents(input: string): number | null {
   const cleaned = String(input).trim().replace(',', '.')
   if (cleaned === '') return null
   const n = Number(cleaned)
   if (!Number.isFinite(n) || n < 0) return null
-  return Math.round(n * 100)
+  return Math.min(Math.round(n * 100), 1_000_000)
 }

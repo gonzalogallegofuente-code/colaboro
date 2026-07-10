@@ -36,7 +36,7 @@ async function run(req: Request): Promise<Response> {
       pointsName: kids.pointsName,
       pointsIcon: kids.pointsIcon,
       n: sql<number>`count(${completions.id})::int`,
-      c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
+      c: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8`,
     })
     .from(kids)
     .leftJoin(

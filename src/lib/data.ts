@@ -112,25 +112,25 @@ export async function getAllTasks(accountId: number, kidId: number): Promise<Tas
 export async function kidBalances(accountId: number): Promise<Map<number, number>> {
   const [earned, paid, redeemed, awards] = await Promise.all([
     db
-      .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
+      .select({ kidId: completions.kidId, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8` })
       .from(completions)
       .innerJoin(kids, eq(kids.id, completions.kidId))
       .where(and(eq(kids.accountId, accountId), eq(completions.status, 'approved')))
       .groupBy(completions.kidId),
     db
-      .select({ kidId: payouts.kidId, c: sql<number>`coalesce(sum(${payouts.amountCents}),0)::int` })
+      .select({ kidId: payouts.kidId, c: sql<number>`coalesce(sum(${payouts.amountCents}),0)::float8` })
       .from(payouts)
       .innerJoin(kids, eq(kids.id, payouts.kidId))
       .where(eq(kids.accountId, accountId))
       .groupBy(payouts.kidId),
     db
-      .select({ kidId: redemptions.kidId, c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::int` })
+      .select({ kidId: redemptions.kidId, c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::float8` })
       .from(redemptions)
       .innerJoin(kids, eq(kids.id, redemptions.kidId))
       .where(eq(kids.accountId, accountId))
       .groupBy(redemptions.kidId),
     db
-      .select({ kidId: badgeAwards.kidId, c: sql<number>`coalesce(sum(${badgeAwards.cents}),0)::int` })
+      .select({ kidId: badgeAwards.kidId, c: sql<number>`coalesce(sum(${badgeAwards.cents}),0)::float8` })
       .from(badgeAwards)
       .innerJoin(kids, eq(kids.id, badgeAwards.kidId))
       .where(eq(kids.accountId, accountId))
@@ -215,7 +215,7 @@ export async function getHistoryStats(accountId: number): Promise<KidHistoryStat
     const [stats, weekAgg, redAgg, top] = await Promise.all([
       getKidStats(k.id),
       db
-        .select({ n: sql<number>`count(*)::int`, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
+        .select({ n: sql<number>`count(*)::int`, c: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8` })
         .from(completions)
         .where(
           and(
@@ -226,7 +226,7 @@ export async function getHistoryStats(accountId: number): Promise<KidHistoryStat
           ),
         ),
       db
-        .select({ c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::int` })
+        .select({ c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::float8` })
         .from(redemptions)
         .where(eq(redemptions.kidId, k.id)),
       db
@@ -326,7 +326,7 @@ export async function getBoardData(
     db
       .select({
         kidId: completions.kidId,
-        cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
+        cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8`,
       })
       .from(completions)
       .innerJoin(kids, eq(kids.id, completions.kidId))
@@ -422,7 +422,7 @@ export async function getWeekGrid(
   const days = weekDays(range.start)
 
   const weekRows = await db
-    .select({ kidId: completions.kidId, cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::int` })
+    .select({ kidId: completions.kidId, cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8` })
     .from(completions)
     .innerJoin(kids, eq(kids.id, completions.kidId))
     .where(
@@ -629,7 +629,7 @@ export async function getKidStats(kidId: number): Promise<{
     db
       .select({
         n: sql<number>`count(*)::int`,
-        e: sql<number>`coalesce(sum(${completions.valueCents}),0)::int`,
+        e: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8`,
       })
       .from(completions)
       .where(and(eq(completions.kidId, kidId), eq(completions.status, 'approved'))),
