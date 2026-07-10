@@ -19,6 +19,9 @@ export const accounts = pgTable('accounts', {
   // Objetivo familiar semanal: N tareas ENTRE TODOS → premio compartido.
   familyGoalTarget: integer('family_goal_target'),
   familyGoalReward: text('family_goal_reward'),
+  // Recuperación de contraseña: hash del token de un solo uso + caducidad.
+  resetTokenHash: text('reset_token_hash'),
+  resetExpires: timestamp('reset_expires', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

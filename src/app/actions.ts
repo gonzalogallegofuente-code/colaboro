@@ -28,6 +28,8 @@ import { hashPassword, verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, KID_COOKIE, makeSessionToken, makeKidToken, pwvOf } from '@/lib/auth'
 import { getViewer, getKidMode, requireAccount } from '@/lib/session'
 import { rateLimit, rateClear } from '@/lib/ratelimit'
+import { sendMail } from '@/lib/mailer'
+import { randomBytes, createHash } from 'node:crypto'
 
 // IP del cliente (tras Traefik) para el limitador de intentos.
 async function clientIp(): Promise<string> {
@@ -132,6 +134,61 @@ export async function logout() {
   const c = await cookies()
   c.delete(SESSION_COOKIE)
   redirect('/login')
+}
+
+// ── Recuperación de contraseña ───────────────────────────────────────
+// Pide el enlace: si el email existe se le envía un enlace de UN SOLO USO que
+// caduca en 45 min. La respuesta es siempre la misma (no revela si existe).
+export async function requestPasswordReset(formData: FormData) {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) redirect('/recuperar?ok=1')
+  // Freno: 3 peticiones/15 min por email y por IP.
+  const ip = await clientIp()
+  if (!rateLimit(`reset:ip:${ip}`, 3, 15 * 60_000) || !rateLimit(`reset:email:${email}`, 3, 15 * 60_000)) {
+    redirect('/recuperar?ok=1')
+  }
+  const [acc] = await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.email, email))
+  if (acc) {
+    const token = randomBytes(32).toString('hex')
+    const tokenHash = createHash('sha256').update(token).digest('hex')
+    await db
+      .update(accounts)
+      .set({ resetTokenHash: tokenHash, resetExpires: new Date(Date.now() + 45 * 60_000) })
+      .where(eq(accounts.id, acc.id))
+    const origin = process.env.COLABORO_ORIGIN || 'https://colaboro.srv1532791.hstgr.cloud'
+    const url = `${origin}/recuperar/nueva?t=${token}`
+    try {
+      await sendMail({
+        to: email,
+        subject: 'Colaboro — recupera tu contraseña',
+        text:
+          `Hola,\n\nAlguien (esperamos que tú) ha pedido restablecer la contraseña de Colaboro.\n\n` +
+          `Entra aquí para poner una nueva (el enlace caduca en 45 minutos y solo vale una vez):\n${url}\n\n` +
+          `Si no fuiste tú, ignora este email: tu contraseña sigue igual.`,
+      })
+    } catch (e) {
+      console.error('[recuperar] fallo enviando email:', e)
+    }
+  }
+  redirect('/recuperar?ok=1')
+}
+
+// Pone la contraseña nueva a partir del token del email.
+export async function resetPassword(formData: FormData) {
+  const token = String(formData.get('token') ?? '')
+  const next = String(formData.get('password') ?? '')
+  if (!/^[0-9a-f]{64}$/.test(token)) redirect('/recuperar?e=link')
+  if (next.length < 6) redirect(`/recuperar/nueva?t=${token}&e=short`)
+  const tokenHash = createHash('sha256').update(token).digest('hex')
+  const [acc] = await db.select().from(accounts).where(eq(accounts.resetTokenHash, tokenHash))
+  if (!acc || !acc.resetExpires || acc.resetExpires.getTime() < Date.now()) redirect('/recuperar?e=link')
+  await db
+    .update(accounts)
+    .set({ passwordHash: hashPassword(next), resetTokenHash: null, resetExpires: null })
+    .where(eq(accounts.id, acc.id))
+  // La sesión va ligada a la contraseña (pwv): las demás sesiones caducan solas.
+  await setSessionCookie(acc.id)
+  redirect('/')
 }
 
 export async function changePassword(formData: FormData) {

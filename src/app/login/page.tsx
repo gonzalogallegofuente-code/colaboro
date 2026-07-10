@@ -39,6 +39,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <Link href="/registro" className="font-bold text-indigo-600 underline">
           Regístrate
         </Link>
+        {' · '}
+        <Link href="/recuperar" className="font-bold text-indigo-600 underline">
+          ¿Olvidaste la contraseña?
+        </Link>
       </p>
       <p className="mt-2 text-xs font-semibold text-[var(--ink-3)]">
         ¿Problemas para entrar o algo no funciona?{' '}

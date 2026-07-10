@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { SESSION_COOKIE, KID_COOKIE, readSession, readKidToken } from '@/lib/auth'
 
-const PUBLIC = ['/login', '/registro']
+const PUBLIC = ['/login', '/registro', '/recuperar', '/recuperar/nueva']
 // Páginas informativas: visibles siempre (con y sin sesión).
 const OPEN = ['/privacidad']
 
