@@ -40,6 +40,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Regístrate
         </Link>
       </p>
+      <p className="mt-2 text-xs font-semibold text-[var(--ink-3)]">
+        ¿Problemas para entrar o algo no funciona?{' '}
+        <a
+          href="mailto:gonzalo.gallego.fuente@gmail.com?subject=Ayuda%20con%20Colaboro"
+          className="font-bold text-indigo-600 underline"
+        >
+          Escríbenos
+        </a>
+      </p>
     </main>
   )
 }
