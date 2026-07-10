@@ -584,13 +584,23 @@ export async function updateTask(formData: FormData) {
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
   const requiresApproval = formData.get('requiresApproval') === '1'
-  const inPlan = formData.get('inPlan') === '1'
+  // OJO: inPlan NO se toca aquí — lo gestiona toggleInPlan (botón de un toque).
   const [row] = await db
     .update(tasks)
-    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval, inPlan })
+    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
     .returning({ kidId: tasks.kidId })
   redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)
+}
+
+// Mete o saca una tarea del objetivo semanal (un toque, sin pasar por Guardar).
+export async function toggleInPlan(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  const inPlan = formData.get('inPlan') === '1'
+  if (!id) throw new Error('Datos inválidos')
+  await db.update(tasks).set({ inPlan }).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
+  refresh()
 }
 
 export async function setTaskActive(formData: FormData) {

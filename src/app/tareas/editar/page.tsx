@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getActiveKids, getAllTasks } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf, formatAmount } from '@/lib/money'
-import { addTask, setTaskActive, setWeekMode, updateTask } from '@/app/actions'
+import { addTask, setTaskActive, setWeekMode, toggleInPlan, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
@@ -133,7 +133,7 @@ export default async function EditarTareasPage({
                 . Empieza realista: mejor un objetivo que se pueda completar 😉
               </>
             ) : (
-              <>🗓️ Aún no hay objetivo: marca "cuenta para el objetivo semanal" en las tareas que acordéis.</>
+              <>🗓️ Aún no hay objetivo: pulsa "🗓️ Añadir al objetivo" en las tareas que acordéis (se guarda al toque).</>
             )}
           </p>
         )}
@@ -176,21 +176,30 @@ export default async function EditarTareasPage({
                   />
                   Requiere tu aprobación cuando la marque el niño
                 </label>
-                <label className="mt-1.5 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
-                  <input
-                    type="checkbox"
-                    name="inPlan"
-                    value="1"
-                    defaultChecked={t.inPlan}
-                    className="h-4 w-4 accent-emerald-600"
-                  />
-                  🗓️ Cuenta para el objetivo semanal
-                </label>
                 <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
                   Guardar
                 </SubmitButton>
               </form>
-              <ToggleActive id={t.id} active={t.active} />
+              <div className="mt-2 flex items-center justify-between gap-2">
+                {modoObjetivo ? (
+                  <form action={toggleInPlan}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="inPlan" value={t.inPlan ? '0' : '1'} />
+                    <SubmitButton
+                      className={`tap-bounce rounded-full px-3 py-1.5 text-xs font-bold ${
+                        t.inPlan
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'border-2 border-emerald-300 text-emerald-700'
+                      }`}
+                    >
+                      {t.inPlan ? '🗓️ En el objetivo ✓ (quitar)' : '🗓️ Añadir al objetivo'}
+                    </SubmitButton>
+                  </form>
+                ) : (
+                  <span />
+                )}
+                <ToggleActive id={t.id} active={t.active} />
+              </div>
             </div>
           ))}
 
@@ -232,7 +241,7 @@ export default async function EditarTareasPage({
 
 function ToggleActive({ id, active }: { id: number; active: boolean }) {
   return (
-    <form action={setTaskActive} className="mt-2 text-right">
+    <form action={setTaskActive} className="shrink-0">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="active" value={active ? '0' : '1'} />
       <SubmitButton className="text-xs font-semibold text-[var(--ink-3)] underline underline-offset-2">

@@ -412,21 +412,27 @@ export default async function Page({
             />
           </div>
 
-          {/* Mini-gráfica: 4 semanas pasadas (grises) + esta (verde) */}
-          <div className="mt-2.5 flex h-12 items-end gap-1.5">
+          {/* Mini-gráfica: 4 semanas pasadas + esta. Cada columna es un carril
+              con fondo (visible aunque valga 0) y el relleno crece dentro. */}
+          <div className="mt-2.5 flex h-14 items-stretch gap-1.5">
             {planHist.weeks.map((w) => (
               <div
                 key={w.start}
-                className="flex-1 rounded-t-md bg-gray-300"
-                style={{ height: `${Math.max(5, Math.min(100, Math.round((w.done / planTotal) * 100)))}%` }}
+                className="flex flex-1 flex-col justify-end overflow-hidden rounded-md bg-gray-200"
                 title={`${w.done} tareas`}
-              />
+              >
+                <div
+                  className="w-full rounded-md bg-gray-400"
+                  style={{ height: `${Math.min(100, Math.round((w.done / planTotal) * 100))}%` }}
+                />
+              </div>
             ))}
             <div
-              className="flex-1 rounded-t-md bg-emerald-500"
-              style={{ height: `${Math.max(5, planPct)}%` }}
+              className="flex flex-1 flex-col justify-end overflow-hidden rounded-md bg-emerald-100"
               title={`${planDone} tareas (esta semana)`}
-            />
+            >
+              <div className="w-full rounded-md bg-emerald-500" style={{ height: `${planPct}%` }} />
+            </div>
           </div>
           <div className="flex justify-between text-[9.5px] font-bold uppercase tracking-wide text-[var(--ink-3)]">
             <span>hace 4 semanas</span>
