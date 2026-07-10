@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getActiveKids, getAllTasks } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { unitWord, moneyOf, themeOf } from '@/lib/money'
+import { unitWord, moneyOf, themeOf, formatAmount } from '@/lib/money'
 import { addTask, setTaskActive, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
@@ -56,6 +56,10 @@ export default async function EditarTareasPage({
   const iconStyle = selKid.iconStyle as IconStyle
   const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
+  // El "plan de la semana" que se está fijando: Σ (valor × veces/semana) de las activas.
+  const activas = tasks.filter((t) => t.active)
+  const planVeces = activas.reduce((a, t) => a + t.weeklyTarget, 0)
+  const planCents = activas.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
 
   return (
     <ThemeShell theme={theme}>
@@ -86,6 +90,19 @@ export default async function EditarTareasPage({
             <span className="font-display font-bold">Tareas de {selKid.name}</span>
           </div>
         </div>
+
+        {/* Resumen del plan que se está fijando */}
+        {planVeces > 0 && (
+          <p className="mx-4 mt-1 text-center text-[11.5px] font-semibold text-[var(--ink-3)]">
+            🗓️ El plan de la semana de {selKid.name} suma <span className="text-[var(--ink-2)]">{planVeces} tareas</span>
+            {planCents > 0 && (
+              <>
+                {' '}y hasta <span className="text-[var(--ink-2)]">{formatAmount(planCents, money)}</span>
+              </>
+            )}
+            .
+          </p>
+        )}
 
         <IconDefs style={iconStyle} />
 

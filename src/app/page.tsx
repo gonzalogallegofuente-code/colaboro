@@ -202,6 +202,12 @@ export default async function Page({
   // Valor medio de sus tareas con pago, para "¡con N tareas más lo tienes!".
   const paidTasks = data.tasks.filter((t) => t.valueCents > 0)
   const avgTaskCents = paidTasks.length ? paidTasks.reduce((a, t) => a + t.valueCents, 0) / paidTasks.length : 0
+  // Plan de la semana: lo fijado en "veces/semana" de cada tarea, agregado.
+  // Cada tarea aporta como máximo su objetivo (repetir de más no rellena otras).
+  const planTotal = data.tasks.reduce((a, t) => a + t.weeklyTarget, 0)
+  const planDone = data.tasks.reduce((a, t) => a + Math.min(data.weekCountByTask[t.id] ?? 0, t.weeklyTarget), 0)
+  const planPct = planTotal > 0 ? Math.min(100, Math.round((planDone / planTotal) * 100)) : 0
+  const planFullCents = data.tasks.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
   const badgeDefs = await getBadgeDefs(accountId)
   const badges = computeBadges(badgeDefs, { bestStreak: stats.bestStreak, total: stats.total, earnedUnits: stats.earnedCents / 100 })
   const earnedBadges = badges.filter((b) => b.earned)
@@ -326,6 +332,39 @@ export default async function Page({
           {earnedBadges.length}/{badges.length} ›
         </span>
       </Link>
+
+      {/* Plan de la semana: el objetivo fijado (veces/semana) y su progreso */}
+      {planTotal > 0 && (
+        <>
+        <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Plan de la semana</h2>
+        <div className="mx-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <div className="flex items-center justify-between gap-2 text-sm font-bold text-[var(--ink)]">
+            <span>
+              {planDone} de {planTotal} tareas del plan
+            </span>
+            <span className="shrink-0 text-[var(--ink-2)]">{planPct}%</span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500"
+              style={{ width: `${planPct}%` }}
+            />
+          </div>
+          <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
+            {planPct >= 100
+              ? '¡Plan de la semana completado! 🎉'
+              : planPct >= 50
+                ? '¡Ya llevas más de la mitad! 💪'
+                : isKid
+                  ? 'Cada tarea que marques rellena la barra 🙂'
+                  : 'El plan sale de las "veces/semana" de cada tarea (Editar tareas).'}
+            {planFullCents > 0 && planPct < 100 && (
+              <> Plan completo: {formatAmount(planFullCents, money)}.</>
+            )}
+          </div>
+        </div>
+        </>
+      )}
 
       {/* Tareas */}
       <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">📋 Tareas</h2>
