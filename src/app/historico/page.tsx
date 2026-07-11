@@ -19,7 +19,7 @@ const MES_LARGO = [
 export default async function HistoricoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ open?: string }>
+  searchParams: Promise<{ open?: string; pk?: string }>
 }) {
   const sp = await searchParams
   const viewer = await requireViewerPage()
@@ -29,12 +29,15 @@ export default async function HistoricoPage({
   const today = todayYmd()
   const currentStart = weekRange(today).start
 
-  // Semana desplegada (su parte por hijo se carga solo al abrirla).
+  // Semana desplegada (su parte se carga solo al abrirla). Con varios hijos hay
+  // pestañas para elegir de quién ver el parte (parám. pk); por defecto el 1º.
+  const parteKids = kids.filter((k) => k.active)
   const openStart =
     sp.open && /^\d{4}-\d{2}-\d{2}$/.test(sp.open) && weeks.some((w) => w.start === sp.open) ? sp.open : null
-  const openGrids = openStart
-    ? await Promise.all(kids.map(async (k) => ({ kid: k, data: await getWeekGrid(accountId, openStart, k.id) })))
-    : []
+  const pkParam = sp.pk ? Number(sp.pk) : undefined
+  const openKidId = pkParam && parteKids.some((k) => k.id === pkParam) ? pkParam : parteKids[0]?.id
+  const openKid = parteKids.find((k) => k.id === openKidId)
+  const openGrid = openStart && openKidId ? await getWeekGrid(accountId, openStart, openKidId) : null
 
   return (
     <ThemeShell theme={theme}>
@@ -148,9 +151,32 @@ export default async function HistoricoPage({
               </div>
 
               {isOpen && (
-                <div className="mt-3 space-y-4 border-t border-gray-100 pt-3">
-                  {openGrids.map(({ kid, data }) =>
-                    data ? <KidWeekGrid key={kid.id} kid={kid} data={data} today={today} editable={!viewer.isKid} /> : null,
+                <div className="mt-3 border-t border-gray-100 pt-3">
+                  {/* Pestañas de hijo (solo si hay más de uno) */}
+                  {parteKids.length > 1 && (
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {parteKids.map((pk) => {
+                        const on = pk.id === openKidId
+                        return (
+                          <Link
+                            key={pk.id}
+                            href={`/historico?open=${w.start}&pk=${pk.id}`}
+                            replace
+                            scroll={false}
+                            className={`tap-bounce flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-display text-xs font-bold ${
+                              on ? 'text-white shadow-sm' : 'text-[var(--ink)]'
+                            }`}
+                            style={{ background: on ? pk.color : 'var(--chip)' }}
+                          >
+                            <Avatar emoji={pk.emoji} avatarUrl={pk.avatarUrl} name={pk.name} size={18} />
+                            {pk.name}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {openGrid && openKid && (
+                    <KidWeekGrid kid={openKid} data={openGrid} today={today} editable={!viewer.isKid} />
                   )}
                 </div>
               )}
