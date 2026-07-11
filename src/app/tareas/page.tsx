@@ -123,8 +123,10 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
           <span className="font-display text-lg font-bold text-[var(--ink-3)]">›</span>
         </Link>
 
-        {/* Cuenta */}
+        {/* Cuenta — subdividida en tarjetas independientes */}
         <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">👤 Cuenta</h2>
+
+        {/* Datos de la cuenta */}
         <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <p className="text-sm text-[var(--ink-2)]">
             Conectado como <span className="font-bold text-[var(--ink)]">{accEmail}</span>
@@ -134,7 +136,12 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               🔒 Política de privacidad y tus datos
             </Link>
           </p>
-          <form action={changePassword} className="mt-3 space-y-2">
+        </div>
+
+        {/* Cambiar contraseña */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">🔑 Cambiar contraseña</span>
+          <form action={changePassword} className="mt-2 space-y-2">
             <input name="current" type="password" placeholder="Contraseña actual" className={inputCls} required />
             <input name="next" type="password" placeholder="Nueva contraseña (mín. 6)" className={inputCls} required />
             {sp.pw === 'ok' && <p className="text-xs font-semibold text-emerald-600">Contraseña cambiada ✓</p>}
@@ -144,46 +151,42 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               Cambiar contraseña
             </SubmitButton>
           </form>
+        </div>
 
-          <div className="mt-3 border-t border-gray-100 pt-3">
-            <span className="font-display text-sm font-bold text-[var(--ink)]">👆 Huella</span>
-            <RegisterFingerprint />
-          </div>
+        {/* Activar huella */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-[var(--ink)]">👆 Huella</span>
+          <RegisterFingerprint />
+        </div>
 
-          <form action={logout} className="mt-3">
+        {/* Cerrar sesión */}
+        <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <form action={logout}>
             <ConfirmButton
               message="¿Seguro que quieres cerrar sesión?"
-              className="rounded-xl border-2 border-gray-200 px-3 py-1.5 text-sm font-semibold text-[var(--ink-2)]"
+              className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm font-semibold text-[var(--ink-2)]"
             >
-              Cerrar sesión
+              🚪 Cerrar sesión
             </ConfirmButton>
           </form>
+        </div>
 
-          {/* Zona de peligro: borrar la cuenta entera (RGPD, supresión) */}
-          <div className="mt-4 rounded-2xl border-2 border-red-100 p-3">
-            <span className="font-display text-sm font-bold text-red-500">🗑️ Borrar la cuenta</span>
-            <p className="mt-0.5 text-[11px] font-semibold text-[var(--ink-3)]">
-              Elimina la cuenta y TODOS sus datos (hijos, tareas, historial, logros…). No se puede deshacer.
-            </p>
-            {sp.del === 'bad' && (
-              <p className="mt-1 text-[11px] font-bold text-red-600">La contraseña no es correcta.</p>
-            )}
-            <form action={deleteAccount} className="mt-2 flex items-end gap-2">
-              <input
-                name="password"
-                type="password"
-                placeholder="Tu contraseña"
-                className={`${inputCls} flex-1`}
-                required
-              />
-              <ConfirmButton
-                message="¿BORRAR la cuenta y todos sus datos? Esta acción es definitiva y no se puede deshacer."
-                className="shrink-0 rounded-xl border-2 border-red-300 px-3 py-1.5 text-sm font-bold text-red-500"
-              >
-                Borrar
-              </ConfirmButton>
-            </form>
-          </div>
+        {/* Borrar la cuenta (RGPD, supresión) */}
+        <div className="mx-3 mt-2 rounded-3xl border-2 border-red-100 bg-[var(--card)] p-3 shadow-md">
+          <span className="font-display text-sm font-bold text-red-500">🗑️ Borrar la cuenta</span>
+          <p className="mt-0.5 text-[11px] font-semibold text-[var(--ink-3)]">
+            Elimina la cuenta y TODOS sus datos (hijos, tareas, historial, logros…). No se puede deshacer.
+          </p>
+          {sp.del === 'bad' && <p className="mt-1 text-[11px] font-bold text-red-600">La contraseña no es correcta.</p>}
+          <form action={deleteAccount} className="mt-2 flex items-end gap-2">
+            <input name="password" type="password" placeholder="Tu contraseña" className={`${inputCls} flex-1`} required />
+            <ConfirmButton
+              message="¿BORRAR la cuenta y todos sus datos? Esta acción es definitiva y no se puede deshacer."
+              className="shrink-0 rounded-xl border-2 border-red-300 px-3 py-1.5 text-sm font-bold text-red-500"
+            >
+              Borrar
+            </ConfirmButton>
+          </form>
         </div>
       </div>
     </ThemeShell>
