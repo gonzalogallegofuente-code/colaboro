@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { ICON_CATALOG, type IconStyle } from '@/lib/icons'
 
 // Pinta un icono del catálogo en el estilo del hijo reutilizando los <symbol>
@@ -97,9 +98,13 @@ export function IconPicker({
                       key={ic.key}
                       title={ic.label}
                       onClick={() => {
-                        setIcon(ic.emoji)
-                        setKey(ic.key)
-                        setOpen(false)
+                        // flushSync: aplica el nuevo icono al campo oculto ANTES de
+                        // enviar, si no se guardaría el icono anterior.
+                        flushSync(() => {
+                          setIcon(ic.emoji)
+                          setKey(ic.key)
+                          setOpen(false)
+                        })
                         if (autoSubmit) rootRef.current?.closest('form')?.requestSubmit()
                       }}
                       className={`tap-bounce flex aspect-square items-center justify-center rounded-lg ${

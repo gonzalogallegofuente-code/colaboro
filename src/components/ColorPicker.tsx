@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 
 const PRESETS = [
   '#2563eb', '#e11d48', '#16a34a', '#ea580c', '#7c3aed',
@@ -21,7 +22,8 @@ export function ColorPicker({
   const [val, setVal] = useState((defaultValue || '#2563eb').toLowerCase())
   const ref = useRef<HTMLDivElement>(null)
   const pick = (c: string) => {
-    setVal(c)
+    // flushSync: aplica el color al campo oculto ANTES de enviar (si no, guarda el anterior).
+    flushSync(() => setVal(c))
     if (autoSubmit) ref.current?.closest('form')?.requestSubmit()
   }
   return (

@@ -106,7 +106,7 @@ export default async function EditarRecompensasPage({
                   form={`ocultar-r-${r.id}`}
                   className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
                 >
-                  Ocultar
+                  Desactivar
                 </button>
               </div>
             </AutoForm>
@@ -134,7 +134,7 @@ export default async function EditarRecompensasPage({
         {/* Ocultas: plegadas a una línea, al final */}
         {ocultas.length > 0 && (
           <>
-            <p className={subHead}>Ocultas</p>
+            <p className={subHead}>Desactivadas</p>
             {ocultas.map((r) => (
               <div key={r.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">

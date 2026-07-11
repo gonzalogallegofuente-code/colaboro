@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { REWARD_CATALOG } from '@/lib/reward-icons'
 
 // Selector de icono de recompensa: galería de dibujos (vía <use>, ver
@@ -78,9 +79,13 @@ export function RewardIconPicker({
                       key={ic.key}
                       title={ic.label}
                       onClick={() => {
-                        setIcon(ic.emoji)
-                        setKey(ic.key)
-                        setOpen(false)
+                        // flushSync: aplica el nuevo icono al campo oculto ANTES de
+                        // enviar, si no se guardaría el icono anterior.
+                        flushSync(() => {
+                          setIcon(ic.emoji)
+                          setKey(ic.key)
+                          setOpen(false)
+                        })
                         if (autoSubmit) rootRef.current?.closest('form')?.requestSubmit()
                       }}
                       className={`tap-bounce flex aspect-square items-center justify-center rounded-lg ${

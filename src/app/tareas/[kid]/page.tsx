@@ -51,8 +51,7 @@ const ICON_PREVIEW_PASTELS = ['#f7d0e0', '#cfe0f5', '#dde7dd', '#f2ecc9', '#ddd6
 
 const SEC_TITLES: Record<string, string> = {
   avatar: '🎭 Nombre y avatar',
-  color: '🎨 Color',
-  diseno: '🌗 Diseño',
+  color: '🎨 Color y modo',
   moneda: '🪙 Contar en',
   iconos: '✏️ Estilo de los iconos',
   meta: '🎯 Meta de ahorro',
@@ -139,9 +138,8 @@ export default async function KidSettingsPage({
             <div className="mx-3 mt-1 space-y-2">
               <GroupLabel>Perfil</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=avatar`} label="🎭 Nombre y avatar" />
-              <SettingRow href={`/tareas/${k.id}?sec=color`} label="🎨 Color" />
               <GroupLabel>Aspecto</GroupLabel>
-              <SettingRow href={`/tareas/${k.id}?sec=diseno`} label="🌗 Diseño" />
+              <SettingRow href={`/tareas/${k.id}?sec=color`} label="🎨 Color y modo" />
               <SettingRow href={`/tareas/${k.id}?sec=iconos`} label="✏️ Estilo de los iconos" />
               <GroupLabel>Recompensas</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=moneda`} label="🪙 Contar en (euros o puntos)" />
@@ -270,33 +268,35 @@ export default async function KidSettingsPage({
           </>
         )}
 
-        {/* ── Color ── */}
+        {/* ── Color y modo ── */}
         {sec === 'color' && (
-          <form action={setKidColor} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <input type="hidden" name="kidId" value={k.id} />
-            <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas. Se guarda solo.</p>
-            <div className="mt-2">
-              <ColorPicker name="color" defaultValue={k.color} autoSubmit />
-            </div>
-          </form>
-        )}
+          <>
+            <form action={setKidColor} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+              <input type="hidden" name="kidId" value={k.id} />
+              <span className="font-display text-sm font-bold text-[var(--ink)]">🎨 Color</span>
+              <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas. Se guarda solo.</p>
+              <div className="mt-2">
+                <ColorPicker name="color" defaultValue={k.color} autoSubmit />
+              </div>
+            </form>
 
-        {/* ── Diseño ── */}
-        {sec === 'diseno' && (
-          <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <div className="flex gap-2">
-              <form action={setTheme} className="flex-1">
-                <input type="hidden" name="kidId" value={k.id} />
-                <input type="hidden" name="theme" value="infantil" />
-                <button className={themePill(theme === 'infantil')}>☀️ Claro</button>
-              </form>
-              <form action={setTheme} className="flex-1">
-                <input type="hidden" name="kidId" value={k.id} />
-                <input type="hidden" name="theme" value="juvenil" />
-                <button className={themePill(theme === 'juvenil')}>🌙 Oscuro</button>
-              </form>
+            <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+              <span className="font-display text-sm font-bold text-[var(--ink)]">🌗 Modo</span>
+              <p className="text-[11px] text-[var(--ink-3)]">Claro u oscuro para la pantalla de {k.name}.</p>
+              <div className="mt-2 flex gap-2">
+                <form action={setTheme} className="flex-1">
+                  <input type="hidden" name="kidId" value={k.id} />
+                  <input type="hidden" name="theme" value="infantil" />
+                  <button className={themePill(theme === 'infantil')}>☀️ Claro</button>
+                </form>
+                <form action={setTheme} className="flex-1">
+                  <input type="hidden" name="kidId" value={k.id} />
+                  <input type="hidden" name="theme" value="juvenil" />
+                  <button className={themePill(theme === 'juvenil')}>🌙 Oscuro</button>
+                </form>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* ── Contar en (+ nombre de los puntos) ── */}
