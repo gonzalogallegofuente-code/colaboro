@@ -11,7 +11,8 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { AutoForm } from '@/components/AutoForm'
 import { IconPicker } from '@/components/IconPicker'
 import { IconDefs, keysForStyle } from '@/components/IconDefs'
-import { type IconStyle } from '@/lib/icons'
+import { TaskGlyph } from '@/components/TaskGlyph'
+import { iconColor, type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,8 @@ export default async function EditarTareasPage({
   const iconStyle = selKid.iconStyle as IconStyle
   const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
+  // Activas primero; las ocultas se pliegan a una línea al final de la lista.
+  const ordered = [...tasks].sort((a, b) => Number(b.active) - Number(a.active))
   // El "objetivo semanal" que se está fijando: solo las tareas marcadas 🗓️.
   const modoObjetivo = selKid.weekMode === 'objetivo'
   const enPlan = tasks.filter((t) => t.active && t.inPlan)
@@ -139,56 +142,80 @@ export default async function EditarTareasPage({
         <IconDefs style={iconStyle} />
 
         <div className="mx-3 mt-3 space-y-2.5">
-          {tasks.map((t) => (
-            <div key={t.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}>
-              <AutoForm action={updateTask}>
-                <input type="hidden" name="id" value={t.id} />
-                {/* Línea 1: icono + nombre + Cambiar icono (catálogo oculto) */}
-                <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit>
-                  <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
-                </IconPicker>
-                {/* Línea 2: descripción */}
-                <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
-                {/* Línea 3: valor + veces/semana + ocultar */}
-                <div className="mt-2 flex items-end gap-2">
-                  <label className="flex-1">
-                    <span className="text-[11px] font-semibold text-[var(--ink-3)]">Valor ({unitWord(money)})</span>
-                    <input name="value" defaultValue={eurosInput(t.valueCents)} inputMode="decimal" className={inputCls} />
-                  </label>
-                  <label className="flex-1">
-                    <span className="text-[11px] font-semibold text-[var(--ink-3)]">Veces/semana</span>
-                    <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
-                  </label>
-                  <button
-                    form={`ocultar-${t.id}`}
-                    className="shrink-0 pb-2 text-xs font-semibold text-[var(--ink-3)] underline underline-offset-2"
-                  >
-                    {t.active ? 'Ocultar' : 'Activar'}
-                  </button>
-                </div>
-              </AutoForm>
-              {/* Formulario del botón Ocultar/Activar (fuera para no anidar formularios) */}
-              <form id={`ocultar-${t.id}`} action={setTaskActive}>
-                <input type="hidden" name="id" value={t.id} />
-                <input type="hidden" name="active" value={t.active ? '0' : '1'} />
-              </form>
-              {modoObjetivo && (
-                <form action={toggleInPlan} className="mt-2">
+          {ordered.map((t) =>
+            t.active ? (
+              <div key={t.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
+                <AutoForm action={updateTask}>
                   <input type="hidden" name="id" value={t.id} />
-                  <input type="hidden" name="inPlan" value={t.inPlan ? '0' : '1'} />
-                  <SubmitButton
-                    className={`tap-bounce rounded-full px-3 py-1.5 text-xs font-bold ${
-                      t.inPlan
-                        ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'border-2 border-emerald-300 text-emerald-700'
-                    }`}
-                  >
-                    {t.inPlan ? '🗓️ En el objetivo ✓ (quitar)' : '🗓️ Añadir al objetivo'}
-                  </SubmitButton>
+                  {/* Línea 1: icono + nombre + Cambiar icono (catálogo oculto) */}
+                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit>
+                    <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
+                  </IconPicker>
+                  {/* Línea 2: descripción */}
+                  <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
+                  {/* Línea 3: valor + veces/sem (estrechos) + objetivo + ocultar */}
+                  <div className="mt-2 flex items-end gap-1.5">
+                    <label className="w-16 shrink-0">
+                      <span className="text-[11px] font-semibold text-[var(--ink-3)]">Valor</span>
+                      <input name="value" defaultValue={eurosInput(t.valueCents)} inputMode="decimal" className={inputCls} />
+                    </label>
+                    <label className="w-16 shrink-0">
+                      <span className="text-[11px] font-semibold text-[var(--ink-3)]">Veces/sem</span>
+                      <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
+                    </label>
+                    <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 pb-1">
+                      {modoObjetivo && (
+                        <button
+                          form={`objetivo-${t.id}`}
+                          title={t.inPlan ? 'Quitar del objetivo semanal' : 'Añadir al objetivo semanal'}
+                          className={`tap-bounce shrink-0 rounded-full px-2.5 py-1.5 text-[11px] font-bold leading-tight ${
+                            t.inPlan ? 'bg-emerald-600 text-white shadow-sm' : 'border-2 border-emerald-300 text-emerald-700'
+                          }`}
+                        >
+                          {t.inPlan ? '🗓️ Objetivo ✓' : '🗓️ Objetivo'}
+                        </button>
+                      )}
+                      <button
+                        form={`ocultar-${t.id}`}
+                        className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
+                      >
+                        Ocultar
+                      </button>
+                    </div>
+                  </div>
+                </AutoForm>
+                {/* Formularios de los botones (fuera para no anidar formularios) */}
+                <form id={`ocultar-${t.id}`} action={setTaskActive}>
+                  <input type="hidden" name="id" value={t.id} />
+                  <input type="hidden" name="active" value="0" />
                 </form>
-              )}
-            </div>
-          ))}
+                {modoObjetivo && (
+                  <form id={`objetivo-${t.id}`} action={toggleInPlan}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="inPlan" value={t.inPlan ? '0' : '1'} />
+                  </form>
+                )}
+              </div>
+            ) : (
+              /* Oculta: plegada a una línea (icono + nombre + Activar), al final */
+              <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
+                  <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={iconStyle} size={22} color={iconColor(t.color)} />
+                </span>
+                <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
+                <button
+                  form={`ocultar-${t.id}`}
+                  className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
+                >
+                  Activar
+                </button>
+                <form id={`ocultar-${t.id}`} action={setTaskActive}>
+                  <input type="hidden" name="id" value={t.id} />
+                  <input type="hidden" name="active" value="1" />
+                </form>
+              </div>
+            ),
+          )}
 
           <form action={addTask} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             <input type="hidden" name="kidId" value={selKid.id} />
