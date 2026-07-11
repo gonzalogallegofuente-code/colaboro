@@ -5,6 +5,7 @@ import { requireViewerPage } from '@/lib/session'
 import { formatRange, todayYmd, weekRange, parseYmd } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
+import { ScrollIntoView } from '@/components/ScrollIntoView'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { KidWeekGrid } from '@/components/KidWeekGrid'
@@ -152,6 +153,7 @@ export default async function HistoricoPage({
 
               {isOpen && (
                 <div className="mt-3 border-t border-gray-100 pt-3">
+                  <ScrollIntoView />
                   {/* Pestañas de hijo (solo si hay más de uno) */}
                   {parteKids.length > 1 && (
                     <div className="mb-3 flex flex-wrap gap-1.5">

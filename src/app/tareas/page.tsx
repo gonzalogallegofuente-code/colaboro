@@ -9,6 +9,7 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { AutoForm } from '@/components/AutoForm'
 import { ConfirmButton } from '@/components/ConfirmButton'
 import { RegisterFingerprint } from '@/components/RegisterFingerprint'
 
@@ -87,10 +88,10 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
 
         {/* Objetivo familiar */}
         <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
-        <form action={setFamilyGoal} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+        <AutoForm action={setFamilyGoal} className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
           <p className="mb-2 text-[11px] font-semibold text-[var(--ink-3)]">
             Un reto de equipo: si ENTRE TODOS llegáis a N tareas esta semana (lunes a domingo), hay premio compartido.
-            Sale en el tablero de todos. Deja el número vacío para quitarlo.
+            Sale en el tablero de todos. Se guarda solo; deja el número vacío para quitarlo.
           </p>
           <div className="flex items-end gap-2">
             <label className="w-28">
@@ -109,10 +110,7 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
               <input name="reward" defaultValue={famReward} placeholder="p. ej. 🎬 Peli con palomitas" className={inputCls} />
             </label>
           </div>
-          <SubmitButton className="tap-bounce mt-2 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-            Guardar objetivo
-          </SubmitButton>
-        </form>
+        </AutoForm>
 
         {/* Sugerencias y peticiones */}
         <Link
