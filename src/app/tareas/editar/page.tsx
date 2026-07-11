@@ -101,35 +101,20 @@ export default async function EditarTareasPage({
             <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
           </label>
           <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 pb-1">
-            {modoObjetivo && (
-              <button
-                form={`objetivo-${t.id}`}
-                title="Quitar del objetivo semanal"
-                className="tap-bounce shrink-0 rounded-full border-2 border-emerald-300 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-emerald-700"
-              >
-                Quitar
-              </button>
-            )}
             <button
               form={`ocultar-${t.id}`}
               className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
             >
-              Ocultar
+              Desactivar
             </button>
           </div>
         </div>
       </AutoForm>
-      {/* Formularios de los botones (fuera para no anidar formularios) */}
+      {/* Formulario del botón Desactivar (fuera para no anidar formularios) */}
       <form id={`ocultar-${t.id}`} action={setTaskActive}>
         <input type="hidden" name="id" value={t.id} />
         <input type="hidden" name="active" value="0" />
       </form>
-      {modoObjetivo && (
-        <form id={`objetivo-${t.id}`} action={toggleInPlan}>
-          <input type="hidden" name="id" value={t.id} />
-          <input type="hidden" name="inPlan" value="0" />
-        </form>
-      )}
     </div>
   )
 
@@ -264,7 +249,7 @@ export default async function EditarTareasPage({
 
           {ocultas.length > 0 && (
             <>
-              <p className={subHead}>Ocultas del tablero</p>
+              <p className={subHead}>Desactivadas</p>
               {ocultas.map(filaOculta)}
             </>
           )}
