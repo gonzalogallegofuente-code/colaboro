@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getAllRewards, getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
-import { unitWord, moneyOf, themeOf } from '@/lib/money'
+import { moneyOf, themeOf } from '@/lib/money'
 import { addReward, setRewardActive, updateReward } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { AutoForm } from '@/components/AutoForm'
 import { RewardGlyph } from '@/components/RewardGlyph'
 import { RewardIconDefs } from '@/components/RewardIconDefs'
 import { RewardIconPicker } from '@/components/RewardIconPicker'
@@ -85,21 +86,22 @@ export default async function EditarRecompensasPage({
         {/* Recompensas activas: tarjeta editable en 2 líneas */}
         {activas.map((r) => (
           <div key={r.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <form action={updateReward}>
+            <AutoForm action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
               {/* Línea 1: icono + nombre + Cambiar icono (galería oculta) */}
-              <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey}>
+              <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey} autoSubmit>
                 <input name="name" defaultValue={r.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} />
               </RewardIconPicker>
-              {/* Línea 2: coste + Guardar + Ocultar */}
-              <div className="mt-2 flex items-end gap-2">
-                <label className="flex-1">
-                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-                  <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
-                </label>
-                <SubmitButton className="tap-bounce shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-[11px] font-bold leading-tight text-white">
-                  Guardar
-                </SubmitButton>
+              {/* Línea 2: importe (sin unidad fija) + Ocultar. Se guarda solo. */}
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  name="cost"
+                  defaultValue={costInput(r.costCents)}
+                  inputMode="decimal"
+                  placeholder="Coste"
+                  aria-label="Coste"
+                  className={`${inputCls} flex-1`}
+                />
                 <button
                   form={`ocultar-r-${r.id}`}
                   className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
@@ -107,7 +109,7 @@ export default async function EditarRecompensasPage({
                   Ocultar
                 </button>
               </div>
-            </form>
+            </AutoForm>
             <form id={`ocultar-r-${r.id}`} action={setRewardActive}>
               <input type="hidden" name="id" value={r.id} />
               <input type="hidden" name="active" value="0" />
@@ -121,11 +123,8 @@ export default async function EditarRecompensasPage({
           <RewardIconPicker defaultIcon="🎁" defaultKey={null}>
             <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
           </RewardIconPicker>
-          <div className="mt-2 flex items-end gap-2">
-            <label className="flex-1">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-              <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
-            </label>
+          <div className="mt-2 flex items-center gap-2">
+            <input name="cost" defaultValue="5" inputMode="decimal" placeholder="Coste" aria-label="Coste" className={`${inputCls} flex-1`} />
             <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-emerald-600 px-4 py-2 font-display text-sm font-bold text-white">
               Añadir
             </SubmitButton>

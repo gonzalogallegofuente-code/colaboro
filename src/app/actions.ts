@@ -833,22 +833,22 @@ export async function addReward(formData: FormData) {
   redirect(`/recompensas/editar?kid=${kidId}`)
 }
 
+// Autoguardado: silencioso (refresh) y tolerante con el nombre vacío a medias.
 export async function updateReward(formData: FormData) {
   const accountId = await requireAccount()
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
   const name = String(formData.get('name') ?? '').trim()
-  if (!name) throw new Error('Falta el nombre')
+  if (!name) return // nombre vacío a medio editar: no guardar todavía
   const icon = String(formData.get('icon') ?? '').trim() || '🎁'
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
-  const [row] = await db
+  await db
     .update(rewards)
     .set({ name, icon, iconKey, costCents })
     .where(and(eq(rewards.id, id), eq(rewards.accountId, accountId)))
-    .returning({ kidId: rewards.kidId })
-  redirect(`/recompensas/editar?kid=${row?.kidId ?? ''}`)
+  refresh()
 }
 
 export async function setRewardActive(formData: FormData) {

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { REWARD_CATALOG } from '@/lib/reward-icons'
 
 // Selector de icono de recompensa: galería de dibujos (vía <use>, ver
@@ -8,17 +8,20 @@ export function RewardIconPicker({
   defaultIcon = '🎁',
   defaultKey = null,
   children,
+  autoSubmit = false,
 }: {
   defaultIcon?: string
   defaultKey?: string | null
   children?: React.ReactNode
+  autoSubmit?: boolean
 }) {
   const [icon, setIcon] = useState(defaultIcon)
   const [key, setKey] = useState<string | null>(defaultKey)
   const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div>
+    <div ref={rootRef}>
       <input type="hidden" name="icon" value={icon} />
       <input type="hidden" name="iconKey" value={key ?? ''} />
 
@@ -78,6 +81,7 @@ export function RewardIconPicker({
                         setIcon(ic.emoji)
                         setKey(ic.key)
                         setOpen(false)
+                        if (autoSubmit) rootRef.current?.closest('form')?.requestSubmit()
                       }}
                       className={`tap-bounce flex aspect-square items-center justify-center rounded-lg ${
                         on ? 'bg-indigo-100 ring-2 ring-indigo-500' : 'bg-[var(--card)] hover:bg-indigo-50'
