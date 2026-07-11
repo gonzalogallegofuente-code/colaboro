@@ -134,7 +134,7 @@ export default async function EditarTareasPage({
                 . Empieza realista: mejor un objetivo que se pueda completar 😉
               </>
             ) : (
-              <>🗓️ Aún no hay objetivo: pulsa "🗓️ Añadir al objetivo" en las tareas que acordéis (se guarda al toque).</>
+              <>🗓️ Aún no hay objetivo: toca el 🗓️ de las tareas que acordéis (se ponen en verde).</>
             )}
           </p>
         )}
@@ -144,7 +144,12 @@ export default async function EditarTareasPage({
         <div className="mx-3 mt-3 space-y-2.5">
           {ordered.map((t) =>
             t.active ? (
-              <div key={t.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
+              <div
+                key={t.id}
+                className={`rounded-3xl p-3 shadow-md ${
+                  modoObjetivo && t.inPlan ? 'bg-emerald-50 ring-2 ring-emerald-300' : 'bg-[var(--card)]'
+                }`}
+              >
                 <AutoForm action={updateTask}>
                   <input type="hidden" name="id" value={t.id} />
                   {/* Línea 1: icono + nombre + Cambiar icono (catálogo oculto) */}
@@ -168,11 +173,12 @@ export default async function EditarTareasPage({
                         <button
                           form={`objetivo-${t.id}`}
                           title={t.inPlan ? 'Quitar del objetivo semanal' : 'Añadir al objetivo semanal'}
-                          className={`tap-bounce shrink-0 rounded-full px-2.5 py-1.5 text-[11px] font-bold leading-tight ${
-                            t.inPlan ? 'bg-emerald-600 text-white shadow-sm' : 'border-2 border-emerald-300 text-emerald-700'
+                          aria-label={t.inPlan ? 'Quitar del objetivo semanal' : 'Añadir al objetivo semanal'}
+                          className={`tap-bounce flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none ${
+                            t.inPlan ? 'bg-emerald-600 text-white shadow-sm' : 'border-2 border-emerald-300 text-emerald-600'
                           }`}
                         >
-                          {t.inPlan ? '🗓️ Objetivo ✓' : '🗓️ Objetivo'}
+                          {t.inPlan ? '✓' : '🗓️'}
                         </button>
                       )}
                       <button
