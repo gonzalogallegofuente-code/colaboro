@@ -589,6 +589,16 @@ export async function updateTask(formData: FormData) {
   refresh()
 }
 
+// Borra una tarea DEFINITIVAMENTE (y su historial de marcas, por cascada).
+// Solo desde la sección "Desactivadas" y con confirmación en la UI.
+export async function deleteTask(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
+  refresh()
+}
+
 // Mete o saca una tarea del objetivo semanal (un toque, sin pasar por Guardar).
 export async function toggleInPlan(formData: FormData) {
   const accountId = await requireAccount()
@@ -695,12 +705,14 @@ export async function addKid(formData: FormData) {
   redirect(`/tareas/${k.id}`)
 }
 
+// Autoguardado del nombre/avatar/color del hijo: silencioso (refresh) y
+// tolerante — si el nombre está vacío a medio escribir, no toca nada.
 export async function updateKid(formData: FormData) {
   const accountId = await requireAccount()
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
   const name = String(formData.get('name') ?? '').trim()
-  if (!name) throw new Error('Falta el nombre')
+  if (!name) return // nombre vacío a medio editar: no guardar todavía
 
   const set: { name: string; emoji?: string; avatarUrl?: string | null; color?: string } = { name }
   const emoji = String(formData.get('emoji') ?? '').trim()
@@ -715,7 +727,7 @@ export async function updateKid(formData: FormData) {
   if (/^#[0-9a-fA-F]{6}$/.test(color)) set.color = color
 
   await db.update(kids).set(set).where(and(eq(kids.id, id), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${id}?sec=avatar`)
+  refresh()
 }
 
 export async function deleteKid(formData: FormData) {

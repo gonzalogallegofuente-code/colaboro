@@ -3,11 +3,12 @@ import { redirect } from 'next/navigation'
 import { getActiveKids, getAllTasks } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf, formatAmount } from '@/lib/money'
-import { addTask, setTaskActive, setWeekMode, toggleInPlan, updateTask } from '@/app/actions'
+import { addTask, deleteTask, setTaskActive, setWeekMode, toggleInPlan, updateTask } from '@/app/actions'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { AutoForm } from '@/components/AutoForm'
 import { IconPicker } from '@/components/IconPicker'
 import { IconDefs, keysForStyle } from '@/components/IconDefs'
@@ -151,9 +152,20 @@ export default async function EditarTareasPage({
       >
         Activar
       </button>
+      <ConfirmSubmit
+        form={`borrar-${t.id}`}
+        message={`¿Borrar «${t.name}» para siempre? Se elimina también su historial de marcas. No se puede deshacer.`}
+        className="tap-bounce flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
+        aria-label={`Borrar ${t.name}`}
+      >
+        🗑️
+      </ConfirmSubmit>
       <form id={`ocultar-${t.id}`} action={setTaskActive}>
         <input type="hidden" name="id" value={t.id} />
         <input type="hidden" name="active" value="1" />
+      </form>
+      <form id={`borrar-${t.id}`} action={deleteTask}>
+        <input type="hidden" name="id" value={t.id} />
       </form>
     </div>
   )

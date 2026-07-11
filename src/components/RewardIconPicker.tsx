@@ -7,9 +7,11 @@ import { REWARD_CATALOG } from '@/lib/reward-icons'
 export function RewardIconPicker({
   defaultIcon = '🎁',
   defaultKey = null,
+  children,
 }: {
   defaultIcon?: string
   defaultKey?: string | null
+  children?: React.ReactNode
 }) {
   const [icon, setIcon] = useState(defaultIcon)
   const [key, setKey] = useState<string | null>(defaultKey)
@@ -20,11 +22,12 @@ export function RewardIconPicker({
       <input type="hidden" name="icon" value={icon} />
       <input type="hidden" name="iconKey" value={key ?? ''} />
 
+      {/* Línea: icono (tocable) + nombre (children) + Cambiar icono */}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          aria-label="Elegir dibujo"
+          aria-label="Cambiar icono"
           className="tap-bounce flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50"
         >
           {key ? (
@@ -35,27 +38,31 @@ export function RewardIconPicker({
             <span className="text-2xl">{icon}</span>
           )}
         </button>
-        <input
-          value={key ? '' : icon}
-          onChange={(e) => {
-            setIcon(e.target.value || '🎁')
-            setKey(null)
-          }}
-          maxLength={4}
-          placeholder="…o tu emoji"
-          className="w-24 rounded-xl border-2 border-indigo-100 px-2 py-1.5 text-center text-lg outline-none focus:border-indigo-500"
-        />
+        {children}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           className="tap-bounce shrink-0 rounded-full bg-indigo-50 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-indigo-600"
         >
-          {open ? 'Cerrar' : 'Elegir dibujo'}
+          {open ? 'Cerrar' : 'Cambiar icono'}
         </button>
       </div>
 
       {open && (
         <div className="mt-2 max-h-52 space-y-2 overflow-y-auto rounded-2xl border-2 border-indigo-50 p-2">
+          <label className="flex items-center gap-2 px-1">
+            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Tu emoji:</span>
+            <input
+              value={key ? '' : icon}
+              onChange={(e) => {
+                setIcon(e.target.value || '🎁')
+                setKey(null)
+              }}
+              maxLength={4}
+              placeholder="🎁"
+              className="w-20 rounded-xl border-2 border-indigo-100 px-2 py-1 text-center text-lg outline-none focus:border-indigo-500"
+            />
+          </label>
           {REWARD_CATALOG.map((cat) => (
             <div key={cat.label}>
               <div className="px-1 text-[10px] font-bold uppercase tracking-wide text-[var(--ink-3)]">{cat.label}</div>

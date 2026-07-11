@@ -9,16 +9,22 @@ export function ConfirmSubmit({
   children,
   className,
   disabled,
+  form,
+  'aria-label': ariaLabel,
 }: {
   message: string
   children: ReactNode
   className?: string
   disabled?: boolean
+  form?: string // id de un formulario externo a enviar (atributo form=)
+  'aria-label'?: string
 }) {
   const { pending } = useFormStatus()
   return (
     <button
       type="submit"
+      form={form}
+      aria-label={ariaLabel}
       disabled={pending || disabled}
       aria-busy={pending}
       onClick={(e) => {

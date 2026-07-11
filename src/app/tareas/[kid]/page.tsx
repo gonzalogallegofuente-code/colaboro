@@ -22,6 +22,7 @@ import { TaskGlyph } from '@/components/TaskGlyph'
 import { ICON_CATALOG, iconColor, type IconStyle } from '@/lib/icons'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
+import { AutoForm } from '@/components/AutoForm'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { EmojiInput } from '@/components/EmojiInput'
 import { ColorPicker } from '@/components/ColorPicker'
@@ -40,7 +41,11 @@ const KID_EMOJIS = [
 ]
 const EMOJIS_POR_TANDA = 20
 const POINT_ICONS = ['💎', '⭐', '🪙', '🦃', '⚡', '🏅', '🔶', '🌟', '🍪', '🔥']
-const GOAL_ICONS = ['🎯', '🚲', '🎮', '📱', '🧸', '🎧', '⚽', '🛹', '📚', '🎨', '🎟️', '🐶', '🍕', '🎂']
+const GOAL_ICONS = [
+  '🎯', '🚲', '🛴', '🛹', '🎮', '🕹️', '📱', '💻', '⌚', '🎧', '🎸', '🎹', '🥁', '🎤',
+  '🧸', '🪀', '🧩', '📚', '🎨', '🖍️', '🎟️', '🎬', '🎡', '🏕️', '⚽', '🏀', '🏓', '🎳',
+  '👟', '🎀', '💍', '🐶', '🐱', '🐹', '🍕', '🍔', '🍦', '🍫', '🎂', '🎈', '🚗', '✈️', '🌟',
+]
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
 const ICON_PREVIEW_PASTELS = ['#f7d0e0', '#cfe0f5', '#dde7dd', '#f2ecc9', '#ddd6f0', '#f3d4e1', '#d2d8f0', '#d6e1d6', '#e3e3c5', '#c5cfe2']
 
@@ -165,16 +170,12 @@ export default async function KidSettingsPage({
         {/* ── Nombre y avatar ── */}
         {sec === 'avatar' && (
           <>
-            <form action={updateKid} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+            <AutoForm action={updateKid} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <input type="hidden" name="id" value={k.id} />
               <span className="font-display text-sm font-bold text-[var(--ink)]">Nombre</span>
-              <div className="mt-2 flex items-center gap-2">
-                <input name="name" defaultValue={k.name} className={`${inputCls} font-display font-bold`} />
-                <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                  Guardar
-                </SubmitButton>
-              </div>
-            </form>
+              <input name="name" defaultValue={k.name} className={`${inputCls} mt-2 font-display font-bold`} />
+              <p className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">Se guarda solo.</p>
+            </AutoForm>
 
             <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <div className="flex items-center gap-2.5">
@@ -274,14 +275,9 @@ export default async function KidSettingsPage({
           <form action={setKidColor} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <input type="hidden" name="kidId" value={k.id} />
             <span className="font-display text-sm font-bold text-[var(--ink)]">🎨 Color</span>
-            <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas.</p>
-            <div className="mt-2 flex items-end gap-2">
-              <div className="flex-1">
-                <ColorPicker name="color" defaultValue={k.color} />
-              </div>
-              <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                Guardar
-              </SubmitButton>
+            <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas. Se guarda solo.</p>
+            <div className="mt-2">
+              <ColorPicker name="color" defaultValue={k.color} autoSubmit />
             </div>
           </form>
         )}
@@ -405,11 +401,24 @@ export default async function KidSettingsPage({
             <p className="text-[11px] text-[var(--ink-3)]">
               Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Déjalo vacío para quitarla.
             </p>
-            <div className="mt-2 flex items-start gap-3">
-              <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
-              <div className="flex-1 space-y-2">
-                <input name="goalName" defaultValue={k.goalName ?? ''} placeholder="p. ej. Bici nueva" className={inputCls} />
-                <label className="block">
+            <div className="mt-2 space-y-2">
+              <label className="block">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Nombre de la meta</span>
+                <input
+                  name="goalName"
+                  defaultValue={k.goalName ?? ''}
+                  placeholder="p. ej. Bici nueva"
+                  className="mt-1 w-full rounded-xl border-2 border-indigo-100 px-3 py-2.5 text-base font-display font-bold outline-none focus:border-indigo-500"
+                />
+              </label>
+              <div className="flex items-end gap-3">
+                <div>
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
+                  <div className="mt-1">
+                    <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
+                  </div>
+                </div>
+                <label className="flex-1">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
                   <input
                     name="goalCost"
@@ -419,10 +428,10 @@ export default async function KidSettingsPage({
                     className={inputCls}
                   />
                 </label>
-                <SubmitButton className="tap-bounce rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                  Guardar meta
-                </SubmitButton>
               </div>
+              <SubmitButton className="tap-bounce w-full rounded-xl bg-indigo-600 py-2 font-display text-sm font-bold text-white">
+                Guardar meta
+              </SubmitButton>
             </div>
           </form>
         )}

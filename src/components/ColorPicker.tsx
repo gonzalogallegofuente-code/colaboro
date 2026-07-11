@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const PRESETS = [
   '#2563eb', '#e11d48', '#16a34a', '#ea580c', '#7c3aed',
@@ -8,17 +8,30 @@ const PRESETS = [
 ]
 
 // Selector de color: muestras predefinidas + un color libre. Guarda el hex
-// en un campo oculto que viaja con el formulario.
-export function ColorPicker({ name, defaultValue }: { name: string; defaultValue: string }) {
+// en un campo oculto. Con autoSubmit, guarda el formulario al elegir.
+export function ColorPicker({
+  name,
+  defaultValue,
+  autoSubmit = false,
+}: {
+  name: string
+  defaultValue: string
+  autoSubmit?: boolean
+}) {
   const [val, setVal] = useState((defaultValue || '#2563eb').toLowerCase())
+  const ref = useRef<HTMLDivElement>(null)
+  const pick = (c: string) => {
+    setVal(c)
+    if (autoSubmit) ref.current?.closest('form')?.requestSubmit()
+  }
   return (
-    <div>
+    <div ref={ref}>
       <div className="flex flex-wrap items-center gap-1.5">
         {PRESETS.map((c) => (
           <button
             type="button"
             key={c}
-            onClick={() => setVal(c)}
+            onClick={() => pick(c)}
             className={`h-7 w-7 rounded-full transition ${val === c ? 'ring-2 ring-gray-800 ring-offset-2' : ''}`}
             style={{ background: c }}
             aria-label={`Color ${c}`}
@@ -29,12 +42,7 @@ export function ColorPicker({ name, defaultValue }: { name: string; defaultValue
           title="Otro color"
         >
           🎨
-          <input
-            type="color"
-            value={val}
-            onChange={(e) => setVal(e.target.value)}
-            className="sr-only"
-          />
+          <input type="color" value={val} onChange={(e) => pick(e.target.value)} className="sr-only" />
         </label>
       </div>
       <input type="hidden" name={name} value={val} />

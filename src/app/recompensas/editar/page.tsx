@@ -52,6 +52,9 @@ export default async function EditarRecompensasPage({
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
   const rewards = await getAllRewards(accountId, selKid.id)
+  const activas = rewards.filter((r) => r.active)
+  const ocultas = rewards.filter((r) => !r.active)
+  const subHead = 'px-2 pt-2 text-[11px] font-bold uppercase tracking-wide text-[var(--ink-3)]'
 
   return (
     <ThemeShell theme={theme}>
@@ -79,62 +82,82 @@ export default async function EditarRecompensasPage({
       <RewardIconDefs />
 
       <div className="mx-3 mt-3 space-y-2.5">
-        {rewards.map((r) => (
-          <div key={r.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${r.active ? '' : 'opacity-60'}`}>
+        {/* Recompensas activas: tarjeta editable en 2 líneas */}
+        {activas.map((r) => (
+          <div key={r.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <form action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
-              <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
-                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={26} />
-                </span>
-                <input name="name" defaultValue={r.name} className={`${inputCls} flex-1 font-display font-bold`} />
+              {/* Línea 1: icono + nombre + Cambiar icono (galería oculta) */}
+              <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey}>
+                <input name="name" defaultValue={r.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} />
+              </RewardIconPicker>
+              {/* Línea 2: coste + Guardar + Ocultar */}
+              <div className="mt-2 flex items-end gap-2">
+                <label className="flex-1">
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
+                  <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
+                </label>
+                <SubmitButton className="tap-bounce shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-[11px] font-bold leading-tight text-white">
+                  Guardar
+                </SubmitButton>
+                <button
+                  form={`ocultar-r-${r.id}`}
+                  className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
+                >
+                  Ocultar
+                </button>
               </div>
-              <label className="mt-2 block">
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-                <input name="cost" defaultValue={costInput(r.costCents)} inputMode="decimal" className={inputCls} />
-              </label>
-              <div className="mt-2">
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey} />
-              </div>
-              <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                Guardar
-              </SubmitButton>
             </form>
-            <ToggleRewardActive id={r.id} active={r.active} />
+            <form id={`ocultar-r-${r.id}`} action={setRewardActive}>
+              <input type="hidden" name="id" value={r.id} />
+              <input type="hidden" name="active" value="0" />
+            </form>
           </div>
         ))}
 
         {/* Añadir */}
         <form action={addReward} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
           <input type="hidden" name="kidId" value={selKid.id} />
-          <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} font-display font-bold`} required />
-          <label className="mt-2 block">
-            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
-            <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
-          </label>
-          <div className="mt-2">
-            <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-            <RewardIconPicker defaultIcon="🎁" defaultKey={null} />
+          <RewardIconPicker defaultIcon="🎁" defaultKey={null}>
+            <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
+          </RewardIconPicker>
+          <div className="mt-2 flex items-end gap-2">
+            <label className="flex-1">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
+              <input name="cost" defaultValue="5" inputMode="decimal" className={inputCls} />
+            </label>
+            <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-emerald-600 px-4 py-2 font-display text-sm font-bold text-white">
+              Añadir
+            </SubmitButton>
           </div>
-          <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
-            Añadir recompensa
-          </SubmitButton>
         </form>
+
+        {/* Ocultas: plegadas a una línea, al final */}
+        {ocultas.length > 0 && (
+          <>
+            <p className={subHead}>Ocultas</p>
+            {ocultas.map((r) => (
+              <div key={r.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={24} />
+                </span>
+                <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{r.name}</span>
+                <button
+                  form={`ocultar-r-${r.id}`}
+                  className="tap-bounce shrink-0 rounded-full bg-gray-100 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-gray-600"
+                >
+                  Activar
+                </button>
+                <form id={`ocultar-r-${r.id}`} action={setRewardActive}>
+                  <input type="hidden" name="id" value={r.id} />
+                  <input type="hidden" name="active" value="1" />
+                </form>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
     </ThemeShell>
-  )
-}
-
-function ToggleRewardActive({ id, active }: { id: number; active: boolean }) {
-  return (
-    <form action={setRewardActive} className="mt-2 text-right">
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="active" value={active ? '0' : '1'} />
-      <SubmitButton className="text-xs font-semibold text-[var(--ink-3)] underline underline-offset-2">
-        {active ? 'Ocultar' : 'Activar'}
-      </SubmitButton>
-    </form>
   )
 }
