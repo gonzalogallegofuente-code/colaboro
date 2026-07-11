@@ -8,6 +8,7 @@ import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
+import { AutoForm } from '@/components/AutoForm'
 import { IconPicker } from '@/components/IconPicker'
 import { IconDefs, keysForStyle } from '@/components/IconDefs'
 import { TaskGlyph } from '@/components/TaskGlyph'
@@ -78,11 +79,9 @@ export default async function EditarTareasPage({
           </Link>
         </div>
         <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
-          Puedes cambiar o añadir tareas: el nombre, el valor (lo que gana) y las veces por semana. Haz los cambios que
-          quieras en cada tarea y dale a <span className="text-[var(--ink-2)]">Guardar</span>. Trucos: valor{' '}
-          <span className="text-[var(--ink-2)]">0</span> = tarea de convivencia 🤝 (cuenta para rachas y logros, sin
-          dinero); con <span className="text-[var(--ink-2)]">"requiere aprobación"</span>, lo que marque el niño queda
-          pendiente hasta tu visto bueno.
+          Cambia el nombre, el valor o las veces por semana: <span className="text-[var(--ink-2)]">se guarda solo</span>.
+          Valor <span className="text-[var(--ink-2)]">0</span> = tarea de convivencia 🤝 (cuenta para rachas y logros,
+          sin dinero).
         </p>
 
         {/* Hijo elegido (solo se editan SUS tareas) — fijo al hacer scroll */}
@@ -143,7 +142,7 @@ export default async function EditarTareasPage({
         <div className="mx-3 mt-3 space-y-2.5">
           {tasks.map((t) => (
             <div key={t.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}>
-              <form action={updateTask}>
+              <AutoForm action={updateTask}>
                 <input type="hidden" name="id" value={t.id} />
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
@@ -154,7 +153,7 @@ export default async function EditarTareasPage({
                 <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
                 <div className="mt-2">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} />
+                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit />
                 </div>
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
@@ -166,20 +165,7 @@ export default async function EditarTareasPage({
                     <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
                   </label>
                 </div>
-                <label className="mt-2 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
-                  <input
-                    type="checkbox"
-                    name="requiresApproval"
-                    value="1"
-                    defaultChecked={t.requiresApproval}
-                    className="h-4 w-4 accent-indigo-600"
-                  />
-                  Requiere tu aprobación cuando la marque el niño
-                </label>
-                <SubmitButton className="tap-bounce mt-2.5 rounded-xl bg-indigo-600 px-3 py-1.5 font-display text-sm font-bold text-white">
-                  Guardar
-                </SubmitButton>
-              </form>
+              </AutoForm>
               <div className="mt-2 flex items-center justify-between gap-2">
                 {modoObjetivo ? (
                   <form action={toggleInPlan}>
@@ -221,14 +207,6 @@ export default async function EditarTareasPage({
                 <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={7} className={inputCls} />
               </label>
             </div>
-            <label className="mt-2 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
-              <input type="checkbox" name="requiresApproval" value="1" className="h-4 w-4 accent-indigo-600" />
-              Requiere tu aprobación cuando la marque el niño
-            </label>
-            <label className="mt-1.5 flex items-center gap-2 text-[12.5px] font-semibold text-[var(--ink-2)]">
-              <input type="checkbox" name="inPlan" value="1" className="h-4 w-4 accent-emerald-600" />
-              🗓️ Cuenta para el objetivo semanal
-            </label>
             <SubmitButton className="tap-bounce mt-2.5 w-full rounded-xl bg-emerald-600 py-2 font-display text-sm font-bold text-white">
               Añadir tarea
             </SubmitButton>

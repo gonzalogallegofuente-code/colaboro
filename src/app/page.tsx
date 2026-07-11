@@ -5,7 +5,6 @@ import {
   getBadgeDefs,
   getPendingCompletions,
   getFamilyGoal,
-  getPlanHistory,
   type PendingCompletion,
   type FamilyGoal,
 } from '@/lib/data'
@@ -211,12 +210,6 @@ export default async function Page({
   const planDone = planTasks.reduce((a, t) => a + Math.min(data.weekCountByTask[t.id] ?? 0, t.weeklyTarget), 0)
   const planPct = planTotal > 0 ? Math.min(100, Math.round((planDone / planTotal) * 100)) : 0
   const planFullCents = planTasks.reduce((a, t) => a + t.valueCents * t.weeklyTarget, 0)
-  const planHist =
-    planTotal > 0
-      ? await getPlanHistory(selKid.id, new Map(planTasks.map((t) => [t.id, t.weeklyTarget])))
-      : { weeks: [], record: 0, lastWeek: 0 }
-  const planRecordNuevo = planDone > planHist.record && planHist.record > 0
-  const planMejorQuePasada = planHist.lastWeek > 0 && planDone > planHist.lastWeek
   // Con objetivo activo, abajo solo salen las tareas acordadas; el resto son extras.
   const conObjetivo = modoObjetivo && planTotal > 0
   const listaTareas = conObjetivo ? planTasks : data.tasks
@@ -394,7 +387,7 @@ export default async function Page({
         </span>
       </Link>
 
-      {/* Objetivo semanal (solo en modo objetivo): progreso + historial */}
+      {/* Objetivo semanal (solo en modo objetivo): progreso de ESTA semana */}
       {planTotal > 0 ? (
         <>
         <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🗓️ Objetivo semanal</h2>
@@ -405,57 +398,20 @@ export default async function Page({
             </span>
             <span className="shrink-0 text-[var(--ink-2)]">{planPct}%</span>
           </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
+          <div className="mt-2 h-4 overflow-hidden rounded-full bg-gray-200">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500 transition-all"
               style={{ width: `${planPct}%` }}
             />
           </div>
-
-          {/* Mini-gráfica: 4 semanas pasadas + esta. Cada columna es un carril
-              con fondo (visible aunque valga 0) y el relleno crece dentro. */}
-          <div className="mt-2.5 flex h-14 items-stretch gap-1.5">
-            {planHist.weeks.map((w) => (
-              <div
-                key={w.start}
-                className="flex flex-1 flex-col justify-end overflow-hidden rounded-md bg-gray-200"
-                title={`${w.done} tareas`}
-              >
-                <div
-                  className="w-full rounded-md bg-gray-400"
-                  style={{ height: `${Math.min(100, Math.round((w.done / planTotal) * 100))}%` }}
-                />
-              </div>
-            ))}
-            <div
-              className="flex flex-1 flex-col justify-end overflow-hidden rounded-md bg-emerald-100"
-              title={`${planDone} tareas (esta semana)`}
-            >
-              <div className="w-full rounded-md bg-emerald-500" style={{ height: `${planPct}%` }} />
-            </div>
-          </div>
-          <div className="flex justify-between text-[9.5px] font-bold uppercase tracking-wide text-[var(--ink-3)]">
-            <span>hace 4 semanas</span>
-            <span className="text-emerald-600">esta</span>
-          </div>
-
           <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
             {planPct >= 100
-              ? `¡Objetivo completado! 🎉${planRecordNuevo ? ' ¡Y es tu récord! 🏆' : ''}`
-              : planRecordNuevo
-                ? '¡Nuevo récord personal! 🏆 ¿Hasta dónde llegas?'
-                : planMejorQuePasada
-                  ? '¡Vas mejor que la semana pasada! 📈'
-                  : planPct >= 50
-                    ? '¡Ya llevas más de la mitad! 💪'
-                    : isKid
-                      ? 'Cada tarea que marques rellena la barra 🙂'
-                      : 'Se ajusta en Editar tareas (🗓️ y veces/semana).'}
-            {planHist.record > 0 && (
-              <>
-                {' '}Semana pasada: {planHist.lastWeek} · Récord: {planHist.record}.
-              </>
-            )}
+              ? '¡Objetivo de la semana completado! 🎉'
+              : planPct >= 50
+                ? '¡Ya llevas más de la mitad! 💪'
+                : isKid
+                  ? 'Cada tarea que marques rellena la barra 🙂'
+                  : 'Se ajusta en Editar tareas (🗓️ y veces/semana).'}
             {planFullCents > 0 && planPct < 100 && <> Objetivo completo: {formatAmount(planFullCents, money)}.</>}
           </div>
         </div>

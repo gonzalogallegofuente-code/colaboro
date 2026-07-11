@@ -418,14 +418,14 @@ export async function markTask(formData: FormData) {
   if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [t] = await db
-    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon, approval: tasks.requiresApproval })
+    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon })
     .from(tasks)
     .where(and(eq(tasks.id, taskId), eq(tasks.kidId, kidId), eq(tasks.accountId, v.accountId)))
   if (!t) throw new Error('Tarea no encontrada')
 
-  // Si la tarea exige aprobación y la marca el NIÑO, queda pendiente (sin dinero
-  // ni logros) hasta que el padre la apruebe. Lo que marca el padre va directo.
-  const pending = v.isKid && t.approval
+  // Lo que marca el NIÑO siempre queda pendiente (sin dinero ni logros) hasta que
+  // el padre lo aprueba. Lo que marca el padre desde su panel va directo.
+  const pending = v.isKid
   await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v, status: pending ? 'pending' : 'approved' })
   if (!pending) {
     await awardEarnedBadges(v.accountId, kidId) // ¿logro con premio?
@@ -546,8 +546,6 @@ export async function addTask(formData: FormData) {
   const icon = String(formData.get('icon') ?? '').trim() || '⭐'
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
-  const requiresApproval = formData.get('requiresApproval') === '1'
-  const inPlan = formData.get('inPlan') === '1'
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -562,20 +560,20 @@ export async function addTask(formData: FormData) {
     iconKey,
     valueCents,
     weeklyTarget,
-    requiresApproval,
-    inPlan,
     color: '#e9d5ff',
     sortOrder: (max ?? 0) + 1,
   })
   redirect(`/tareas/editar?kid=${kidId}`)
 }
 
+// Autoguardado: se llama al salir de cada campo. Silencioso (sin redirect) y
+// tolerante — si el nombre está vacío a medio escribir, no toca nada (no rompe).
 export async function updateTask(formData: FormData) {
   const accountId = await requireAccount()
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
   const name = String(formData.get('name') ?? '').trim()
-  if (!name) throw new Error('Falta el nombre')
+  if (!name) return // nombre vacío (a medio editar): no guardar todavía
   const valueCents = parseEurosToCents(String(formData.get('value') ?? '')) ?? 100
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
@@ -583,14 +581,12 @@ export async function updateTask(formData: FormData) {
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
 
-  const requiresApproval = formData.get('requiresApproval') === '1'
-  // OJO: inPlan NO se toca aquí — lo gestiona toggleInPlan (botón de un toque).
-  const [row] = await db
+  // inPlan lo gestiona toggleInPlan; la aprobación es siempre para el modo niño.
+  await db
     .update(tasks)
-    .set({ name, description, icon, iconKey, valueCents, weeklyTarget, requiresApproval })
+    .set({ name, description, icon, iconKey, valueCents, weeklyTarget })
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
-    .returning({ kidId: tasks.kidId })
-  redirect(`/tareas/editar?kid=${row?.kidId ?? ''}`)
+  refresh()
 }
 
 // Mete o saca una tarea del objetivo semanal (un toque, sin pasar por Guardar).
