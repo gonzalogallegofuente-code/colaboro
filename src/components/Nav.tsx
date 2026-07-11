@@ -1,6 +1,4 @@
 import Link from 'next/link'
-import { logout } from '@/app/actions'
-import { ConfirmButton } from '@/components/ConfirmButton'
 
 export function Nav({
   active,
@@ -45,20 +43,12 @@ export function Nav({
             ⚙️
           </Link>
         )}
-        {kidMode ? (
+        {/* En modo niño, salir al modo adulto (con contraseña/huella). En modo
+            padre no hay botón: cerrar sesión está en Ajustes → Cuenta. */}
+        {kidMode && (
           <Link href="/salir" className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]" aria-label="Modo adulto">
             👤
           </Link>
-        ) : (
-          <form action={logout}>
-            <ConfirmButton
-              message="¿Seguro que quieres cerrar sesión?"
-              className="rounded-full px-2.5 py-1.5 text-sm text-[var(--ink-3)]"
-              ariaLabel="Salir"
-            >
-              🚪
-            </ConfirmButton>
-          </form>
         )}
       </nav>
     </header>
