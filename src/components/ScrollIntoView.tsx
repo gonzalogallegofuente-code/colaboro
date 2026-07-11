@@ -11,7 +11,7 @@ export function ScrollIntoView() {
     // Se difiere para ganar a la navegación de Next (el enlace usa scroll={false}
     // y, sin esperar, la transición deja el scroll donde estaba).
     const t = setTimeout(() => {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      ref.current?.scrollIntoView({ block: 'start' }) // instantáneo: el 'smooth' falla en algunos navegadores
     }, 90)
     return () => clearTimeout(t)
   }, [])
