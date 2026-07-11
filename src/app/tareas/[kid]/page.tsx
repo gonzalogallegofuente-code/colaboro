@@ -391,10 +391,11 @@ export default async function KidSettingsPage({
 
         {/* ── Meta de ahorro ── */}
         {sec === 'meta' && (
-          <form action={setGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          <AutoForm action={setGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <input type="hidden" name="kidId" value={k.id} />
             <p className="text-[11px] text-[var(--ink-3)]">
-              Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Déjalo vacío para quitarla.
+              Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Se guarda solo. Déjalo vacío
+              para quitarla.
             </p>
             <div className="mt-2 space-y-2">
               {/* Nombre grande + coste a su derecha */}
@@ -422,14 +423,11 @@ export default async function KidSettingsPage({
               <div>
                 <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
                 <div className="mt-1">
-                  <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
+                  <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} autoSubmit />
                 </div>
               </div>
-              <SubmitButton className="tap-bounce w-full rounded-xl bg-indigo-600 py-2 font-display text-sm font-bold text-white">
-                Guardar meta
-              </SubmitButton>
             </div>
-          </form>
+          </AutoForm>
         )}
 
         {/* ── Modo niño ── */}

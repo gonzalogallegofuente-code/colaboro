@@ -1,20 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 
 // Campo de texto para un emoji + chips de sugerencias que lo rellenan.
 export function EmojiInput({
   name,
   defaultValue,
   suggestions,
+  autoSubmit = false,
 }: {
   name: string
   defaultValue?: string
   suggestions: string[]
+  autoSubmit?: boolean // al tocar un chip, guarda el formulario (autoguardado)
 }) {
   const [val, setVal] = useState(defaultValue ?? '')
+  const ref = useRef<HTMLDivElement>(null)
   return (
-    <div>
+    <div ref={ref}>
       <input
         name={name}
         value={val}
@@ -28,7 +32,10 @@ export function EmojiInput({
           <button
             type="button"
             key={s}
-            onClick={() => setVal(s)}
+            onClick={() => {
+              flushSync(() => setVal(s))
+              if (autoSubmit) ref.current?.closest('form')?.requestSubmit()
+            }}
             className={`rounded-lg px-1.5 py-0.5 text-xl transition ${
               val === s ? 'bg-indigo-100 ring-2 ring-indigo-400' : 'bg-gray-100'
             }`}

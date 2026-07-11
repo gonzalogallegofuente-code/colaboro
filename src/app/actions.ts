@@ -1,6 +1,7 @@
 'use server'
 
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
+import { weekRange } from '@/lib/week'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -418,15 +419,56 @@ export async function markTask(formData: FormData) {
   if (!kidId || !taskId || !isYmd(doneOn)) throw new Error('Datos inválidos')
 
   const [t] = await db
-    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon })
+    .select({ v: tasks.valueCents, name: tasks.name, icon: tasks.icon, inPlan: tasks.inPlan })
     .from(tasks)
     .where(and(eq(tasks.id, taskId), eq(tasks.kidId, kidId), eq(tasks.accountId, v.accountId)))
   if (!t) throw new Error('Tarea no encontrada')
 
+  // Bonus del objetivo semanal: si el objetivo YA está completo (todas las tareas
+  // acordadas en su meta), lo que se haga DE MÁS de una tarea del objetivo vale doble.
+  let valueCents = t.v
+  let doble = false
+  if (t.inPlan) {
+    const [k] = await db.select({ mode: kids.weekMode }).from(kids).where(eq(kids.id, kidId))
+    if (k?.mode === 'objetivo') {
+      const range = weekRange(doneOn)
+      const objTasks = await db
+        .select({ id: tasks.id, target: tasks.weeklyTarget })
+        .from(tasks)
+        .where(and(eq(tasks.kidId, kidId), eq(tasks.active, true), eq(tasks.inPlan, true)))
+      if (objTasks.length > 0) {
+        const counts = await db
+          .select({ taskId: completions.taskId, n: sql<number>`count(*)::int` })
+          .from(completions)
+          .where(
+            and(
+              inArray(completions.taskId, objTasks.map((o) => o.id)),
+              eq(completions.status, 'approved'),
+              gte(completions.doneOn, range.start),
+              lte(completions.doneOn, range.end),
+            ),
+          )
+          .groupBy(completions.taskId)
+        const byId = new Map(counts.map((c) => [c.taskId, c.n]))
+        let capped = 0
+        let total = 0
+        for (const ot of objTasks) {
+          total += ot.target
+          capped += Math.min(byId.get(ot.id) ?? 0, ot.target)
+        }
+        // Objetivo ya completo ANTES de esta marca → esta cuenta doble.
+        if (total > 0 && capped >= total) {
+          valueCents = t.v * 2
+          doble = true
+        }
+      }
+    }
+  }
+
   // Lo que marca el NIÑO siempre queda pendiente (sin dinero ni logros) hasta que
   // el padre lo aprueba. Lo que marca el padre desde su panel va directo.
   const pending = v.isKid
-  await db.insert(completions).values({ kidId, taskId, doneOn, valueCents: t.v, status: pending ? 'pending' : 'approved' })
+  await db.insert(completions).values({ kidId, taskId, doneOn, valueCents, status: pending ? 'pending' : 'approved' })
   if (!pending) {
     await awardEarnedBadges(v.accountId, kidId) // ¿logro con premio?
     await maybeCelebrateFamilyGoal(v.accountId) // ¿objetivo familiar alcanzado?
@@ -436,11 +478,12 @@ export async function markTask(formData: FormData) {
   // En modo niño, avisa al padre (sin bloquear).
   if (v.isKid) {
     const [k] = await db.select({ name: kids.name }).from(kids).where(eq(kids.id, kidId))
+    const extra = doble ? ' ✨ (¡vale doble!)' : ''
     void sendToAccount(v.accountId, {
       title: pending ? `${t.icon} Tarea por aprobar` : `${t.icon} Tarea hecha`,
       body: pending
-        ? `${k?.name ?? 'Tu hijo'} ha marcado «${t.name}» — espera tu aprobación`
-        : `${k?.name ?? 'Tu hijo'} ha hecho «${t.name}»`,
+        ? `${k?.name ?? 'Tu hijo'} ha marcado «${t.name}» — espera tu aprobación${extra}`
+        : `${k?.name ?? 'Tu hijo'} ha hecho «${t.name}»${extra}`,
       url: '/',
     })
   }
@@ -781,6 +824,7 @@ export async function setTheme(formData: FormData) {
 }
 
 // ── Meta de ahorro (por hijo) ────────────────────────────────────────
+// Autoguardado: silencioso (refresh). Nombre vacío = quitar la meta.
 export async function setGoal(formData: FormData) {
   const accountId = await requireAccount()
   const kidId = Number(formData.get('kidId'))
@@ -791,7 +835,8 @@ export async function setGoal(formData: FormData) {
       .update(kids)
       .set({ goalName: null, goalIcon: null, goalCostCents: null })
       .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-    redirect(`/tareas/${kidId}?sec=meta`)
+    refresh()
+    return
   }
   const icon = String(formData.get('goalIcon') ?? '').trim() || '🎯'
   const cost = parseEurosToCents(String(formData.get('goalCost') ?? '')) ?? 0
@@ -799,7 +844,7 @@ export async function setGoal(formData: FormData) {
     .update(kids)
     .set({ goalName: name.slice(0, 30), goalIcon: icon.slice(0, 8), goalCostCents: cost })
     .where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  redirect(`/tareas/${kidId}?sec=meta`)
+  refresh()
 }
 
 export async function clearGoal(formData: FormData) {

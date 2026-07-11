@@ -406,7 +406,7 @@ export default async function Page({
           </div>
           <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
             {planPct >= 100
-              ? '¡Objetivo de la semana completado! 🎉'
+              ? '¡Objetivo completado! 🎉 Ahora cada tarea del objetivo que hagas de más vale DOBLE ✨'
               : planPct >= 50
                 ? '¡Ya llevas más de la mitad! 💪'
                 : isKid
