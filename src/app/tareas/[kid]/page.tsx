@@ -274,7 +274,6 @@ export default async function KidSettingsPage({
         {sec === 'color' && (
           <form action={setKidColor} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <input type="hidden" name="kidId" value={k.id} />
-            <span className="font-display text-sm font-bold text-[var(--ink)]">🎨 Color</span>
             <p className="text-[11px] text-[var(--ink-3)]">Color de {k.name} en el tablero y las tarjetas. Se guarda solo.</p>
             <div className="mt-2">
               <ColorPicker name="color" defaultValue={k.color} autoSubmit />
@@ -285,8 +284,7 @@ export default async function KidSettingsPage({
         {/* ── Diseño ── */}
         {sec === 'diseno' && (
           <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <span className="font-display text-sm font-bold text-[var(--ink)]">Diseño</span>
-            <div className="mt-2 flex gap-2">
+            <div className="flex gap-2">
               <form action={setTheme} className="flex-1">
                 <input type="hidden" name="kidId" value={k.id} />
                 <input type="hidden" name="theme" value="infantil" />
@@ -305,8 +303,7 @@ export default async function KidSettingsPage({
         {sec === 'moneda' && (
           <>
             <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <span className="font-display text-sm font-bold text-[var(--ink)]">Contar en</span>
-              <div className="mt-2 flex gap-2">
+              <div className="flex gap-2">
                 <form action={setUnit} className="flex-1">
                   <input type="hidden" name="kidId" value={k.id} />
                   <input type="hidden" name="unit" value="eur" />
@@ -339,7 +336,6 @@ export default async function KidSettingsPage({
         {/* ── Estilo de los iconos ── */}
         {sec === 'iconos' && (
           <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <span className="font-display text-sm font-bold text-[var(--ink)]">Estilo de los iconos</span>
             <p className="text-[11px] text-[var(--ink-3)]">Cómo se ven los iconos de las tareas de {k.name}.</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {(
@@ -397,37 +393,37 @@ export default async function KidSettingsPage({
         {sec === 'meta' && (
           <form action={setGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <input type="hidden" name="kidId" value={k.id} />
-            <span className="font-display text-sm font-bold text-[var(--ink)]">🎯 Meta de ahorro</span>
             <p className="text-[11px] text-[var(--ink-3)]">
               Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Déjalo vacío para quitarla.
             </p>
             <div className="mt-2 space-y-2">
-              <label className="block">
-                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Nombre de la meta</span>
-                <input
-                  name="goalName"
-                  defaultValue={k.goalName ?? ''}
-                  placeholder="p. ej. Bici nueva"
-                  className="mt-1 w-full rounded-xl border-2 border-indigo-100 px-3 py-2.5 text-base font-display font-bold outline-none focus:border-indigo-500"
-                />
-              </label>
-              <div className="flex items-end gap-3">
-                <div>
-                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <div className="mt-1">
-                    <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
-                  </div>
-                </div>
-                <label className="flex-1">
+              {/* Nombre grande + coste a su derecha */}
+              <div className="flex items-end gap-2">
+                <label className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Nombre de la meta</span>
+                  <input
+                    name="goalName"
+                    defaultValue={k.goalName ?? ''}
+                    placeholder="p. ej. Bici nueva"
+                    className="mt-1 w-full rounded-xl border-2 border-indigo-100 px-3 py-2.5 text-base font-display font-bold outline-none focus:border-indigo-500"
+                  />
+                </label>
+                <label className="w-24 shrink-0">
                   <span className="text-[11px] font-semibold text-[var(--ink-3)]">Coste ({unitWord(money)})</span>
                   <input
                     name="goalCost"
                     defaultValue={k.goalCostCents ? (k.goalCostCents / 100).toString().replace('.', ',') : ''}
                     inputMode="decimal"
                     placeholder="30"
-                    className={inputCls}
+                    className="mt-1 w-full rounded-xl border-2 border-indigo-100 px-2.5 py-2.5 text-sm outline-none focus:border-indigo-500"
                   />
                 </label>
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
+                <div className="mt-1">
+                  <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} />
+                </div>
               </div>
               <SubmitButton className="tap-bounce w-full rounded-xl bg-indigo-600 py-2 font-display text-sm font-bold text-white">
                 Guardar meta
@@ -440,7 +436,6 @@ export default async function KidSettingsPage({
         {sec === 'modo' && (
           <>
           <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <span className="font-display text-sm font-bold text-[var(--ink)]">📱 Modo niño</span>
             <p className="text-[11px] text-[var(--ink-3)]">
               Abre una pantalla sencilla para que {k.name} apunte solo sus tareas. Para volver a tu cuenta hará
               falta tu contraseña.
