@@ -35,18 +35,23 @@ function Glyph({
 
 // Selector de icono para una tarea: rejilla del catálogo (fija icon + iconKey)
 // en el estilo del hijo, con opción de escribir un emoji libre.
+// Fila: [icono (tocable)] [children: p. ej. el campo del nombre] [Cambiar icono].
+// El catálogo queda OCULTO hasta pulsar el icono o el botón; al elegir se cierra
+// y, con autoSubmit, guarda el formulario (edición con autoguardado).
 export function IconPicker({
   defaultIcon = '⭐',
   defaultKey = null,
   style = 'emoji',
   availableKeys = [],
   autoSubmit = false,
+  children,
 }: {
   defaultIcon?: string
   defaultKey?: string | null
   style?: IconStyle
   availableKeys?: string[]
-  autoSubmit?: boolean // al elegir icono, guarda el formulario (edición)
+  autoSubmit?: boolean
+  children?: React.ReactNode
 }) {
   const [icon, setIcon] = useState(defaultIcon)
   const [key, setKey] = useState<string | null>(defaultKey)
@@ -59,17 +64,22 @@ export function IconPicker({
       <input type="hidden" name="icon" value={icon} />
       <input type="hidden" name="iconKey" value={key ?? ''} />
 
-      {/* Vista plegada: icono actual + botón para abrir el catálogo */}
       <div className="flex items-center gap-2">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-          {key ? <Glyph iconKey={key} emoji={icon} style={style} available={available} size={28} /> : <span className="text-2xl">{icon}</span>}
-        </span>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="tap-bounce rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600"
+          aria-label="Cambiar icono"
+          className="tap-bounce flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50"
         >
-          {open ? 'Cerrar' : 'Elegir icono'}
+          {key ? <Glyph iconKey={key} emoji={icon} style={style} available={available} size={28} /> : <span className="text-2xl">{icon}</span>}
+        </button>
+        {children}
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="tap-bounce shrink-0 rounded-full bg-indigo-50 px-2.5 py-1.5 text-[11px] font-bold leading-tight text-indigo-600"
+        >
+          {open ? 'Cerrar' : 'Cambiar icono'}
         </button>
       </div>
 

@@ -11,8 +11,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { AutoForm } from '@/components/AutoForm'
 import { IconPicker } from '@/components/IconPicker'
 import { IconDefs, keysForStyle } from '@/components/IconDefs'
-import { TaskGlyph } from '@/components/TaskGlyph'
-import { iconColor, type IconStyle } from '@/lib/icons'
+import { type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,17 +143,13 @@ export default async function EditarTareasPage({
             <div key={t.id} className={`rounded-3xl bg-[var(--card)] p-3 shadow-md ${t.active ? '' : 'opacity-60'}`}>
               <AutoForm action={updateTask}>
                 <input type="hidden" name="id" value={t.id} />
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-                    <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={22} color={iconColor(t.color)} />
-                  </span>
-                  <input name="name" defaultValue={t.name} className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre" />
-                </div>
+                {/* Línea 1: icono + nombre + Cambiar icono (catálogo oculto) */}
+                <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit>
+                  <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
+                </IconPicker>
+                {/* Línea 2: descripción */}
                 <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
-                <div className="mt-2">
-                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-                  <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit />
-                </div>
+                {/* Línea 3: valor + veces/semana + ocultar */}
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
                     <span className="text-[11px] font-semibold text-[var(--ink-3)]">Valor ({unitWord(money)})</span>
@@ -164,39 +159,43 @@ export default async function EditarTareasPage({
                     <span className="text-[11px] font-semibold text-[var(--ink-3)]">Veces/semana</span>
                     <input name="weeklyTarget" type="number" min={1} max={31} defaultValue={t.weeklyTarget} className={inputCls} />
                   </label>
+                  <button
+                    form={`ocultar-${t.id}`}
+                    className="shrink-0 pb-2 text-xs font-semibold text-[var(--ink-3)] underline underline-offset-2"
+                  >
+                    {t.active ? 'Ocultar' : 'Activar'}
+                  </button>
                 </div>
               </AutoForm>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                {modoObjetivo ? (
-                  <form action={toggleInPlan}>
-                    <input type="hidden" name="id" value={t.id} />
-                    <input type="hidden" name="inPlan" value={t.inPlan ? '0' : '1'} />
-                    <SubmitButton
-                      className={`tap-bounce rounded-full px-3 py-1.5 text-xs font-bold ${
-                        t.inPlan
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'border-2 border-emerald-300 text-emerald-700'
-                      }`}
-                    >
-                      {t.inPlan ? '🗓️ En el objetivo ✓ (quitar)' : '🗓️ Añadir al objetivo'}
-                    </SubmitButton>
-                  </form>
-                ) : (
-                  <span />
-                )}
-                <ToggleActive id={t.id} active={t.active} />
-              </div>
+              {/* Formulario del botón Ocultar/Activar (fuera para no anidar formularios) */}
+              <form id={`ocultar-${t.id}`} action={setTaskActive}>
+                <input type="hidden" name="id" value={t.id} />
+                <input type="hidden" name="active" value={t.active ? '0' : '1'} />
+              </form>
+              {modoObjetivo && (
+                <form action={toggleInPlan} className="mt-2">
+                  <input type="hidden" name="id" value={t.id} />
+                  <input type="hidden" name="inPlan" value={t.inPlan ? '0' : '1'} />
+                  <SubmitButton
+                    className={`tap-bounce rounded-full px-3 py-1.5 text-xs font-bold ${
+                      t.inPlan
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'border-2 border-emerald-300 text-emerald-700'
+                    }`}
+                  >
+                    {t.inPlan ? '🗓️ En el objetivo ✓ (quitar)' : '🗓️ Añadir al objetivo'}
+                  </SubmitButton>
+                </form>
+              )}
             </div>
           ))}
 
           <form action={addTask} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             <input type="hidden" name="kidId" value={selKid.id} />
-            <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} font-display font-bold`} required />
+            <IconPicker defaultIcon="⭐" defaultKey={null} style={iconStyle} availableKeys={availableKeys}>
+              <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
+            </IconPicker>
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
-            <div className="mt-2">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
-              <IconPicker defaultIcon="⭐" defaultKey={null} style={iconStyle} availableKeys={availableKeys} />
-            </div>
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">
                 <span className="text-[11px] font-semibold text-[var(--ink-3)]">Valor ({unitWord(money)})</span>
@@ -217,14 +216,3 @@ export default async function EditarTareasPage({
   )
 }
 
-function ToggleActive({ id, active }: { id: number; active: boolean }) {
-  return (
-    <form action={setTaskActive} className="shrink-0">
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="active" value={active ? '0' : '1'} />
-      <SubmitButton className="text-xs font-semibold text-[var(--ink-3)] underline underline-offset-2">
-        {active ? 'Ocultar del tablero' : 'Activar'}
-      </SubmitButton>
-    </form>
-  )
-}
