@@ -77,9 +77,12 @@ export function KidWeekGrid({
   const money = moneyOf(kid)
   return (
     <div>
-      <div className="mb-1 flex items-center gap-1.5 font-display text-sm font-bold" style={{ color: kid.color }}>
-        <Avatar emoji={kid.emoji} avatarUrl={kid.avatarUrl} name={kid.name} size={18} />
-        {kid.name}
+      <div
+        className="mb-2 flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-white shadow-sm"
+        style={{ background: kid.color }}
+      >
+        <Avatar emoji={kid.emoji} avatarUrl={kid.avatarUrl} name={kid.name} size={20} />
+        <span className="font-display text-sm font-bold">{kid.name}</span>
       </div>
       {tasks.length === 0 ? (
         <p className="px-1 pb-1 text-[11px] font-semibold text-[var(--ink-3)]">Sin tareas esta semana.</p>
