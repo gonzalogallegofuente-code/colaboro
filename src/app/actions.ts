@@ -632,13 +632,26 @@ export async function updateTask(formData: FormData) {
   refresh()
 }
 
-// Borra una tarea DEFINITIVAMENTE (y su historial de marcas, por cascada).
-// Solo desde la sección "Desactivadas" y con confirmación en la UI.
+// Borra una tarea DEFINITIVAMENTE y su historial de marcas. Solo desde la
+// sección "Desactivadas" y con confirmación en la UI. La FK de la BD es RESTRICT
+// (no cascade), así que se borran las marcas primero, en una transacción.
 export async function deleteTask(formData: FormData) {
   const accountId = await requireAccount()
   const id = Number(formData.get('id'))
   if (!id) throw new Error('Datos inválidos')
-  await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
+  // Verifica que la tarea es de esta cuenta antes de tocar nada.
+  const [own] = await db
+    .select({ id: tasks.id })
+    .from(tasks)
+    .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
+  if (!own) {
+    refresh()
+    return
+  }
+  await db.transaction(async (tx) => {
+    await tx.delete(completions).where(eq(completions.taskId, id))
+    await tx.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
+  })
   refresh()
 }
 
