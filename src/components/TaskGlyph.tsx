@@ -2,13 +2,17 @@ import { ICON_PATHS } from '@/lib/icon-paths'
 import { ICON_OPENMOJI } from '@/lib/icon-openmoji'
 import { ICON_GAME } from '@/lib/icon-game'
 import { ICON_SHUTTERSTOCK } from '@/lib/icon-shutterstock'
+import { edadTaskSrc } from '@/lib/edad-icons'
 import type { IconStyle } from '@/lib/icons'
 
-// Pinta el icono de una tarea según el estilo del hijo: emoji, línea, relleno o pegatina.
+// Pinta el icono de una tarea según el estilo del hijo. Sistema actual: por
+// EDAD ('infantil' | 'juvenil', ligada al tema del hijo), asignación automática
+// por clave/emoji/nombre. Los demás estilos quedan como legado.
 export function TaskGlyph({
   iconKey,
   emoji,
   style,
+  name,
   size = 24,
   color,
   className,
@@ -16,10 +20,26 @@ export function TaskGlyph({
   iconKey?: string | null
   emoji: string
   style: IconStyle
+  name?: string | null
   size?: number
   color?: string
   className?: string
 }) {
+  // Por edad: SVG a todo color desde /public/icons/{edad}/.
+  if (style === 'infantil' || style === 'juvenil') {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={edadTaskSrc(style, { iconKey, emoji, name })}
+        alt=""
+        width={size}
+        height={size}
+        className={className}
+        style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
+      />
+    )
+  }
+
   // Pegatina (OpenMoji): color propio, viewBox 0 0 72 72.
   if (style === 'openmoji') {
     const om = iconKey ? ICON_OPENMOJI[iconKey] : undefined

@@ -20,6 +20,7 @@ import { InstallPrompt } from '@/components/InstallPrompt'
 import { Avatar } from '@/components/Avatar'
 import { TaskGlyph } from '@/components/TaskGlyph'
 import { iconColor, type IconStyle } from '@/lib/icons'
+import { edadBadgeSrc } from '@/lib/edad-icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
 
@@ -226,7 +227,7 @@ export default async function Page({
           className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-inner"
           style={{ background: t.color }}
         >
-          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={selKid.iconStyle as IconStyle} size={34} color={iconColor(t.color)} />
+          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={34} color={iconColor(t.color)} />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -376,9 +377,8 @@ export default async function Page({
             <span className="text-xs font-semibold text-[var(--ink-3)]">Aún sin medallas — ¡a por la primera! 🌱</span>
           ) : (
             earnedBadges.slice(0, 8).map((b) => (
-              <span key={b.id} className="text-xl">
-                {b.icon}
-              </span>
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={b.id} src={edadBadgeSrc(theme, b.icon)} alt={b.label} width={22} height={22} style={{ width: 22, height: 22, objectFit: 'contain' }} />
             ))
           )}
         </div>

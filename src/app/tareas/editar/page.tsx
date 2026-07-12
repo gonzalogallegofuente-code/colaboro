@@ -10,8 +10,6 @@ import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { AutoForm } from '@/components/AutoForm'
-import { IconPicker } from '@/components/IconPicker'
-import { IconDefs, keysForStyle } from '@/components/IconDefs'
 import { TaskGlyph } from '@/components/TaskGlyph'
 import { iconColor, type IconStyle } from '@/lib/icons'
 
@@ -55,8 +53,6 @@ export default async function EditarTareasPage({
   if (!selKid) redirect('/tareas')
   const money = moneyOf(selKid)
   const theme = themeOf(selKid)
-  const iconStyle = selKid.iconStyle as IconStyle
-  const availableKeys = keysForStyle(iconStyle)
   const tasks = await getAllTasks(accountId, selKid.id)
   // Activas primero; las ocultas se pliegan a una línea al final de la lista.
   const ordered = [...tasks].sort((a, b) => Number(b.active) - Number(a.active))
@@ -85,10 +81,13 @@ export default async function EditarTareasPage({
     >
       <AutoForm action={updateTask}>
         <input type="hidden" name="id" value={t.id} />
-        {/* Línea 1: icono + nombre + Cambiar icono (catálogo oculto) */}
-        <IconPicker defaultIcon={t.icon} defaultKey={t.iconKey} style={iconStyle} availableKeys={availableKeys} autoSubmit>
+        {/* Línea 1: icono (automático según la edad) + nombre */}
+        <div className="flex items-center gap-2">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
+            <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={26} color={iconColor(t.color)} />
+          </span>
           <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
-        </IconPicker>
+        </div>
         {/* Línea 2: descripción */}
         <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
         {/* Línea 3: valor + veces/sem (estrechos) + quitar del objetivo + ocultar */}
@@ -123,7 +122,7 @@ export default async function EditarTareasPage({
   const filaAlObjetivo = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 shadow-sm">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={iconStyle} size={22} color={iconColor(t.color)} />
+        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={22} color={iconColor(t.color)} />
       </span>
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
@@ -143,7 +142,7 @@ export default async function EditarTareasPage({
   const filaOculta = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} style={iconStyle} size={22} color={iconColor(t.color)} />
+        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={22} color={iconColor(t.color)} />
       </span>
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
@@ -240,8 +239,6 @@ export default async function EditarTareasPage({
           </p>
         )}
 
-        <IconDefs style={iconStyle} />
-
         <div className="mx-3 mt-3 space-y-2.5">
           {/* En modo objetivo: solo las del objetivo salen desplegadas (verde);
               las demás quedan plegadas abajo con un botón para sumarlas. */}
@@ -268,9 +265,7 @@ export default async function EditarTareasPage({
 
           <form action={addTask} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             <input type="hidden" name="kidId" value={selKid.id} />
-            <IconPicker defaultIcon="⭐" defaultKey={null} style={iconStyle} availableKeys={availableKeys}>
-              <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
-            </IconPicker>
+            <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} w-full font-display font-bold`} required />
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">

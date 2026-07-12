@@ -620,14 +620,19 @@ export async function updateTask(formData: FormData) {
   const valueCents = parseEurosToCents(String(formData.get('value') ?? '')) ?? 100
   const weeklyTarget = Math.max(1, Math.min(31, Number(formData.get('weeklyTarget')) || 7))
   const description = String(formData.get('description') ?? '').trim() || null
-  const icon = String(formData.get('icon') ?? '').trim() || '⭐'
-  const ikRaw = String(formData.get('iconKey') ?? '').trim()
-  const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
+  // El icono ya no se elige a mano (va por edad): si el formulario no lo envía,
+  // se conserva el guardado (sigue sirviendo para derivar el icono por clave/emoji).
+  const set: Partial<typeof tasks.$inferInsert> = { name, description, valueCents, weeklyTarget }
+  if (formData.get('icon') !== null) {
+    set.icon = String(formData.get('icon') ?? '').trim() || '⭐'
+    const ikRaw = String(formData.get('iconKey') ?? '').trim()
+    set.iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
+  }
 
   // inPlan lo gestiona toggleInPlan; la aprobación es siempre para el modo niño.
   await db
     .update(tasks)
-    .set({ name, description, icon, iconKey, valueCents, weeklyTarget })
+    .set(set)
     .where(and(eq(tasks.id, id), eq(tasks.accountId, accountId)))
   refresh()
 }
@@ -728,16 +733,6 @@ export async function setWeekMode(formData: FormData) {
   if (!kidId) throw new Error('Datos inválidos')
   const mode = formData.get('mode') === 'objetivo' ? 'objetivo' : 'tareas'
   await db.update(kids).set({ weekMode: mode }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
-  refresh()
-}
-
-export async function setIconStyle(formData: FormData) {
-  const accountId = await requireAccount()
-  const kidId = Number(formData.get('kidId'))
-  const style = String(formData.get('iconStyle') ?? '')
-  if (!kidId || !['emoji', 'line', 'fill', 'openmoji', 'game', 'dibujos'].includes(style))
-    throw new Error('Datos inválidos')
-  await db.update(kids).set({ iconStyle: style }).where(and(eq(kids.id, kidId), eq(kids.accountId, accountId)))
   refresh()
 }
 
@@ -898,13 +893,18 @@ export async function updateReward(formData: FormData) {
   if (!id) throw new Error('Datos inválidos')
   const name = String(formData.get('name') ?? '').trim()
   if (!name) return // nombre vacío a medio editar: no guardar todavía
-  const icon = String(formData.get('icon') ?? '').trim() || '🎁'
-  const ikRaw = String(formData.get('iconKey') ?? '').trim()
-  const iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
+  // El icono ya no se elige a mano (va por edad): si el formulario no lo envía,
+  // se conserva el guardado (sigue sirviendo para derivar el icono por clave).
+  const set: Partial<typeof rewards.$inferInsert> = { name, costCents }
+  if (formData.get('icon') !== null) {
+    set.icon = String(formData.get('icon') ?? '').trim() || '🎁'
+    const ikRaw = String(formData.get('iconKey') ?? '').trim()
+    set.iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
+  }
   await db
     .update(rewards)
-    .set({ name, icon, iconKey, costCents })
+    .set(set)
     .where(and(eq(rewards.id, id), eq(rewards.accountId, accountId)))
   refresh()
 }

@@ -7,7 +7,6 @@ import {
   deleteKid,
   enterKid,
   setGoal,
-  setIconStyle,
   setKidAvatar,
   setKidColor,
   setKidEmoji,
@@ -51,9 +50,8 @@ const ICON_PREVIEW_PASTELS = ['#f7d0e0', '#cfe0f5', '#dde7dd', '#f2ecc9', '#ddd6
 
 const SEC_TITLES: Record<string, string> = {
   avatar: '🎭 Nombre y avatar',
-  color: '🎨 Color y modo',
+  color: '🎨 Color y edad',
   moneda: '🪙 Contar en',
-  iconos: '✏️ Estilo de los iconos',
   meta: '🎯 Meta de ahorro',
   modo: '📱 Modo niño',
 }
@@ -139,8 +137,7 @@ export default async function KidSettingsPage({
               <GroupLabel>Perfil</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=avatar`} label="🎭 Nombre y avatar" />
               <GroupLabel>Aspecto</GroupLabel>
-              <SettingRow href={`/tareas/${k.id}?sec=color`} label="🎨 Color y modo" />
-              <SettingRow href={`/tareas/${k.id}?sec=iconos`} label="✏️ Estilo de los iconos" />
+              <SettingRow href={`/tareas/${k.id}?sec=color`} label="🎨 Color y edad" />
               <GroupLabel>Recompensas</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=moneda`} label="🪙 Contar en (euros o puntos)" />
               <SettingRow href={`/tareas/${k.id}?sec=meta`} label="🎯 Meta de ahorro" />
@@ -281,19 +278,39 @@ export default async function KidSettingsPage({
             </form>
 
             <div className="mx-3 mt-2 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <span className="font-display text-sm font-bold text-[var(--ink)]">🌗 Modo</span>
-              <p className="text-[11px] text-[var(--ink-3)]">Claro u oscuro para la pantalla de {k.name}.</p>
+              <span className="font-display text-sm font-bold text-[var(--ink)]">🧒🧑 Edad</span>
+              <p className="text-[11px] text-[var(--ink-3)]">
+                El mundo de {k.name}: fija el tema (claro u oscuro) y todos los iconos de tareas, recompensas y medallas.
+              </p>
               <div className="mt-2 flex gap-2">
                 <form action={setTheme} className="flex-1">
                   <input type="hidden" name="kidId" value={k.id} />
                   <input type="hidden" name="theme" value="infantil" />
-                  <button className={themePill(theme === 'infantil')}>☀️ Claro</button>
+                  <button className={themePill(theme === 'infantil')}>🧒 Infantil</button>
                 </form>
                 <form action={setTheme} className="flex-1">
                   <input type="hidden" name="kidId" value={k.id} />
                   <input type="hidden" name="theme" value="juvenil" />
-                  <button className={themePill(theme === 'juvenil')}>🌙 Oscuro</button>
+                  <button className={themePill(theme === 'juvenil')}>🧑 Juvenil</button>
                 </form>
+              </div>
+              <div className="mt-3 border-t-2 border-indigo-50 pt-2">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Así se ven los iconos:</span>
+                <div className="mt-1.5 grid grid-cols-7 gap-1.5">
+                  {allIcons.slice(0, 14).map((ic, i) => {
+                    const bg = ICON_PREVIEW_PASTELS[i % ICON_PREVIEW_PASTELS.length]
+                    return (
+                      <span
+                        key={ic.key}
+                        title={ic.label}
+                        className="flex aspect-square items-center justify-center rounded-xl shadow-inner"
+                        style={{ background: bg }}
+                      >
+                        <TaskGlyph iconKey={ic.key} emoji={ic.emoji} style={theme as IconStyle} size={24} color={iconColor(bg)} />
+                      </span>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </>
@@ -331,62 +348,6 @@ export default async function KidSettingsPage({
               </div>
             </form>
           </>
-        )}
-
-        {/* ── Estilo de los iconos ── */}
-        {sec === 'iconos' && (
-          <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <p className="text-[11px] text-[var(--ink-3)]">Cómo se ven los iconos de las tareas de {k.name}.</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(
-                [
-                  ['dibujos', 'Dibujos'],
-                  ['openmoji', 'Pegatina'],
-                  ['game', 'Gamer'],
-                  ['emoji', 'Emoji'],
-                  ['line', 'Línea'],
-                  ['fill', 'Relleno'],
-                ] as const
-              ).map(([val, label]) => {
-                const on = k.iconStyle === val
-                return (
-                  <form key={val} action={setIconStyle} className="shrink-0">
-                    <input type="hidden" name="kidId" value={k.id} />
-                    <input type="hidden" name="iconStyle" value={val} />
-                    <button
-                      className={`tap-bounce flex w-[78px] flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-2 ${
-                        on ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-indigo-200 text-[var(--head)]'
-                      }`}
-                    >
-                      <span className="flex h-7 items-center justify-center">
-                        <TaskGlyph iconKey="broom" emoji="🧹" style={val as IconStyle} size={26} color={on ? '#fff' : '#3f3f55'} />
-                      </span>
-                      <span className="font-display text-xs font-bold">{label}</span>
-                    </button>
-                  </form>
-                )
-              })}
-            </div>
-
-            <div className="mt-3 border-t-2 border-indigo-50 pt-2">
-              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Todos los iconos en este estilo:</span>
-              <div className="mt-1.5 grid grid-cols-7 gap-1.5">
-                {allIcons.map((ic, i) => {
-                  const bg = ICON_PREVIEW_PASTELS[i % ICON_PREVIEW_PASTELS.length]
-                  return (
-                    <span
-                      key={ic.key}
-                      title={ic.label}
-                      className="flex aspect-square items-center justify-center rounded-xl shadow-inner"
-                      style={{ background: bg }}
-                    >
-                      <TaskGlyph iconKey={ic.key} emoji={ic.emoji} style={k.iconStyle as IconStyle} size={24} color={iconColor(bg)} />
-                    </span>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
         )}
 
         {/* ── Meta de ahorro ── */}

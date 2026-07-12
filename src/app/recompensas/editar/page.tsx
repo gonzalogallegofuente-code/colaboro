@@ -10,8 +10,6 @@ import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { AutoForm } from '@/components/AutoForm'
 import { RewardGlyph } from '@/components/RewardGlyph'
-import { RewardIconDefs } from '@/components/RewardIconDefs'
-import { RewardIconPicker } from '@/components/RewardIconPicker'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,18 +78,19 @@ export default async function EditarRecompensasPage({
         </div>
       </div>
 
-      <RewardIconDefs />
-
       <div className="mx-3 mt-3 space-y-2.5">
         {/* Recompensas activas: tarjeta editable en 2 líneas */}
         {activas.map((r) => (
           <div key={r.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <AutoForm action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
-              {/* Línea 1: icono + nombre + Cambiar icono (galería oculta) */}
-              <RewardIconPicker defaultIcon={r.icon} defaultKey={r.iconKey} autoSubmit>
+              {/* Línea 1: icono (automático según la edad) + nombre */}
+              <div className="flex items-center gap-2">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={26} />
+                </span>
                 <input name="name" defaultValue={r.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} />
-              </RewardIconPicker>
+              </div>
               {/* Línea 2: importe (sin unidad fija) + Ocultar. Se guarda solo. */}
               <div className="mt-2 flex items-center gap-2">
                 <input
@@ -120,9 +119,7 @@ export default async function EditarRecompensasPage({
         {/* Añadir */}
         <form action={addReward} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
           <input type="hidden" name="kidId" value={selKid.id} />
-          <RewardIconPicker defaultIcon="🎁" defaultKey={null}>
-            <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
-          </RewardIconPicker>
+          <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} w-full font-display font-bold`} required />
           <div className="mt-2 flex items-center gap-2">
             <input name="cost" defaultValue="5" inputMode="decimal" placeholder="Coste" aria-label="Coste" className={`${inputCls} flex-1`} />
             <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-emerald-600 px-4 py-2 font-display text-sm font-bold text-white">
@@ -138,7 +135,7 @@ export default async function EditarRecompensasPage({
             {ocultas.map((r) => (
               <div key={r.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
-                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={24} />
+                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={24} />
                 </span>
                 <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{r.name}</span>
                 <button

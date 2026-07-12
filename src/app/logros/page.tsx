@@ -3,6 +3,7 @@ import { getActiveKids, getKidStats, getBadgeDefs } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
 import { formatAmount, moneyOf, themeOf } from '@/lib/money'
 import { computeBadges } from '@/lib/badges'
+import { edadBadgeSrc } from '@/lib/edad-icons'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
@@ -100,7 +101,8 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
                 b.earned ? 'bg-[var(--card)]' : 'bg-[var(--card)] opacity-40 grayscale'
               }`}
             >
-              <span className="text-3xl">{b.icon}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={edadBadgeSrc(theme, b.icon)} alt="" width={40} height={40} style={{ width: 40, height: 40, objectFit: 'contain' }} />
               <span className="text-[11px] font-semibold leading-tight text-[var(--ink-2)]">{b.label}</span>
               {b.rewardCents > 0 && (
                 <span className="text-[10px] font-bold text-emerald-600">+{formatAmount(b.rewardCents, money)}</span>

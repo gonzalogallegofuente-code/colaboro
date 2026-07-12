@@ -113,7 +113,7 @@ export default async function RecompensasPage({
           return (
             <div key={r.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-50 shadow-inner">
-                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} size={38} />
+                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={38} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display font-bold text-[var(--ink)]">{r.name}</div>
