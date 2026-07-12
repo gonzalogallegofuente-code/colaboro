@@ -39,6 +39,7 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icon-192.png|icon-512.png|apple-icon.png|robots.txt).*)',
+    // icons/ = SVG de tareas por edad (estáticos, cacheables por el SW sin auth)
+    '/((?!api|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/|icon-192.png|icon-512.png|apple-icon.png|robots.txt).*)',
   ],
 }
