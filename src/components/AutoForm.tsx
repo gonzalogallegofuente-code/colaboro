@@ -2,8 +2,11 @@
 
 import { useRef } from 'react'
 
-// Formulario que se guarda SOLO: al salir de un campo (blur) tras haber
-// cambiado algo, envía la Server Action. Sin botón Guardar.
+// Formulario que se guarda SOLO: al salir del formulario (blur hacia fuera)
+// tras haber cambiado algo, envía la Server Action. Sin botón Guardar.
+// OJO: saltar de un campo a OTRO del mismo formulario NO guarda todavía
+// (si guardara a medias, actions como el objetivo familiar interpretarían
+// el campo aún vacío como "borrar").
 export function AutoForm({
   action,
   className,
@@ -23,7 +26,8 @@ export function AutoForm({
       onChange={() => {
         dirty.current = true
       }}
-      onBlur={() => {
+      onBlur={(e) => {
+        if (e.relatedTarget && ref.current?.contains(e.relatedTarget as Node)) return
         if (dirty.current) {
           dirty.current = false
           ref.current?.requestSubmit()

@@ -493,19 +493,23 @@ export async function markTask(formData: FormData) {
 // ── Objetivo familiar (semanal, por cuenta) ──────────────────────────
 export async function setFamilyGoal(formData: FormData) {
   const accountId = await requireAccount()
-  const target = Math.max(0, Math.round(Number(formData.get('target')) || 0))
+  const targetRaw = String(formData.get('target') ?? '').trim()
   const reward = String(formData.get('reward') ?? '').trim().slice(0, 60)
+  const target = Math.max(0, Math.round(Number(targetRaw) || 0))
   if (target > 0 && reward) {
     await db
       .update(accounts)
       .set({ familyGoalTarget: target, familyGoalReward: reward })
       .where(eq(accounts.id, accountId))
-  } else {
-    // Sin número o sin premio = quitar el objetivo.
+  } else if (!targetRaw && !reward) {
+    // AMBOS vacíos = quitar el objetivo.
     await db
       .update(accounts)
       .set({ familyGoalTarget: null, familyGoalReward: null })
       .where(eq(accounts.id, accountId))
+  } else {
+    // A medias (solo número o solo premio): no guardar todavía, no borrar.
+    return
   }
   refresh()
 }
