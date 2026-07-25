@@ -161,6 +161,11 @@ export default async function RecompensasPage({
                       {kid?.name} · {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </div>
                   </div>
+                  {red.status === 'pending' && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                      ⏳ esperando OK
+                    </span>
+                  )}
                   <span className="font-display text-sm font-bold text-rose-500">
                     −{formatAmount(red.costCents, moneyOf(kid ?? selKid))}
                   </span>

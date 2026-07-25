@@ -935,7 +935,12 @@ export async function setRewardActive(formData: FormData) {
 }
 
 export async function redeemReward(formData: FormData) {
-  const { accountId, kidId } = await actingKid(Number(formData.get('kidId')))
+  const v = await getViewer()
+  if (!v) throw new Error('No autorizado')
+  const kidId = v.isKid ? v.kidId! : Number(formData.get('kidId'))
+  if (!kidId) throw new Error('Datos inválidos')
+  await assertKid(v.accountId, kidId)
+  const accountId = v.accountId
   const rewardId = Number(formData.get('rewardId'))
   if (!rewardId) throw new Error('Datos inválidos')
 
@@ -947,12 +952,53 @@ export async function redeemReward(formData: FormData) {
 
   if (((await kidBalances(accountId)).get(kidId) ?? 0) < r.costCents) throw new Error('Saldo insuficiente')
 
+  // Lo que canjea el NIÑO queda pendiente del OK del padre (retiene el saldo
+  // hasta aprobar o rechazar). El canje del padre va directo.
+  const pending = v.isKid
   await db.insert(redemptions).values({
     kidId,
     rewardId: r.id,
     rewardName: r.name,
     rewardIcon: r.icon,
     costCents: r.costCents,
+    status: pending ? 'pending' : 'approved',
   })
+  refresh()
+
+  if (pending) {
+    const [k] = await db.select({ name: kids.name }).from(kids).where(eq(kids.id, kidId))
+    void sendToAccount(accountId, {
+      title: `${r.icon} Canje por aprobar`,
+      body: `${k?.name ?? 'Tu hijo'} quiere canjear «${r.name}» — espera tu aprobación`,
+      url: '/',
+    })
+  }
+}
+
+// ── Aprobación de canjes hechos por los niños ────────────────────────
+export async function approveRedemption(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const [row] = await db
+    .select({ id: redemptions.id })
+    .from(redemptions)
+    .innerJoin(kids, eq(kids.id, redemptions.kidId))
+    .where(and(eq(redemptions.id, id), eq(kids.accountId, accountId), eq(redemptions.status, 'pending')))
+  if (row) await db.update(redemptions).set({ status: 'approved' }).where(eq(redemptions.id, row.id))
+  refresh()
+}
+
+// Rechazar borra el canje: el saldo retenido vuelve a la hucha.
+export async function rejectRedemption(formData: FormData) {
+  const accountId = await requireAccount()
+  const id = Number(formData.get('id'))
+  if (!id) throw new Error('Datos inválidos')
+  const [row] = await db
+    .select({ id: redemptions.id })
+    .from(redemptions)
+    .innerJoin(kids, eq(kids.id, redemptions.kidId))
+    .where(and(eq(redemptions.id, id), eq(kids.accountId, accountId), eq(redemptions.status, 'pending')))
+  if (row) await db.delete(redemptions).where(eq(redemptions.id, row.id))
   refresh()
 }

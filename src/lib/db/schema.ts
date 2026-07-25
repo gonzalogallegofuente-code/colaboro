@@ -156,6 +156,9 @@ export const redemptions = pgTable('redemptions', {
   rewardName: text('reward_name').notNull(),
   rewardIcon: text('reward_icon').notNull().default('🎁'),
   costCents: integer('cost_cents').notNull(),
+  // 'approved' descuenta definitivo; 'pending' espera el OK del padre (retiene
+  // saldo; al rechazar se borra la fila y se libera).
+  status: text('status').notNull().default('approved'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

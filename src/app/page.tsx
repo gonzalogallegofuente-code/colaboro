@@ -4,15 +4,17 @@ import {
   getKidStats,
   getBadgeDefs,
   getPendingCompletions,
+  getPendingRedemptions,
   getFamilyGoal,
   type PendingCompletion,
+  type PendingRedemption,
   type FamilyGoal,
 } from '@/lib/data'
 import { computeBadges } from '@/lib/badges'
 import { requireViewerPage } from '@/lib/session'
 import { todayYmd, friendlyDay } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
-import { markTask, undoTask, approveCompletion, rejectCompletion } from './actions'
+import { markTask, undoTask, approveCompletion, rejectCompletion, approveRedemption, rejectRedemption } from './actions'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { Nav } from '@/components/Nav'
 import { ThemeShell } from '@/components/ThemeShell'
@@ -48,13 +50,52 @@ function ProgressCoins({ count, target }: { count: number; target: number }) {
   )
 }
 
-// Marcas de los niños pendientes del visto bueno del padre (✓ aprueba, ✕ rechaza).
-function PendientesSection({ pendientes }: { pendientes: PendingCompletion[] }) {
-  if (pendientes.length === 0) return null
+// Marcas y CANJES de los niños pendientes del visto bueno del padre
+// (✓ aprueba, ✕ rechaza; rechazar un canje devuelve el dinero a la hucha).
+function PendientesSection({
+  pendientes,
+  canjes,
+}: {
+  pendientes: PendingCompletion[]
+  canjes: PendingRedemption[]
+}) {
+  if (pendientes.length === 0 && canjes.length === 0) return null
   return (
     <>
       <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">⏳ Para aprobar</h2>
       <div className="mx-3 space-y-1.5">
+        {canjes.map((c) => (
+          <div key={`r${c.id}`} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-xl shadow-inner">
+              {c.rewardIcon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-display text-sm font-bold text-[var(--ink)]">🎁 Canjear: {c.rewardName}</div>
+              <div className="text-[11px] font-semibold text-[var(--ink-3)]">
+                {c.kidName} ·{' '}
+                {formatAmount(c.costCents, moneyOf({ unit: c.kidUnit, pointsName: c.kidPointsName, pointsIcon: c.kidPointsIcon }))}
+              </div>
+            </div>
+            <form action={approveRedemption}>
+              <input type="hidden" name="id" value={c.id} />
+              <SubmitButton
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-base leading-none text-white shadow-sm"
+                aria-label={`Aprobar canje de ${c.rewardName} de ${c.kidName}`}
+              >
+                ✓
+              </SubmitButton>
+            </form>
+            <form action={rejectRedemption}>
+              <input type="hidden" name="id" value={c.id} />
+              <ConfirmSubmit
+                message={`¿Rechazar el canje de «${c.rewardName}» de ${c.kidName}? El dinero vuelve a su hucha.`}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-base leading-none text-red-500"
+              >
+                ✕
+              </ConfirmSubmit>
+            </form>
+          </div>
+        ))}
         {pendientes.map((p) => (
           <div key={p.id} className="flex items-center gap-2.5 rounded-2xl bg-[var(--card)] px-3 py-2 shadow-sm">
             <span
@@ -158,7 +199,9 @@ export default async function Page({
   // (pendientes de aprobar, objetivo) vive ahí. Con uno solo, directo a él.
   const multi = !isKid && data.kids.length > 1
   const chooserMode = multi && !kidParam
-  const pendientes = isKid ? [] : await getPendingCompletions(accountId)
+  const [pendientes, canjesPend] = isKid
+    ? [[], []]
+    : await Promise.all([getPendingCompletions(accountId), getPendingRedemptions(accountId)])
   const famGoal = await getFamilyGoal(accountId)
 
   if (chooserMode) {
@@ -188,7 +231,7 @@ export default async function Page({
               )
             })}
           </div>
-          <PendientesSection pendientes={pendientes} />
+          <PendientesSection pendientes={pendientes} canjes={canjesPend} />
           {famGoal && <FamGoalSection goal={famGoal} />}
         </div>
       </ThemeShell>
@@ -322,7 +365,7 @@ export default async function Page({
       )}
 
       {/* Para aprobar: con varios hijos vive en la portada de selección */}
-      {!multi && <PendientesSection pendientes={pendientes} />}
+      {!multi && <PendientesSection pendientes={pendientes} canjes={canjesPend} />}
 
       {/* Meta de ahorro */}
       {hasGoal && (

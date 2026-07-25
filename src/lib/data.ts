@@ -187,6 +187,42 @@ export async function getPendingCompletions(accountId: number): Promise<PendingC
     .orderBy(desc(completions.doneOn), desc(completions.id))
 }
 
+export type PendingRedemption = {
+  id: number
+  costCents: number
+  rewardName: string
+  rewardIcon: string
+  kidId: number
+  kidName: string
+  kidEmoji: string
+  kidAvatarUrl: string | null
+  kidUnit: string
+  kidPointsName: string
+  kidPointsIcon: string
+}
+
+// Canjes hechos por los niños que esperan la aprobación del padre.
+export async function getPendingRedemptions(accountId: number): Promise<PendingRedemption[]> {
+  return db
+    .select({
+      id: redemptions.id,
+      costCents: redemptions.costCents,
+      rewardName: redemptions.rewardName,
+      rewardIcon: redemptions.rewardIcon,
+      kidId: kids.id,
+      kidName: kids.name,
+      kidEmoji: kids.emoji,
+      kidAvatarUrl: kids.avatarUrl,
+      kidUnit: kids.unit,
+      kidPointsName: kids.pointsName,
+      kidPointsIcon: kids.pointsIcon,
+    })
+    .from(redemptions)
+    .innerJoin(kids, eq(kids.id, redemptions.kidId))
+    .where(and(eq(kids.accountId, accountId), eq(redemptions.status, 'pending')))
+    .orderBy(desc(redemptions.id))
+}
+
 // ── Resumen para el histórico (por hijo) ─────────────────────────────
 export type KidHistoryStats = {
   kidId: number
@@ -228,7 +264,7 @@ export async function getHistoryStats(accountId: number): Promise<KidHistoryStat
       db
         .select({ c: sql<number>`coalesce(sum(${redemptions.costCents}),0)::float8` })
         .from(redemptions)
-        .where(eq(redemptions.kidId, k.id)),
+        .where(and(eq(redemptions.kidId, k.id), eq(redemptions.status, 'approved'))),
       db
         .select({ name: tasks.name, n: sql<number>`count(*)::int` })
         .from(completions)
@@ -612,6 +648,7 @@ export type RecentRedemption = {
   rewardName: string
   rewardIcon: string
   costCents: number
+  status: string
   createdAt: Date
 }
 export type RewardsData = {
@@ -641,6 +678,7 @@ export async function getRewardsData(accountId: number, kidId?: number): Promise
         rewardName: redemptions.rewardName,
         rewardIcon: redemptions.rewardIcon,
         costCents: redemptions.costCents,
+        status: redemptions.status,
         createdAt: redemptions.createdAt,
       })
       .from(redemptions)
