@@ -132,8 +132,8 @@ export default async function HistoricoPage({
       )}
 
       {/* Registro de liquidaciones (cuándo se pagó la hucha): plegado, es solo
-          un comprobante — lo ganado por semana ya se ve arriba. */}
-      {payouts.length > 0 && (
+          un comprobante del PADRE — en modo niño no se muestra. */}
+      {!viewer.isKid && payouts.length > 0 && (
         <details className="mx-3 mt-6">
           <summary className="tap-bounce mx-auto w-fit cursor-pointer list-none rounded-full bg-[var(--card)] px-4 py-2 text-center font-display text-sm font-bold text-[var(--ink-2)] shadow-sm">
             💸 Pagos realizados ({payouts.length}) ▾
