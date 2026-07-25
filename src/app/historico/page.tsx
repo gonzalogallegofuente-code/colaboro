@@ -115,13 +115,14 @@ export default async function HistoricoPage({
         </div>
       )}
 
-      <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">💸 Pagos</h2>
-      <div className="mx-3 mt-2 space-y-2">
-        {payouts.length === 0 && (
-          <div className="rounded-3xl bg-[var(--card)] p-4 text-center text-sm text-[var(--ink-2)] shadow-md">
-            Todavía no se ha pagado nada.
-          </div>
-        )}
+      {/* Registro de liquidaciones (cuándo se pagó la hucha): plegado, es solo
+          un comprobante — lo ganado por semana ya se ve arriba. */}
+      {payouts.length > 0 && (
+        <details className="mx-3 mt-6">
+          <summary className="tap-bounce mx-auto w-fit cursor-pointer list-none rounded-full bg-[var(--card)] px-4 py-2 text-center font-display text-sm font-bold text-[var(--ink-2)] shadow-sm">
+            💸 Pagos realizados ({payouts.length}) ▾
+          </summary>
+          <div className="mt-2 space-y-2">
         {payouts.map((p) => {
           const kid = allKids.find((k) => k.id === p.kidId)
           const d = new Date(p.paidAt)
@@ -144,7 +145,9 @@ export default async function HistoricoPage({
             </div>
           )
         })}
-      </div>
+          </div>
+        </details>
+      )}
     </div>
     </ThemeShell>
   )
