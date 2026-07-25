@@ -445,6 +445,7 @@ export type WeekGridKid = {
   pointsIcon: string
   iconStyle: string
   weekCents: number
+  weekCount: number
 }
 export type WeekGrid = {
   kids: WeekGridKid[]
@@ -469,7 +470,11 @@ export async function getWeekGrid(
   const days = weekDays(range.start)
 
   const weekRows = await db
-    .select({ kidId: completions.kidId, cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8` })
+    .select({
+      kidId: completions.kidId,
+      cents: sql<number>`coalesce(sum(${completions.valueCents}),0)::float8`,
+      n: sql<number>`count(*)::int`,
+    })
     .from(completions)
     .innerJoin(kids, eq(kids.id, completions.kidId))
     .where(
@@ -481,7 +486,7 @@ export async function getWeekGrid(
       ),
     )
     .groupBy(completions.kidId)
-  const week = new Map(weekRows.map((r) => [r.kidId, r.cents]))
+  const week = new Map(weekRows.map((r) => [r.kidId, r]))
 
   const kidsOut: WeekGridKid[] = kidList.map((k) => ({
     id: k.id,
@@ -494,7 +499,8 @@ export async function getWeekGrid(
     pointsName: k.pointsName,
     pointsIcon: k.pointsIcon,
     iconStyle: k.iconStyle,
-    weekCents: week.get(k.id) ?? 0,
+    weekCents: week.get(k.id)?.cents ?? 0,
+    weekCount: week.get(k.id)?.n ?? 0,
   }))
   const selectedKidId = kidId && kidList.some((k) => k.id === kidId) ? kidId : kidList[0].id
   const taskList = await getActiveTasks(accountId, selectedKidId)

@@ -1,44 +1,44 @@
 import Link from 'next/link'
-import { Fragment } from 'react'
-import { getHistory, getWeekGrid, getHistoryStats } from '@/lib/data'
+import { getHistory, getWeekGrid } from '@/lib/data'
 import { requireViewerPage } from '@/lib/session'
-import { formatRange, todayYmd, weekRange, parseYmd } from '@/lib/week'
+import { formatRange, todayYmd, weekRange, shiftWeek } from '@/lib/week'
 import { formatAmount, unitIcon, moneyOf, themeOf } from '@/lib/money'
 import { Nav } from '@/components/Nav'
-import { ScrollIntoView } from '@/components/ScrollIntoView'
 import { ThemeShell } from '@/components/ThemeShell'
 import { Avatar } from '@/components/Avatar'
 import { KidWeekGrid } from '@/components/KidWeekGrid'
 
 export const dynamic = 'force-dynamic'
 
-const MES_LARGO = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-]
-
 export default async function HistoricoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ open?: string; pk?: string }>
+  searchParams: Promise<{ w?: string; pk?: string }>
 }) {
   const sp = await searchParams
   const viewer = await requireViewerPage()
   const accountId = viewer.accountId
-  const [{ kids, weeks, payouts }, resumen] = await Promise.all([getHistory(accountId), getHistoryStats(accountId)])
-  const theme = kids.length ? themeOf(kids[0]) : 'infantil'
   const today = todayYmd()
   const currentStart = weekRange(today).start
 
-  // Semana desplegada (su parte se carga solo al abrirla). Con varios hijos hay
-  // pestañas para elegir de quién ver el parte (parám. pk); por defecto el 1º.
-  const parteKids = kids.filter((k) => k.active)
-  const openStart =
-    sp.open && /^\d{4}-\d{2}-\d{2}$/.test(sp.open) && weeks.some((w) => w.start === sp.open) ? sp.open : null
+  // Semana mostrada (parám. w = cualquier fecha de la semana; por defecto, la
+  // actual). Nunca más allá de la semana en curso.
+  const wParam = sp.w && /^\d{4}-\d{2}-\d{2}$/.test(sp.w) ? weekRange(sp.w) : weekRange(today)
+  const week = wParam.start > currentStart ? weekRange(today) : wParam
+  const prevStart = shiftWeek(week.start, -1)
+  const nextStart = shiftWeek(week.start, 1)
+  const hasNext = nextStart <= currentStart
+
+  // Hijo del parte (parám. pk); por defecto el primero.
   const pkParam = sp.pk ? Number(sp.pk) : undefined
-  const openKidId = pkParam && parteKids.some((k) => k.id === pkParam) ? pkParam : parteKids[0]?.id
-  const openKid = parteKids.find((k) => k.id === openKidId)
-  const openGrid = openStart && openKidId ? await getWeekGrid(accountId, openStart, openKidId) : null
+  const grid = await getWeekGrid(accountId, week.start, pkParam)
+  const selKid = grid?.kids.find((k) => k.id === grid.selectedKidId)
+  const theme = selKid ? themeOf(selKid) : 'infantil'
+
+  const { payouts, kids: allKids } = await getHistory(accountId)
+
+  const navBtn =
+    'tap-bounce flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--chip)] font-display text-lg font-bold text-[var(--chip-ink)]'
 
   return (
     <ThemeShell theme={theme}>
@@ -47,146 +47,73 @@ export default async function HistoricoPage({
 
       <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📅 Histórico semanal</h1>
       <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
-        Pulsa una semana para ver el parte (qué día se hizo cada cosa). Lun → dom.
+        Toca un hijo para ver su semana (lun → dom).
         {!viewer.isKid && ' Toca una casilla para corregir un día.'}
       </p>
 
-      {/* Resumen por hijo */}
-      {resumen.length > 0 && (
-        <div className="mx-3 mt-3 space-y-2">
-          {resumen.map((s) => {
-            const money = moneyOf(s)
-            return (
-              <div key={s.kidId} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
-                <div className="flex items-center gap-2">
-                  <Avatar emoji={s.emoji} avatarUrl={s.avatarUrl} name={s.name} size={22} />
-                  <span className="font-display text-sm font-bold" style={{ color: s.color }}>{s.name}</span>
-                  <span className="ml-auto text-xs font-bold text-[var(--ink-2)]">
-                    Esta semana: {s.weekCount} {s.weekCount === 1 ? 'tarea' : 'tareas'} · {formatAmount(s.weekCents, money)}
-                  </span>
-                </div>
-                <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
-                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">{formatAmount(s.totalCents, money)}</div>
-                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">ganado total</div>
+      {!grid || !selKid ? (
+        <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
+          Aún no hay nadie dado de alta.
+        </div>
+      ) : (
+        <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+          {/* Selector de semana: ‹ 20–26 jul 2026 › */}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <Link href={`/historico?w=${prevStart}&pk=${selKid.id}`} replace scroll={false} className={navBtn} aria-label="Semana anterior">
+              ‹
+            </Link>
+            <span className="font-display text-base font-bold text-[var(--ink)]">
+              {formatRange(week.start, week.end)}
+            </span>
+            {hasNext ? (
+              <Link href={`/historico?w=${nextStart}&pk=${selKid.id}`} replace scroll={false} className={navBtn} aria-label="Semana siguiente">
+                ›
+              </Link>
+            ) : (
+              <span
+                aria-hidden
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--chip)] font-display text-lg font-bold text-[var(--chip-ink)] opacity-30"
+              >
+                ›
+              </span>
+            )}
+          </div>
+
+          {/* Resumen por hijo: tocar uno abre su parte */}
+          <div className="grid grid-cols-2 gap-2">
+            {grid.kids.map((k) => {
+              const money = moneyOf(k)
+              const on = k.id === selKid.id
+              return (
+                <Link
+                  key={k.id}
+                  href={`/historico?w=${week.start}&pk=${k.id}`}
+                  replace
+                  scroll={false}
+                  className={`tap-bounce rounded-2xl p-2.5 ${on ? 'ring-2' : ''}`}
+                  style={{ background: `${k.color}14`, ...(on ? { ['--tw-ring-color' as string]: k.color } : {}) }}
+                >
+                  <div className="flex items-center gap-1 font-display text-sm font-bold" style={{ color: k.color }}>
+                    <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={18} />
+                    {k.name}
                   </div>
-                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
-                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">{formatAmount(s.redeemedCents, money)}</div>
-                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">canjeado</div>
+                  <div className="font-display text-lg font-bold text-[var(--ink)]">
+                    {unitIcon(money)} {formatAmount(k.weekCents, money)}
                   </div>
-                  <div className="rounded-2xl bg-[var(--chip)] px-1 py-1.5">
-                    <div className="font-display text-sm font-bold text-[var(--chip-ink)]">🔥 {s.bestStreak}</div>
-                    <div className="text-[10px] font-semibold text-[var(--ink-3)]">mejor racha</div>
+                  <div className="text-[11px] font-semibold text-[var(--ink-3)]">
+                    {k.weekCount} {k.weekCount === 1 ? 'tarea' : 'tareas'}
                   </div>
-                </div>
-                {s.topTaskName && (
-                  <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
-                    ⭐ Su tarea estrella: <span className="text-[var(--ink-2)]">{s.topTaskName}</span> (×{s.topTaskCount})
-                  </div>
-                )}
-              </div>
-            )
-          })}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Parte de la semana del hijo elegido */}
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <KidWeekGrid kid={selKid} data={grid} today={today} editable={!viewer.isKid} />
+          </div>
         </div>
       )}
-
-      <div className="mx-3 mt-3 space-y-2.5">
-        {weeks.length === 0 && (
-          <div className="rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
-            Aún no hay nada apuntado. ¡A por la primera tarea! 💪
-          </div>
-        )}
-        {weeks.map((w, i) => {
-          const isCurrent = w.start === currentStart
-          const isOpen = w.start === openStart
-          const d = parseYmd(w.start)
-          const prev = i > 0 ? parseYmd(weeks[i - 1].start) : null
-          const newMonth = !prev || prev.getMonth() !== d.getMonth() || prev.getFullYear() !== d.getFullYear()
-          return (
-            <Fragment key={w.start}>
-            {newMonth && (
-              <h3 className="px-2 pt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ink-3)]">
-                {MES_LARGO[d.getMonth()]} {d.getFullYear()}
-              </h3>
-            )}
-            <div className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <Link
-                href={isOpen ? '/historico' : `/historico?open=${w.start}`}
-                replace
-                scroll={false}
-                className="mb-2 flex items-center justify-between"
-              >
-                <span className="font-display text-sm font-bold text-[var(--ink)]">
-                  {formatRange(w.start, w.end)}
-                </span>
-                <div className="flex items-center gap-2">
-                  {isCurrent && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-                      en curso
-                    </span>
-                  )}
-                  <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600">
-                    📅 {isOpen ? 'ocultar ▲' : 'ver días ▼'}
-                  </span>
-                </div>
-              </Link>
-
-              <div className="grid grid-cols-2 gap-2">
-                {kids.map((k) => {
-                  const cell = w.perKid[k.id]
-                  return (
-                    <div key={k.id} className="rounded-2xl p-2.5" style={{ background: `${k.color}14` }}>
-                      <div className="flex items-center gap-1 font-display text-sm font-bold" style={{ color: k.color }}>
-                        <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={18} />
-                        {k.name}
-                      </div>
-                      <div className="font-display text-lg font-bold text-[var(--ink)]">
-                        {unitIcon(moneyOf(k))} {formatAmount(cell?.cents ?? 0, moneyOf(k))}
-                      </div>
-                      <div className="text-[11px] font-semibold text-[var(--ink-3)]">
-                        {cell?.count ?? 0} {cell?.count === 1 ? 'tarea' : 'tareas'}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {isOpen && (
-                <div className="mt-3 border-t border-gray-100 pt-3">
-                  <ScrollIntoView />
-                  {/* Pestañas de hijo (solo si hay más de uno) */}
-                  {parteKids.length > 1 && (
-                    <div className="mb-3 flex flex-wrap gap-1.5">
-                      {parteKids.map((pk) => {
-                        const on = pk.id === openKidId
-                        return (
-                          <Link
-                            key={pk.id}
-                            href={`/historico?open=${w.start}&pk=${pk.id}`}
-                            replace
-                            scroll={false}
-                            className={`tap-bounce flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-display text-xs font-bold ${
-                              on ? 'text-white shadow-sm' : 'text-[var(--ink)]'
-                            }`}
-                            style={{ background: on ? pk.color : 'var(--chip)' }}
-                          >
-                            <Avatar emoji={pk.emoji} avatarUrl={pk.avatarUrl} name={pk.name} size={18} />
-                            {pk.name}
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  )}
-                  {openGrid && openKid && (
-                    <KidWeekGrid kid={openKid} data={openGrid} today={today} editable={!viewer.isKid} />
-                  )}
-                </div>
-              )}
-            </div>
-            </Fragment>
-          )
-        })}
-      </div>
 
       <h2 className="px-4 pt-6 font-display text-lg font-bold text-[var(--head)]">💸 Pagos</h2>
       <div className="mx-3 mt-2 space-y-2">
@@ -196,7 +123,7 @@ export default async function HistoricoPage({
           </div>
         )}
         {payouts.map((p) => {
-          const kid = kids.find((k) => k.id === p.kidId)
+          const kid = allKids.find((k) => k.id === p.kidId)
           const d = new Date(p.paidAt)
           return (
             <div key={p.id} className="flex items-center justify-between rounded-3xl bg-[var(--card)] px-4 py-3 shadow-md">

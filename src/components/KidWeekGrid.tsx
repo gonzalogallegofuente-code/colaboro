@@ -62,13 +62,14 @@ function EditCell({
 }
 
 // Parte de un hijo en una semana: cuadrícula tareas × días (lun→dom).
+// `kid` acepta tanto el Kid completo de BD como el resumen del grid semanal.
 export function KidWeekGrid({
   kid,
   data,
   today,
   editable,
 }: {
-  kid: Kid
+  kid: Pick<Kid, 'id' | 'name' | 'emoji' | 'avatarUrl' | 'color' | 'theme' | 'unit' | 'pointsName' | 'pointsIcon'>
   data: WeekGrid
   today: string
   editable?: boolean
