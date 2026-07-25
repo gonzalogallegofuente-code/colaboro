@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { login } from '@/app/actions'
+import { getViewer } from '@/lib/session'
 import { SubmitButton } from '@/components/SubmitButton'
 
 export const dynamic = 'force-dynamic'
@@ -8,6 +10,9 @@ const inputCls =
   'mt-1 w-full rounded-2xl border-2 border-indigo-100 px-4 py-3 outline-none focus:border-indigo-500'
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
+  // Sesión contrastada con la BD (versión de contraseña incluida): si de
+  // verdad está logueado, al tablero. Una cookie obsoleta muestra el login.
+  if (await getViewer()) redirect('/')
   const { e } = await searchParams
   return (
     <main className="mx-auto flex min-h-full max-w-sm flex-col items-center justify-center px-6">

@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { register } from '@/app/actions'
+import { getViewer } from '@/lib/session'
 import { SubmitButton } from '@/components/SubmitButton'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +18,7 @@ const ERRORS: Record<string, string> = {
 }
 
 export default async function RegistroPage({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
+  if (await getViewer()) redirect('/') // logueado de verdad → al tablero
   const { e } = await searchParams
   return (
     <main className="mx-auto flex min-h-full max-w-sm flex-col items-center justify-center px-6">

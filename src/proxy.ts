@@ -20,10 +20,13 @@ export async function proxy(req: NextRequest) {
   const session = await readSession(secret, req.cookies.get(SESSION_COOKIE)?.value)
   const kidMode = session ? null : await readKidToken(secret, req.cookies.get(KID_COOKIE)?.value)
 
-  if (PUBLIC.includes(pathname)) {
-    if (session || kidMode) return NextResponse.redirect(new URL('/', req.url))
-    return NextResponse.next()
-  }
+  // Login/registro/recuperar se sirven SIEMPRE. Aquí solo se valida la firma
+  // de la cookie, no la "versión de contraseña" (eso requiere BD): si tras un
+  // cambio de contraseña quedara una cookie vieja y redirigiéramos a "/",
+  // se formaría un bucle / → /login → / infinito ("la página no carga").
+  // La redirección de un usuario YA logueado la hace la propia página de
+  // login con la sesión contrastada de verdad.
+  if (PUBLIC.includes(pathname)) return NextResponse.next()
 
   if (!session && !kidMode) {
     return NextResponse.redirect(new URL('/login', req.url))
