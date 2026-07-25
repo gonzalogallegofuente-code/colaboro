@@ -86,9 +86,7 @@ export default async function EditarRecompensasPage({
               <input type="hidden" name="id" value={r.id} />
               {/* Línea 1: icono (automático según la edad) + nombre */}
               <div className="flex items-center gap-2">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50">
-                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={26} />
-                </span>
+                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={40} className="shrink-0" />
                 <input name="name" defaultValue={r.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} />
               </div>
               {/* Línea 2: importe (sin unidad fija) + Ocultar. Se guarda solo. */}
@@ -134,9 +132,7 @@ export default async function EditarRecompensasPage({
             <p className={subHead}>Desactivadas</p>
             {ocultas.map((r) => (
               <div key={r.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
-                  <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={24} />
-                </span>
+                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={32} className="shrink-0" />
                 <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{r.name}</span>
                 <button
                   form={`ocultar-r-${r.id}`}

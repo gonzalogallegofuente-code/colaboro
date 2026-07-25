@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { Avatar } from '@/components/Avatar'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import { iconColor, type IconStyle } from '@/lib/icons'
+import { type IconStyle } from '@/lib/icons'
 import { moneyOf, themeOf } from '@/lib/money'
 import type { WeekGrid } from '@/lib/data'
 import type { Kid } from '@/lib/db/schema'
@@ -99,9 +99,7 @@ export function KidWeekGrid({
           {tasks.map((t) => (
             <Fragment key={t.id}>
               <div className="flex items-center gap-1.5 pr-1">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: t.color }}>
-                  <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={themeOf(kid) as IconStyle} size={18} color={iconColor(t.color)} />
-                </span>
+                <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={themeOf(kid) as IconStyle} size={26} className="shrink-0" />
                 <span className="truncate text-[11px] font-semibold leading-tight text-[var(--ink)]">{t.name}</span>
               </div>
               {days.map((d, i) => {

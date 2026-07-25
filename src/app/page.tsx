@@ -19,7 +19,7 @@ import { ThemeShell } from '@/components/ThemeShell'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { Avatar } from '@/components/Avatar'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import { iconColor, type IconStyle } from '@/lib/icons'
+import { type IconStyle } from '@/lib/icons'
 import { edadBadgeSrc } from '@/lib/edad-icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
@@ -223,12 +223,7 @@ export default async function Page({
     const day = data.dayCountByTask[t.id] ?? 0
     return (
       <div key={t.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md animate-pop">
-        <div
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-inner"
-          style={{ background: t.color }}
-        >
-          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={34} color={iconColor(t.color)} />
-        </div>
+        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={52} className="shrink-0" />
 
         <div className="min-w-0 flex-1">
           <div className="truncate font-display text-base font-bold text-[var(--ink)]">{t.name}</div>

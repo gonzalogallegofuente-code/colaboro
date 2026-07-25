@@ -18,7 +18,7 @@ import {
 import { AVATAR_STYLES, avatarDataUri } from '@/lib/avatars'
 import { Nav } from '@/components/Nav'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import { ICON_CATALOG, iconColor, type IconStyle } from '@/lib/icons'
+import { ICON_CATALOG, type IconStyle } from '@/lib/icons'
 import { ThemeShell } from '@/components/ThemeShell'
 import { SubmitButton } from '@/components/SubmitButton'
 import { AutoForm } from '@/components/AutoForm'
@@ -46,7 +46,6 @@ const GOAL_ICONS = [
   '👟', '🎀', '💍', '🐶', '🐱', '🐹', '🍕', '🍔', '🍦', '🍫', '🎂', '🎈', '🚗', '✈️', '🌟',
 ]
 const inputCls = 'w-full rounded-xl border-2 border-indigo-100 px-2.5 py-1.5 text-sm outline-none focus:border-indigo-500'
-const ICON_PREVIEW_PASTELS = ['#f7d0e0', '#cfe0f5', '#dde7dd', '#f2ecc9', '#ddd6f0', '#f3d4e1', '#d2d8f0', '#d6e1d6', '#e3e3c5', '#c5cfe2']
 
 const SEC_TITLES: Record<string, string> = {
   avatar: '🎭 Nombre y avatar',
@@ -297,19 +296,11 @@ export default async function KidSettingsPage({
               <div className="mt-3 border-t-2 border-indigo-50 pt-2">
                 <span className="text-[11px] font-semibold text-[var(--ink-3)]">Así se ven los iconos:</span>
                 <div className="mt-1.5 grid grid-cols-7 gap-1.5">
-                  {allIcons.slice(0, 14).map((ic, i) => {
-                    const bg = ICON_PREVIEW_PASTELS[i % ICON_PREVIEW_PASTELS.length]
-                    return (
-                      <span
-                        key={ic.key}
-                        title={ic.label}
-                        className="flex aspect-square items-center justify-center rounded-xl shadow-inner"
-                        style={{ background: bg }}
-                      >
-                        <TaskGlyph iconKey={ic.key} emoji={ic.emoji} style={theme as IconStyle} size={24} color={iconColor(bg)} />
-                      </span>
-                    )
-                  })}
+                  {allIcons.slice(0, 14).map((ic) => (
+                    <span key={ic.key} title={ic.label} className="flex aspect-square items-center justify-center">
+                      <TaskGlyph iconKey={ic.key} emoji={ic.emoji} style={theme as IconStyle} size={34} />
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

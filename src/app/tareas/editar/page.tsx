@@ -11,7 +11,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { AutoForm } from '@/components/AutoForm'
 import { TaskGlyph } from '@/components/TaskGlyph'
-import { iconColor, type IconStyle } from '@/lib/icons'
+import { type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,9 +83,7 @@ export default async function EditarTareasPage({
         <input type="hidden" name="id" value={t.id} />
         {/* Línea 1: icono (automático según la edad) + nombre */}
         <div className="flex items-center gap-2">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-            <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={26} color={iconColor(t.color)} />
-          </span>
+          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={40} className="shrink-0" />
           <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
         </div>
         {/* Línea 2: descripción */}
@@ -121,9 +119,7 @@ export default async function EditarTareasPage({
   // Fila plegada de una tarea que NO está en el objetivo: botón para sumarla.
   const filaAlObjetivo = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 shadow-sm">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={22} color={iconColor(t.color)} />
-      </span>
+      <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
         form={`objetivo-${t.id}`}
@@ -141,9 +137,7 @@ export default async function EditarTareasPage({
   // Fila plegada de una tarea oculta: botón para activarla.
   const filaOculta = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: t.color }}>
-        <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={22} color={iconColor(t.color)} />
-      </span>
+      <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
         form={`ocultar-${t.id}`}
