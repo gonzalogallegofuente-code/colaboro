@@ -112,7 +112,7 @@ export default async function RecompensasPage({
           const enough = selKid.balanceCents >= r.costCents
           return (
             <div key={r.id} className="flex items-center gap-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-              <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={52} className="shrink-0" />
+              <RewardGlyph iconKey={r.iconKey} iconSlug={r.iconSlug} emoji={r.icon} name={r.name} edad={theme} size={52} className="shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display font-bold text-[var(--ink)]">{r.name}</div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[var(--chip)] px-2 py-0.5 text-xs font-bold text-[var(--chip-ink)]">

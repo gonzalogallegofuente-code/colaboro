@@ -29,13 +29,17 @@ export default async function HistoricoPage({
   const nextStart = shiftWeek(week.start, 1)
   const hasNext = nextStart <= currentStart
 
-  // Hijo del parte (parám. pk); por defecto el primero.
-  const pkParam = sp.pk ? Number(sp.pk) : undefined
+  // Hijo del parte (parám. pk); por defecto el primero. En modo niño se
+  // fuerza SIEMPRE el suyo (no puede ver a los hermanos, ni por URL).
+  const pkParam = viewer.isKid ? viewer.kidId! : sp.pk ? Number(sp.pk) : undefined
   const grid = await getWeekGrid(accountId, week.start, pkParam)
   const selKid = grid?.kids.find((k) => k.id === grid.selectedKidId)
   const theme = selKid ? themeOf(selKid) : 'infantil'
+  // En modo niño: solo su tarjeta (y solo sus pagos, más abajo).
+  const cardKids = grid ? (viewer.isKid ? grid.kids.filter((k) => k.id === grid.selectedKidId) : grid.kids) : []
 
-  const { payouts, kids: allKids } = await getHistory(accountId)
+  const { payouts: allPayouts, kids: allKids } = await getHistory(accountId)
+  const payouts = viewer.isKid ? allPayouts.filter((p) => p.kidId === viewer.kidId) : allPayouts
 
   const navBtn =
     'tap-bounce flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--chip)] font-display text-lg font-bold text-[var(--chip-ink)]'
@@ -79,20 +83,13 @@ export default async function HistoricoPage({
             )}
           </div>
 
-          {/* Resumen por hijo: tocar uno abre su parte */}
+          {/* Resumen por hijo: tocar uno abre su parte (en modo niño, solo él) */}
           <div className="grid grid-cols-2 gap-2">
-            {grid.kids.map((k) => {
+            {cardKids.map((k) => {
               const money = moneyOf(k)
               const on = k.id === selKid.id
-              return (
-                <Link
-                  key={k.id}
-                  href={`/historico?w=${week.start}&pk=${k.id}`}
-                  replace
-                  scroll={false}
-                  className={`tap-bounce rounded-2xl p-2.5 ${on ? 'ring-2' : ''}`}
-                  style={{ background: `${k.color}14`, ...(on ? { ['--tw-ring-color' as string]: k.color } : {}) }}
-                >
+              const inner = (
+                <>
                   <div className="flex items-center gap-1 font-display text-sm font-bold" style={{ color: k.color }}>
                     <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={18} />
                     {k.name}
@@ -103,6 +100,25 @@ export default async function HistoricoPage({
                   <div className="text-[11px] font-semibold text-[var(--ink-3)]">
                     {k.weekCount} {k.weekCount === 1 ? 'tarea' : 'tareas'}
                   </div>
+                </>
+              )
+              if (viewer.isKid) {
+                return (
+                  <div key={k.id} className="col-span-2 rounded-2xl p-2.5" style={{ background: `${k.color}14` }}>
+                    {inner}
+                  </div>
+                )
+              }
+              return (
+                <Link
+                  key={k.id}
+                  href={`/historico?w=${week.start}&pk=${k.id}`}
+                  replace
+                  scroll={false}
+                  className={`tap-bounce rounded-2xl p-2.5 ${on ? 'ring-2' : ''}`}
+                  style={{ background: `${k.color}14`, ...(on ? { ['--tw-ring-color' as string]: k.color } : {}) }}
+                >
+                  {inner}
                 </Link>
               )
             })}

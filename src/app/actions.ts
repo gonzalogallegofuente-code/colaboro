@@ -2,6 +2,7 @@
 
 import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { weekRange } from '@/lib/week'
+import { isIconSlug } from '@/lib/edad-icons'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -589,6 +590,8 @@ export async function addTask(formData: FormData) {
   const icon = String(formData.get('icon') ?? '').trim() || '⭐'
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
+  const slugRaw = String(formData.get('iconSlug') ?? '').trim()
+  const iconSlug = isIconSlug(slugRaw) ? slugRaw : null
 
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${tasks.sortOrder}),0)::int` })
@@ -601,6 +604,7 @@ export async function addTask(formData: FormData) {
     description,
     icon,
     iconKey,
+    iconSlug,
     valueCents,
     weeklyTarget,
     color: '#e9d5ff',
@@ -627,6 +631,11 @@ export async function updateTask(formData: FormData) {
     set.icon = String(formData.get('icon') ?? '').trim() || '⭐'
     const ikRaw = String(formData.get('iconKey') ?? '').trim()
     set.iconKey = ikRaw && ICON_BY_KEY[ikRaw] ? ikRaw : null
+  }
+  // Dibujo fijado en la galería ("Cambiar dibujo"); vacío = automático.
+  if (formData.get('iconSlug') !== null) {
+    const s = String(formData.get('iconSlug') ?? '').trim()
+    set.iconSlug = isIconSlug(s) ? s : null
   }
 
   // inPlan lo gestiona toggleInPlan; la aprobación es siempre para el modo niño.
@@ -877,12 +886,14 @@ export async function addReward(formData: FormData) {
   const icon = String(formData.get('icon') ?? '').trim() || '🎁'
   const ikRaw = String(formData.get('iconKey') ?? '').trim()
   const iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
+  const slugRaw = String(formData.get('iconSlug') ?? '').trim()
+  const iconSlug = isIconSlug(slugRaw) ? slugRaw : null
   const costCents = parseEurosToCents(String(formData.get('cost') ?? '')) ?? 500
   const [{ max }] = await db
     .select({ max: sql<number>`coalesce(max(${rewards.sortOrder}),0)::int` })
     .from(rewards)
     .where(and(eq(rewards.accountId, accountId), eq(rewards.kidId, kidId)))
-  await db.insert(rewards).values({ accountId, kidId, name, icon, iconKey, costCents, sortOrder: (max ?? 0) + 1 })
+  await db.insert(rewards).values({ accountId, kidId, name, icon, iconKey, iconSlug, costCents, sortOrder: (max ?? 0) + 1 })
   redirect(`/recompensas/editar?kid=${kidId}`)
 }
 
@@ -901,6 +912,11 @@ export async function updateReward(formData: FormData) {
     set.icon = String(formData.get('icon') ?? '').trim() || '🎁'
     const ikRaw = String(formData.get('iconKey') ?? '').trim()
     set.iconKey = ikRaw && REWARD_BY_KEY[ikRaw] ? ikRaw : null
+  }
+  // Dibujo fijado en la galería ("Cambiar dibujo"); vacío = automático.
+  if (formData.get('iconSlug') !== null) {
+    const s = String(formData.get('iconSlug') ?? '').trim()
+    set.iconSlug = isIconSlug(s) ? s : null
   }
   await db
     .update(rewards)

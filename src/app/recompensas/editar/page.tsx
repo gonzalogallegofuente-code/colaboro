@@ -10,6 +10,8 @@ import { Avatar } from '@/components/Avatar'
 import { SubmitButton } from '@/components/SubmitButton'
 import { AutoForm } from '@/components/AutoForm'
 import { RewardGlyph } from '@/components/RewardGlyph'
+import { SlugPicker } from '@/components/SlugPicker'
+import { edadRewardSrc } from '@/lib/edad-icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,11 +86,15 @@ export default async function EditarRecompensasPage({
           <div key={r.id} className="rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <AutoForm action={updateReward}>
               <input type="hidden" name="id" value={r.id} />
-              {/* Línea 1: icono (automático según la edad) + nombre */}
-              <div className="flex items-center gap-2">
-                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={40} className="shrink-0" />
+              {/* Línea 1: dibujo (tocable → galería para cambiarlo) + nombre */}
+              <SlugPicker
+                edad={theme}
+                defaultSlug={r.iconSlug}
+                fallbackSrc={edadRewardSrc(theme, { iconKey: r.iconKey, name: r.name })}
+                autoSubmit
+              >
                 <input name="name" defaultValue={r.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} />
-              </div>
+              </SlugPicker>
               {/* Línea 2: importe (sin unidad fija) + Ocultar. Se guarda solo. */}
               <div className="mt-2 flex items-center gap-2">
                 <input
@@ -117,7 +123,9 @@ export default async function EditarRecompensasPage({
         {/* Añadir */}
         <form action={addReward} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
           <input type="hidden" name="kidId" value={selKid.id} />
-          <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} w-full font-display font-bold`} required />
+          <SlugPicker edad={theme} defaultSlug={null} fallbackSrc={`/icons/${theme}/regalo.svg`}>
+            <input name="name" placeholder={`Nueva recompensa para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
+          </SlugPicker>
           <div className="mt-2 flex items-center gap-2">
             <input name="cost" defaultValue="5" inputMode="decimal" placeholder="Coste" aria-label="Coste" className={`${inputCls} flex-1`} />
             <SubmitButton className="tap-bounce shrink-0 rounded-xl bg-emerald-600 px-4 py-2 font-display text-sm font-bold text-white">
@@ -132,7 +140,7 @@ export default async function EditarRecompensasPage({
             <p className={subHead}>Desactivadas</p>
             {ocultas.map((r) => (
               <div key={r.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
-                <RewardGlyph iconKey={r.iconKey} emoji={r.icon} name={r.name} edad={theme} size={32} className="shrink-0" />
+                <RewardGlyph iconKey={r.iconKey} iconSlug={r.iconSlug} emoji={r.icon} name={r.name} edad={theme} size={32} className="shrink-0" />
                 <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{r.name}</span>
                 <button
                   form={`ocultar-r-${r.id}`}

@@ -11,6 +11,8 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { ConfirmSubmit } from '@/components/ConfirmSubmit'
 import { AutoForm } from '@/components/AutoForm'
 import { TaskGlyph } from '@/components/TaskGlyph'
+import { SlugPicker } from '@/components/SlugPicker'
+import { edadTaskSrc } from '@/lib/edad-icons'
 import { type IconStyle } from '@/lib/icons'
 
 export const dynamic = 'force-dynamic'
@@ -81,11 +83,15 @@ export default async function EditarTareasPage({
     >
       <AutoForm action={updateTask}>
         <input type="hidden" name="id" value={t.id} />
-        {/* Línea 1: icono (automático según la edad) + nombre */}
-        <div className="flex items-center gap-2">
-          <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={40} className="shrink-0" />
+        {/* Línea 1: dibujo (tocable → galería para cambiarlo) + nombre */}
+        <SlugPicker
+          edad={theme}
+          defaultSlug={t.iconSlug}
+          fallbackSrc={edadTaskSrc(theme, { iconKey: t.iconKey, emoji: t.icon, name: t.name })}
+          autoSubmit
+        >
           <input name="name" defaultValue={t.name} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} placeholder="Nombre" />
-        </div>
+        </SlugPicker>
         {/* Línea 2: descripción */}
         <input name="description" defaultValue={t.description ?? ''} className={`${inputCls} mt-1.5 text-[var(--ink-2)]`} placeholder="Descripción (opcional)" />
         {/* Línea 3: valor + veces/sem (estrechos) + quitar del objetivo + ocultar */}
@@ -119,7 +125,7 @@ export default async function EditarTareasPage({
   // Fila plegada de una tarea que NO está en el objetivo: botón para sumarla.
   const filaAlObjetivo = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 shadow-sm">
-      <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
+      <TaskGlyph iconKey={t.iconKey} iconSlug={t.iconSlug} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
         form={`objetivo-${t.id}`}
@@ -137,7 +143,7 @@ export default async function EditarTareasPage({
   // Fila plegada de una tarea oculta: botón para activarla.
   const filaOculta = (t: (typeof tasks)[number]) => (
     <div key={t.id} className="flex items-center gap-2 rounded-3xl bg-[var(--card)] p-2.5 opacity-60 shadow-sm">
-      <TaskGlyph iconKey={t.iconKey} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
+      <TaskGlyph iconKey={t.iconKey} iconSlug={t.iconSlug} emoji={t.icon} name={t.name} style={theme as IconStyle} size={32} className="shrink-0" />
       <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-[var(--ink)]">{t.name}</span>
       <button
         form={`ocultar-${t.id}`}
@@ -259,7 +265,9 @@ export default async function EditarTareasPage({
 
           <form action={addTask} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             <input type="hidden" name="kidId" value={selKid.id} />
-            <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} w-full font-display font-bold`} required />
+            <SlugPicker edad={theme} defaultSlug={null} fallbackSrc={`/icons/${theme}/estrella.svg`}>
+              <input name="name" placeholder={`Nueva tarea para ${selKid.name}`} className={`${inputCls} min-w-0 flex-1 font-display font-bold`} required />
+            </SlugPicker>
             <input name="description" placeholder="Descripción (opcional)" className={`${inputCls} mt-1.5`} />
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">

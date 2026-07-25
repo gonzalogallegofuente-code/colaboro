@@ -10,6 +10,7 @@ import type { IconStyle } from '@/lib/icons'
 // por clave/emoji/nombre. Los demás estilos quedan como legado.
 export function TaskGlyph({
   iconKey,
+  iconSlug,
   emoji,
   style,
   name,
@@ -18,6 +19,7 @@ export function TaskGlyph({
   className,
 }: {
   iconKey?: string | null
+  iconSlug?: string | null
   emoji: string
   style: IconStyle
   name?: string | null
@@ -30,7 +32,7 @@ export function TaskGlyph({
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={edadTaskSrc(style, { iconKey, emoji, name })}
+        src={edadTaskSrc(style, { iconSlug, iconKey, emoji, name })}
         alt=""
         width={size}
         height={size}

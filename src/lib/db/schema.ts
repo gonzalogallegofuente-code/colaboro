@@ -70,6 +70,8 @@ export const tasks = pgTable('tasks', {
   icon: text('icon').notNull().default('⭐'),
   // Clave del icono en el catálogo (icons.ts); permite estilos línea/relleno.
   iconKey: text('icon_key'),
+  // Dibujo fijado a mano (slug de public/icons/<edad>/); NULL = automático.
+  iconSlug: text('icon_slug'),
   valueCents: integer('value_cents').notNull().default(100),
   weeklyTarget: integer('weekly_target').notNull().default(7),
   // Si está activa, lo que marque el NIÑO queda pendiente hasta que el padre apruebe.
@@ -137,6 +139,8 @@ export const rewards = pgTable('rewards', {
   icon: text('icon').notNull().default('🎁'),
   // Clave del icono de recompensa (reward-icons.ts) para mostrar el dibujo.
   iconKey: text('icon_key'),
+  // Dibujo fijado a mano (slug de public/icons/<edad>/); NULL = automático.
+  iconSlug: text('icon_slug'),
   costCents: integer('cost_cents').notNull().default(500),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),

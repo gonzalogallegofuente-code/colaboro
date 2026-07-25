@@ -206,16 +206,70 @@ const KEYWORDS: Array<[RegExp, string]> = [
   [/regalo|sorpresa/i, 'regalo'],
 ]
 
+// Galería para "Cambiar dibujo": todos los slugs disponibles, agrupados.
+export type SlugGrupo = { label: string; slugs: Array<{ slug: string; label: string }> }
+export const SLUG_GRUPOS: SlugGrupo[] = [
+  { label: 'Limpieza', slugs: [
+    { slug: 'barrer', label: 'Barrer' }, { slug: 'fregar', label: 'Fregar' },
+    { slug: 'aspirar', label: 'Aspirar' }, { slug: 'polvo', label: 'Polvo' },
+    { slug: 'cristales', label: 'Cristales' }, { slug: 'bano', label: 'Baño' },
+    { slug: 'ducha', label: 'Ducha' }, { slug: 'basura', label: 'Basura' },
+    { slug: 'reciclar', label: 'Reciclar' }, { slug: 'dientes', label: 'Dientes' },
+  ] },
+  { label: 'Cocina y ropa', slugs: [
+    { slug: 'cocinar', label: 'Cocinar' }, { slug: 'mesa', label: 'Mesa' },
+    { slug: 'platos', label: 'Platos' }, { slug: 'lavadora', label: 'Lavadora' },
+    { slug: 'planchar', label: 'Planchar' }, { slug: 'ropa', label: 'Ropa' },
+  ] },
+  { label: 'Casa', slugs: [
+    { slug: 'cama', label: 'Cama' }, { slug: 'ordenar', label: 'Ordenar' },
+    { slug: 'madrugar', label: 'Madrugar' }, { slug: 'dormir', label: 'Dormir' },
+    { slug: 'perro', label: 'Perro' }, { slug: 'gato', label: 'Gato' },
+    { slug: 'regar', label: 'Regar' },
+  ] },
+  { label: 'Cole y hábitos', slugs: [
+    { slug: 'deberes', label: 'Deberes' }, { slug: 'leer', label: 'Leer' },
+    { slug: 'mates', label: 'Mates' }, { slug: 'mochila', label: 'Mochila' },
+    { slug: 'aprender', label: 'Aprender' }, { slug: 'ejercicio', label: 'Ejercicio' },
+    { slug: 'palabrotas', label: 'No palabrotas' }, { slug: 'amable', label: 'Ser amable' },
+  ] },
+  { label: 'Ocio', slugs: [
+    { slug: 'videojuegos', label: 'Videojuegos' }, { slug: 'tele', label: 'Tele' },
+    { slug: 'cine', label: 'Cine' }, { slug: 'helado', label: 'Helado' },
+    { slug: 'refresco', label: 'Refresco' }, { slug: 'batido', label: 'Batido' },
+    { slug: 'musica', label: 'Música' }, { slug: 'futbol', label: 'Fútbol' },
+    { slug: 'bici', label: 'Bici' }, { slug: 'excursion', label: 'Excursión' },
+    { slug: 'parque', label: 'Parque' }, { slug: 'megafono', label: 'Megáfono' },
+  ] },
+  { label: 'Premios', slugs: [
+    { slug: 'paga', label: 'Paga' }, { slug: 'regalo', label: 'Regalo' },
+    { slug: 'primera', label: 'Brote' }, { slug: 'fuerza', label: 'Fuerza' },
+    { slug: 'medalla', label: 'Medalla' }, { slug: 'campeon', label: 'Campeón' },
+    { slug: 'estrella', label: 'Estrella' }, { slug: 'fuego', label: 'Fuego' },
+    { slug: 'rayo', label: 'Rayo' }, { slug: 'diamante', label: 'Diamante' },
+    { slug: 'ganado', label: 'Ganancias' }, { slug: 'corona', label: 'Corona' },
+    { slug: 'trofeo', label: 'Trofeo' },
+  ] },
+]
+
+const SLUG_SET = new Set(SLUG_GRUPOS.flatMap((g) => g.slugs.map((s) => s.slug)))
+
+export function isIconSlug(v: string | null | undefined): v is string {
+  return !!v && SLUG_SET.has(v)
+}
+
 function src(edad: Edad, slug: string): string {
   return `/icons/${edad}/${slug}.svg`
 }
 
-// Icono de una tarea. Prioridad: clave elegida → palabras del NOMBRE (lo más
-// específico) → emoji heredado. Siempre devuelve una ruta (genérico: estrella).
+// Icono de una tarea. Prioridad: dibujo FIJADO a mano (iconSlug) → clave
+// elegida → palabras del NOMBRE (lo más específico) → emoji heredado.
+// Siempre devuelve una ruta (genérico: estrella).
 export function edadTaskSrc(
   edad: Edad,
-  t: { iconKey?: string | null; emoji?: string | null; name?: string | null },
+  t: { iconSlug?: string | null; iconKey?: string | null; emoji?: string | null; name?: string | null },
 ): string {
+  if (isIconSlug(t.iconSlug)) return src(edad, t.iconSlug)
   let slug: string | undefined
   if (t.iconKey) slug = TASK_BY_KEY[t.iconKey]
   if (!slug && t.name) {
@@ -236,8 +290,9 @@ export function edadTaskSrc(
 // Icono de una recompensa. Genérico: regalo.
 export function edadRewardSrc(
   edad: Edad,
-  r: { iconKey?: string | null; emoji?: string | null; name?: string | null },
+  r: { iconSlug?: string | null; iconKey?: string | null; emoji?: string | null; name?: string | null },
 ): string {
+  if (isIconSlug(r.iconSlug)) return src(edad, r.iconSlug)
   let slug = r.iconKey ? REWARD_BY_KEY[r.iconKey] : undefined
   if (!slug && r.name) {
     for (const [re, s] of KEYWORDS) {

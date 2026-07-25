@@ -5,6 +5,7 @@ import { edadRewardSrc, isEdad } from '@/lib/edad-icons'
 // clave/nombre; sin ella, el dibujo del set clásico o el emoji (legado).
 export function RewardGlyph({
   iconKey,
+  iconSlug,
   emoji,
   edad,
   name,
@@ -12,6 +13,7 @@ export function RewardGlyph({
   className,
 }: {
   iconKey?: string | null
+  iconSlug?: string | null
   emoji: string
   edad?: string | null
   name?: string | null
@@ -22,7 +24,7 @@ export function RewardGlyph({
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={edadRewardSrc(edad, { iconKey, name })}
+        src={edadRewardSrc(edad, { iconSlug, iconKey, name })}
         alt=""
         width={size}
         height={size}
