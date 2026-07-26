@@ -1,11 +1,15 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { eq } from 'drizzle-orm'
+import { db } from '@/lib/db'
+import { accounts } from '@/lib/db/schema'
 import { getActiveKids } from '@/lib/data'
 import { requireAccountPage } from '@/lib/session'
 import { unitWord, moneyOf, themeOf } from '@/lib/money'
 import {
   deleteKid,
   enterKid,
+  setFamilyGoal,
   setGoal,
   setKidAvatar,
   setKidColor,
@@ -52,6 +56,7 @@ const SEC_TITLES: Record<string, string> = {
   color: '🎨 Color y edad',
   moneda: '🪙 Contar en',
   meta: '🎯 Meta de ahorro',
+  familiar: '👨‍👩‍👧‍👦 Objetivo familiar',
   modo: '📱 Modo niño',
 }
 
@@ -90,6 +95,15 @@ export default async function KidSettingsPage({
   const theme = themeOf(k)
   const allIcons = ICON_CATALOG.flatMap((c) => c.icons)
   const sec = sp.sec && SEC_TITLES[sp.sec] ? sp.sec : undefined
+
+  // El objetivo familiar es de la CUENTA (compartido por todos los hermanos).
+  const [acc] =
+    sec === 'familiar'
+      ? await db
+          .select({ famTarget: accounts.familyGoalTarget, famReward: accounts.familyGoalReward })
+          .from(accounts)
+          .where(eq(accounts.id, accountId))
+      : []
 
   // Avatar: un emoji o un personaje generado. Se elige el tipo y se ven variantes.
   const avSalt = Number(sp.av) > 0 ? Number(sp.av) : 1
@@ -140,6 +154,7 @@ export default async function KidSettingsPage({
               <GroupLabel>Recompensas</GroupLabel>
               <SettingRow href={`/tareas/${k.id}?sec=moneda`} label="🪙 Contar en (euros o puntos)" />
               <SettingRow href={`/tareas/${k.id}?sec=meta`} label="🎯 Meta de ahorro" />
+              <SettingRow href={`/tareas/${k.id}?sec=familiar`} label="👨‍👩‍👧‍👦 Objetivo familiar" />
               <SettingRow href={`/recompensas/editar?kid=${k.id}`} label="🎁 Editar recompensas" />
               <SettingRow href={`/logros/editar?kid=${k.id}`} label="🏅 Editar logros" />
               <GroupLabel>Tareas</GroupLabel>
@@ -378,6 +393,41 @@ export default async function KidSettingsPage({
                   <EmojiInput name="goalIcon" defaultValue={k.goalIcon ?? '🎯'} suggestions={GOAL_ICONS} autoSubmit />
                 </div>
               </div>
+            </div>
+          </AutoForm>
+        )}
+
+        {/* ── Objetivo familiar (de la cuenta: el mismo para todos los hermanos) ── */}
+        {sec === 'familiar' && (
+          <AutoForm action={setFamilyGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+            <p className="text-[11px] text-[var(--ink-3)]">
+              Un reto de equipo: si ENTRE TODOS llegáis a N tareas esta semana (lunes a domingo), hay premio
+              compartido. Sale en el tablero de todos. Se guarda solo; deja los dos campos vacíos para quitarlo.
+            </p>
+            <p className="mt-1 text-[11px] font-bold text-[var(--ink-2)]">
+              👨‍👩‍👧‍👦 Es el MISMO objetivo para toda la familia: si lo cambias aquí, cambia para todos los hermanos.
+            </p>
+            <div className="mt-2 flex items-end gap-2">
+              <label className="w-28">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Tareas/semana</span>
+                <input
+                  name="target"
+                  type="number"
+                  min={0}
+                  defaultValue={acc?.famTarget ?? ''}
+                  placeholder="20"
+                  className={inputCls}
+                />
+              </label>
+              <label className="flex-1">
+                <span className="text-[11px] font-semibold text-[var(--ink-3)]">Premio</span>
+                <input
+                  name="reward"
+                  defaultValue={acc?.famReward ?? ''}
+                  placeholder="p. ej. 🎬 Peli con palomitas"
+                  className={inputCls}
+                />
+              </label>
             </div>
           </AutoForm>
         )}
