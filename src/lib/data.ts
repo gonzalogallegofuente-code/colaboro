@@ -59,7 +59,7 @@ export async function awardEarnedBadges(accountId: number, kidId: number): Promi
     void sendToAccount(accountId, {
       title: '🏅 ¡Logro conseguido!',
       body: `${k.name} ha ganado «${def?.label ?? 'un logro'}» y su premio: +${formatAmount(row.cents, moneyOf(k))}`,
-      url: '/logros',
+      url: `/logros?kid=${kidId}`,
     })
   }
 }

@@ -4,7 +4,7 @@ export function Nav({
   active,
   kidMode,
 }: {
-  active?: 'inicio' | 'modo' | 'recompensas' | 'historico' | 'tareas' | 'logros'
+  active?: 'inicio' | 'modo' | 'recompensas' | 'historico' | 'tareas'
   kidMode?: boolean
 }) {
   const tab = (on?: boolean) =>
@@ -25,11 +25,6 @@ export function Nav({
         <Link href="/recompensas" className={tab(active === 'recompensas')} aria-label="Recompensas">
           🎁
         </Link>
-        {kidMode && (
-          <Link href="/logros" className={tab(active === 'logros')} aria-label="Logros">
-            🏅
-          </Link>
-        )}
         <Link href="/historico" className={tab(active === 'historico')} aria-label="Histórico">
           📅
         </Link>

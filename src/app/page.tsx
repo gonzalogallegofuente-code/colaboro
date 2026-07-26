@@ -420,8 +420,11 @@ export default async function Page({
             ))
           )}
         </div>
-        <span className="shrink-0 text-xs font-bold text-[var(--ink-3)]">
-          {earnedBadges.length}/{badges.length} ›
+        <span
+          className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-bold text-white shadow-sm"
+          style={{ background: selKid.color }}
+        >
+          {earnedBadges.length}/{badges.length} · Ver todos ›
         </span>
       </Link>
 

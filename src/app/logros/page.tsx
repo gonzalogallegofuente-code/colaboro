@@ -20,7 +20,7 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
     return (
       <ThemeShell theme="infantil">
         <div className="mx-auto max-w-md">
-          <Nav active="logros" kidMode={isKid} />
+          <Nav kidMode={isKid} />
           <div className="mx-3 mt-10 rounded-3xl bg-[var(--card)] p-6 text-center text-[var(--ink-2)] shadow-md">
             Todavía no hay nadie dado de alta.
           </div>
@@ -40,34 +40,30 @@ export default async function LogrosPage({ searchParams }: { searchParams: Promi
   return (
     <ThemeShell theme={theme}>
       <div className="mx-auto max-w-md pb-12">
-        <Nav active="logros" kidMode={isKid} />
+        <Nav kidMode={isKid} />
 
-        <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">🏅 Logros</h1>
-        <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+        {/* Los logros son de CADA hijo: cabecera con su identidad y vuelta a su tablero */}
+        <div className="flex items-center gap-2 px-3 pt-1">
+          <Link
+            href={isKid ? '/' : `/?kid=${selKid.id}`}
+            className="tap-bounce flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--card)] font-display text-xl font-bold text-[var(--head)] shadow-sm"
+            aria-label="Volver a su tablero"
+          >
+            ←
+          </Link>
+          <div
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-3xl p-2.5 pl-3 text-white shadow-md"
+            style={{ background: selKid.color }}
+          >
+            <Avatar emoji={selKid.emoji} avatarUrl={selKid.avatarUrl} name={selKid.name} size={40} />
+            <div className="truncate font-display text-lg font-bold leading-tight">🏅 Logros de {selKid.name}</div>
+          </div>
+        </div>
+
+        <p className="px-4 pt-2 text-xs font-semibold leading-snug text-[var(--ink-3)]">
           🔥 <span className="text-[var(--ink-2)]">Racha</span>: días seguidos haciendo alguna tarea (no se
           rompe si hoy aún no ha apuntado nada).
         </p>
-
-        {/* Hijo (oculto en modo niño) */}
-        {!isKid && (
-        <div className="mt-3 flex gap-2 px-3">
-          {kids.map((k) => {
-            const on = k.id === selKid.id
-            return (
-              <Link
-                key={k.id}
-                href={`/logros?kid=${k.id}`}
-                replace
-                className={`flex flex-1 items-center justify-center gap-2 rounded-2xl px-2 py-2 shadow-sm ${on ? 'shadow-md ring-2 ring-white' : ''}`}
-                style={{ background: on ? k.color : 'var(--card)', color: on ? '#fff' : 'var(--ink)' }}
-              >
-                <Avatar emoji={k.emoji} avatarUrl={k.avatarUrl} name={k.name} size={28} />
-                <span className="font-display font-bold">{k.name}</span>
-              </Link>
-            )
-          })}
-        </div>
-        )}
 
         {/* Resumen */}
         <div className="mx-3 mt-3 grid grid-cols-3 gap-2">
