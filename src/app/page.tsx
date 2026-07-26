@@ -396,8 +396,9 @@ export default async function Page({
         </>
       )}
 
-      {/* Objetivo familiar: el padre con varios hijos lo ve en la portada */}
-      {(isKid || !multi) && famGoal && <FamGoalSection goal={famGoal} />}
+      {/* Objetivo familiar: en el tablero de CADA hijo (además de la portada
+          del padre), para animar a que cada uno aporte lo suyo */}
+      {famGoal && <FamGoalSection goal={famGoal} />}
 
       {/* Logros */}
       <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">🏅 Logros</h2>
