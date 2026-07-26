@@ -436,9 +436,27 @@ export default async function KidSettingsPage({
         {sec === 'modo' && (
           <>
           <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <p className="text-[11px] text-[var(--ink-3)]">
-              Abre una pantalla sencilla para que {k.name} apunte solo sus tareas. Para volver a tu cuenta hará
-              falta tu contraseña.
+            <p className="text-[11px] font-semibold text-[var(--ink-3)]">
+              Una pantalla sencilla y segura para dejarle el móvil o la tablet a {k.name}: solo ve lo suyo. En modo
+              niño puede…
+            </p>
+            <ul className="mt-1.5 space-y-1 text-[11px] font-semibold text-[var(--ink-2)]">
+              <li>✅ Apuntar sus tareas — te llegan a «Para aprobar» y las confirmas tú.</li>
+              <li>
+                🎁 Canjear sus puntos o su dinero por recompensas — el canje también pasa por tu visto bueno, y si lo
+                rechazas se le devuelve a la hucha.
+              </li>
+              <li>🏅 Ver sus logros: racha, medallas y lo que lleva ganado.</li>
+              <li>🎯 Seguir su meta de ahorro y el objetivo familiar.</li>
+              <li>📅 Repasar su histórico de tareas.</li>
+            </ul>
+            <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
+              No puede entrar en los ajustes, ni ver lo de sus hermanos, ni aprobar nada.
+            </p>
+            <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
+              Se entra con el botón de abajo (o desde 📱 en la barra de arriba) y el aparato se queda en modo niño
+              hasta que se sale: pulsando 👤 arriba a la derecha, con tu contraseña o tu huella. {k.name} no puede
+              salir solo.
             </p>
             <form action={enterKid} className="mt-2">
               <input type="hidden" name="kidId" value={k.id} />

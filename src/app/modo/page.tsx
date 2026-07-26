@@ -21,7 +21,8 @@ export default async function ModoPage() {
 
         <h1 className="px-4 pt-2 font-display text-xl font-bold text-[var(--head)]">📱 Modo niño</h1>
         <p className="px-4 text-xs font-semibold text-[var(--ink-3)]">
-          Toca un hijo para abrirle su pantalla sencilla (solo sus tareas). Para volver a tu cuenta, pulsa 🏠 arriba.
+          Toca un hijo para abrirle su pantalla sencilla: apunta sus tareas, canjea sus recompensas y ve sus logros
+          (todo con tu visto bueno). Para salir del modo niño se pulsa 👤 arriba, con tu contraseña o tu huella.
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-3 px-3">
