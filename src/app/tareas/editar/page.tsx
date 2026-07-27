@@ -187,8 +187,11 @@ export default async function EditarTareasPage({
             El dibujo se pone solo según el nombre — <span className="text-[var(--ink-2)]">tócalo para elegir otro</span>.
           </p>
           <p>
-            Todo <span className="text-[var(--ink-2)]">se guarda solo</span>. Valor{' '}
-            <span className="text-[var(--ink-2)]">0</span> = convivencia 🤝 (cuenta para rachas, sin dinero).
+            Todo <span className="text-[var(--ink-2)]">se guarda solo</span>.
+          </p>
+          <p>
+            ¿Tareas que se hacen sin paga (dientes, portarse bien…)? Pon el valor a{' '}
+            <span className="text-[var(--ink-2)]">0</span>: no dan dinero, pero sí cuentan para rachas y logros 🤝.
           </p>
         </div>
 
