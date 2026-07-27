@@ -25,6 +25,7 @@ import { type IconStyle } from '@/lib/icons'
 import { edadBadgeSrc } from '@/lib/edad-icons'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CoinButton } from '@/components/CoinButton'
+import { SegmentBar, TickBar } from '@/components/ProgressBars'
 
 export const dynamic = 'force-dynamic'
 
@@ -138,7 +139,6 @@ function PendientesSection({
 
 // Objetivo familiar semanal (entre todos los hermanos), con barra de progreso.
 function FamGoalSection({ goal }: { goal: FamilyGoal }) {
-  const pct = Math.min(100, Math.round((goal.count / goal.target) * 100))
   return (
     <>
       <h2 className="px-4 pt-4 pb-1 font-display text-base font-bold text-[var(--head)]">👨‍👩‍👧‍👦 Objetivo familiar</h2>
@@ -149,12 +149,7 @@ function FamGoalSection({ goal }: { goal: FamilyGoal }) {
           </span>
           <span className="shrink-0 text-[var(--ink-2)]">→ {goal.reward}</span>
         </div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-sky-300 to-indigo-500"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+        <SegmentBar done={goal.count} total={goal.target} tone="azul" height={12} />
         <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
           {goal.done
             ? `Habéis hecho ${goal.count} tareas esta semana. ¡A disfrutar el premio!`
@@ -308,7 +303,6 @@ export default async function Page({
   const goalCost = selKid.goalCostCents ?? 0
   const hasGoal = goalCost > 0
   const goalBal = Math.max(0, selKid.balanceCents)
-  const goalPct = hasGoal ? Math.min(100, Math.round((goalBal / goalCost) * 100)) : 0
   const goalDone = goalBal >= goalCost
 
   return (
@@ -380,9 +374,7 @@ export default async function Page({
               {formatAmount(goalBal, money)} / {formatAmount(goalCost, money)}
             </span>
           </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500" style={{ width: `${goalPct}%` }} />
-          </div>
+          <TickBar doneCents={goalBal} totalCents={goalCost} />
           <div className="mt-1 text-[11px] font-semibold text-[var(--ink-3)]">
             {goalDone
               ? '¡Meta conseguida! 🎉'
@@ -440,12 +432,7 @@ export default async function Page({
             </span>
             <span className="shrink-0 text-[var(--ink-2)]">{planPct}%</span>
           </div>
-          <div className="mt-2 h-4 overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500 transition-all"
-              style={{ width: `${planPct}%` }}
-            />
-          </div>
+          <SegmentBar done={planDone} total={planTotal} tone="verde" />
           <div className="mt-1.5 text-[11px] font-semibold text-[var(--ink-3)]">
             {planPct >= 100
               ? '¡Objetivo completado! 🎉 Ahora cada tarea del objetivo que hagas de más vale DOBLE ✨'
