@@ -400,10 +400,11 @@ export default async function KidSettingsPage({
         {/* ── Objetivo familiar (de la cuenta: el mismo para todos los hermanos) ── */}
         {sec === 'familiar' && (
           <AutoForm action={setFamilyGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
-            <p className="text-[11px] text-[var(--ink-3)]">
-              Un reto de equipo: si ENTRE TODOS llegáis a N tareas esta semana (lunes a domingo), hay premio
-              compartido. Sale en el tablero de todos. Se guarda solo; deja los dos campos vacíos para quitarlo.
-            </p>
+            <div className="space-y-1 text-[11px] text-[var(--ink-3)]">
+              <p>Un reto de equipo: N tareas ENTRE TODOS esta semana (lun–dom) = premio compartido.</p>
+              <p>Sale en el tablero de todos. Se guarda solo al salir.</p>
+              <p>Para quitarlo, vacía los dos campos.</p>
+            </div>
             <p className="mt-1 text-[11px] font-bold text-[var(--ink-2)]">
               👨‍👩‍👧‍👦 Es el MISMO objetivo para toda la familia: si lo cambias aquí, cambia para todos los hermanos.
             </p>

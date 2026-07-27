@@ -68,12 +68,17 @@ export default async function EditarRecompensasPage({
           ← Volver
         </Link>
       </div>
-      <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
-        Las recompensas son los premios que {selKid.name} puede conseguir con lo que gana haciendo tareas. Se canjean
-        en la pestaña 🎁: el coste se descuenta de su hucha y, si el canje se pide desde el modo niño, te llega a ti
-        para darle el visto bueno. Cada hijo tiene su propia lista. Toca el dibujo, el nombre o el coste para
-        cambiarlos (se guarda solo); «Desactivar» la aparta sin borrar nada, y podrás reactivarla desde abajo.
-      </p>
+      <div className="space-y-1 px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+        <p>Los premios que {selKid.name} puede conseguir con lo que gana.</p>
+        <p>
+          Su hucha se canjea por estas recompensas… o por dinero de verdad
+          (💸 Pagar, en la pestaña 🎁).
+        </p>
+        <p>Si el canje lo pide desde el modo niño, te llega a ti para dar el visto bueno.</p>
+        <p>
+          El dibujo se pone solo — <span className="text-[var(--ink-2)]">tócalo para cambiarlo</span>. Todo se guarda solo.
+        </p>
+      </div>
 
       {/* Hijo elegido (solo se editan SUS recompensas) — fijo al hacer scroll */}
       <div className="sticky top-14 z-20 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">

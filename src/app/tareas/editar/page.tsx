@@ -180,11 +180,17 @@ export default async function EditarTareasPage({
             ← Volver
           </Link>
         </div>
-        <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
-          Cambia el nombre, el valor o las veces por semana: <span className="text-[var(--ink-2)]">se guarda solo</span>.
-          Valor <span className="text-[var(--ink-2)]">0</span> = tarea de convivencia 🤝 (cuenta para rachas y logros,
-          sin dinero).
-        </p>
+        <div className="space-y-1 px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+          <p>Estas son las tareas con las que {selKid.name} consigue dinero o recompensas.</p>
+          <p>Puedes añadir, cambiar o borrar: el nombre, el valor, las veces por semana…</p>
+          <p>
+            El dibujo se pone solo según el nombre — <span className="text-[var(--ink-2)]">tócalo para elegir otro</span>.
+          </p>
+          <p>
+            Todo <span className="text-[var(--ink-2)]">se guarda solo</span>. Valor{' '}
+            <span className="text-[var(--ink-2)]">0</span> = convivencia 🤝 (cuenta para rachas, sin dinero).
+          </p>
+        </div>
 
         {/* Hijo elegido (solo se editan SUS tareas) — fijo al hacer scroll */}
         <div className="sticky top-14 z-20 bg-[var(--nav)] px-3 py-2 backdrop-blur-md">
