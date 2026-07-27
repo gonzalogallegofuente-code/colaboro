@@ -59,9 +59,13 @@ export default async function EditarLogrosPage({
               <form action={updateBadge}>
                 <input type="hidden" name="id" value={b.id} />
                 {kid && <input type="hidden" name="kid" value={kid} />}
-                <div className="flex items-center gap-2">
+                <label className="block">
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Nombre del logro</span>
+                  <input name="label" defaultValue={b.label} className={`${inputCls} font-display font-bold`} placeholder="p. ej. 100 tareas" />
+                </label>
+                <div className="mt-2">
+                  <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
                   <EmojiInput name="icon" defaultValue={b.icon} suggestions={BADGE_ICONS} />
-                  <input name="label" defaultValue={b.label} className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre del logro" />
                 </div>
                 <div className="mt-2 flex items-end gap-2">
                   <label className="flex-1">
@@ -110,9 +114,13 @@ export default async function EditarLogrosPage({
           <form action={addBadge} className="rounded-3xl border-2 border-dashed border-indigo-200 bg-[var(--card)] p-3">
             {kid && <input type="hidden" name="kid" value={kid} />}
             <span className="font-display text-sm font-bold text-[var(--ink)]">➕ Añadir logro</span>
-            <div className="mt-2 flex items-center gap-2">
+            <label className="mt-2 block">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Nombre del logro</span>
+              <input name="label" className={`${inputCls} font-display font-bold`} placeholder="p. ej. 100 tareas" required />
+            </label>
+            <div className="mt-2">
+              <span className="text-[11px] font-semibold text-[var(--ink-3)]">Icono</span>
               <EmojiInput name="icon" defaultValue="🏅" suggestions={BADGE_ICONS} />
-              <input name="label" className={`${inputCls} flex-1 font-display font-bold`} placeholder="Nombre del logro" required />
             </div>
             <div className="mt-2 flex items-end gap-2">
               <label className="flex-1">
