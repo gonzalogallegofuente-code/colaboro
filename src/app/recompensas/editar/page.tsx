@@ -69,7 +69,7 @@ export default async function EditarRecompensasPage({
         </Link>
       </div>
       <div className="space-y-1 px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
-        <p>Los premios que {selKid.name} puede conseguir con lo que gana.</p>
+        <p>Son los premios que {selKid.name} puede conseguir con lo que gana.</p>
         <p>
           Su hucha se canjea por estas recompensas… o por dinero de verdad
           (💸 Pagar, en la pestaña 🎁).

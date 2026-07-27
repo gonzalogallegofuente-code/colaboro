@@ -401,7 +401,7 @@ export default async function KidSettingsPage({
         {sec === 'familiar' && (
           <AutoForm action={setFamilyGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <div className="space-y-1 text-[11px] text-[var(--ink-3)]">
-              <p>Un reto de equipo: N tareas ENTRE TODOS esta semana (lun–dom) = premio compartido.</p>
+              <p>Es un reto de equipo: N tareas ENTRE TODOS esta semana (lun–dom) = premio compartido.</p>
               <p>Sale en el tablero de todos. Se guarda solo al salir.</p>
               <p>Para quitarlo, vacía los dos campos.</p>
             </div>
