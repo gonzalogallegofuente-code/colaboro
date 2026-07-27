@@ -326,6 +326,10 @@ export default async function KidSettingsPage({
         {sec === 'moneda' && (
           <>
             <div className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
+              <div className="mb-2 space-y-1 text-[11px] text-[var(--ink-3)]">
+                <p>Es la moneda con la que cuenta {k.name}: euros de verdad…</p>
+                <p>…o puntos inventados (gemas, estrellas…) con el nombre que elijáis abajo.</p>
+              </div>
               <div className="flex gap-2">
                 <form action={setUnit} className="flex-1">
                   <input type="hidden" name="kidId" value={k.id} />
@@ -360,10 +364,12 @@ export default async function KidSettingsPage({
         {sec === 'meta' && (
           <AutoForm action={setGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <input type="hidden" name="kidId" value={k.id} />
-            <p className="text-[11px] text-[var(--ink-3)]">
-              Un objetivo al que ahorrar; aparece con barra de progreso en el tablero. Se guarda solo. Déjalo vacío
-              para quitarla.
-            </p>
+            <div className="space-y-1 text-[11px] text-[var(--ink-3)]">
+              <p>Es un objetivo a medio/largo plazo que {k.name} quiere conseguir.</p>
+              <p>Para lograrlo necesitará ahorrar más de una semana.</p>
+              <p>Aparece en su tablero con barra de progreso.</p>
+              <p>Se guarda solo. Para quitar la meta, deja el nombre vacío.</p>
+            </div>
             <div className="mt-2 space-y-2">
               {/* Nombre grande + coste a su derecha */}
               <div className="flex items-end gap-2">
@@ -401,7 +407,8 @@ export default async function KidSettingsPage({
         {sec === 'familiar' && (
           <AutoForm action={setFamilyGoal} className="mx-3 mt-3 rounded-3xl bg-[var(--card)] p-3 shadow-md">
             <div className="space-y-1 text-[11px] text-[var(--ink-3)]">
-              <p>Es un reto de equipo: N tareas ENTRE TODOS esta semana (lun–dom) = premio compartido.</p>
+              <p>Es un reto en equipo: se consigue sumando las tareas de TODOS los hermanos esa semana (lun–dom).</p>
+              <p>Y el premio es para todos, compartido.</p>
               <p>Sale en el tablero de todos. Se guarda solo al salir.</p>
               <p>Para quitarlo, vacía los dos campos.</p>
             </div>

@@ -40,12 +40,18 @@ export default async function EditarLogrosPage({
             {kid ? '← Volver' : '← Ajustes'}
           </Link>
         </div>
-        <p className="px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
-          Los logros son medallas que los niños ganan al llegar a una meta. Puedes cambiar la meta (el valor), el icono
-          y el nombre, o añadir y quitar logros. Cada uno se gana según un dato: <b>tareas hechas</b>,{' '}
-          <b>mejor racha (días)</b> o <b>dinero/puntos ganados</b>. Son los mismos para todos los hijos. Además, un
-          logro puede tener <b>premio</b>: al conseguirlo, ese dinero (o puntos) se suma solo a la hucha del niño.
-        </p>
+        <div className="space-y-1 px-4 pt-1 text-xs font-semibold leading-snug text-[var(--ink-3)]">
+          <p>Son medallas que los niños ganan al llegar a una meta.</p>
+          <p>
+            Cada logro se gana según un dato: <b>tareas hechas</b>, <b>mejor racha (días)</b> o{' '}
+            <b>dinero/puntos ganados</b>.
+          </p>
+          <p>Puedes cambiar la meta (el valor), el icono y el nombre, o añadir y quitar logros.</p>
+          <p>Son los mismos para todos los hijos.</p>
+          <p>
+            Un logro puede tener <b>premio</b>: al conseguirlo, se suma solo a la hucha del niño.
+          </p>
+        </div>
 
         <div className="mx-3 mt-3 space-y-2.5">
           {list.map((b) => (
