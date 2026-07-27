@@ -24,8 +24,10 @@ export function EmojiInput({
         value={val}
         onChange={(e) => setVal(e.target.value)}
         maxLength={4}
-        className="w-16 rounded-xl border-2 border-indigo-100 px-2 py-1.5 text-center text-2xl outline-none focus:border-indigo-500"
-        aria-label="Icono"
+        placeholder="＋"
+        title="¿Otro emoji? Escríbelo o pégalo aquí"
+        className="w-16 rounded-xl border-2 border-indigo-100 px-2 py-1.5 text-center text-2xl outline-none placeholder:text-indigo-200 focus:border-indigo-500"
+        aria-label="Otro emoji (escríbelo o pégalo)"
       />
       <div className="mt-1 flex flex-wrap gap-1">
         {suggestions.map((s) => (
